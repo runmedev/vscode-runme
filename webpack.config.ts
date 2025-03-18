@@ -58,7 +58,24 @@ const rendererConfig: Configuration = {
     libraryTarget: 'module',
     chunkFormat: 'module'
   },
-  target: 'web'
+  target: 'web',
+  module: {
+    rules: [
+      ...(baseConfig.module?.rules || []),
+      {
+        test: /\.ts$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: 'ts-loader',
+            options: {
+              transpileOnly: false
+            }
+          }
+        ],
+      }
+    ]
+  }
 }
 
 const extensionConfig: Configuration = {

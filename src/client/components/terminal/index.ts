@@ -343,6 +343,9 @@ export class TerminalView extends LitElement {
   @property({ type: String })
   id!: string
 
+  @property({ type: Boolean, converter: (value: string | null) => value !== 'false' })
+  buttons: boolean = true
+
   @property({ type: String })
   fontFamily?: TerminalConfiguration['fontFamily']
 
@@ -963,16 +966,7 @@ export class TerminalView extends LitElement {
 
   // Render the UI as a function of component state
   render() {
-    return html`<section>
-      <div id="terminal"></div>
-      <close-cell-button
-        @closed="${() => {
-          return closeOutput({
-            id: this.id!,
-            outputType: OutputType.terminal,
-          })
-        }}"
-      ></close-cell-button>
+    const buttons = html`
       <div class="button-group">
         <copy-button
           copyText="${this.copyText}"
@@ -1051,6 +1045,19 @@ export class TerminalView extends LitElement {
           () => {},
         )}
       </div>
+    `
+
+    return html`<section>
+      <div id="terminal"></div>
+      <close-cell-button
+        @closed="${() => {
+          return closeOutput({
+            id: this.id!,
+            outputType: OutputType.terminal,
+          })
+        }}"
+      ></close-cell-button>
+      ${when(this.buttons, () => buttons)}
     </section>`
   }
 

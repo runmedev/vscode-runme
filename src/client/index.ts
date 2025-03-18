@@ -1,6 +1,6 @@
 import type { ActivationFunction } from 'vscode-notebook-renderer'
 
-import { OutputType, RENDERERS } from '../constants'
+import { ClientMessages, OutputType, RENDERERS } from '../constants'
 import type { CellOutput } from '../types'
 
 import { setContext } from './utils'
@@ -189,3 +189,5 @@ export const activate: ActivationFunction<void> = (context) => {
     },
   }
 }
+
+export { setContext, ClientMessages }

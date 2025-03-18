@@ -13,6 +13,7 @@
     "experimentalDecorators": true,
     "sourceMap": true,
     "strict": true,
+    "declaration": true,
     "types": [
       "node",
       "vscode"
