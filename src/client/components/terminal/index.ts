@@ -967,6 +967,14 @@ export class TerminalView extends LitElement {
   // Render the UI as a function of component state
   render() {
     const buttons = html`
+      <close-cell-button
+        @closed="${() => {
+          return closeOutput({
+            id: this.id!,
+            outputType: OutputType.terminal,
+          })
+        }}"
+      ></close-cell-button>
       <div class="button-group">
         <copy-button
           copyText="${this.copyText}"
@@ -1049,14 +1057,6 @@ export class TerminalView extends LitElement {
 
     return html`<section>
       <div id="terminal"></div>
-      <close-cell-button
-        @closed="${() => {
-          return closeOutput({
-            id: this.id!,
-            outputType: OutputType.terminal,
-          })
-        }}"
-      ></close-cell-button>
       ${when(this.buttons, () => buttons)}
     </section>`
   }
