@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import { Disposable } from 'vscode'
 import { LitElement, html, css } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
@@ -277,8 +278,7 @@ export class VMInstancesDetail extends LitElement implements Disposable {
   }
 
   private get instanceStorage() {
-    return html`
-      <h3>Storage</h3>
+    return html` <h3>Storage</h3>
       <h4>Boot disk</h4>
       <table-view
         .columns="${[
@@ -345,74 +345,79 @@ export class VMInstancesDetail extends LitElement implements Disposable {
               return html`${row[field]}`
           }
         }}"
-      ></table-view>
-      <h4>Additional disks</h4>
-      <table-view
-      .columns="${[
-        'Name',
-        'Image',
-        'Interface type',
-        'Size (GB)',
-        'Device name',
-        'Type',
-        'Architecture',
-        'Encryption',
-        'Mode',
-        'When deleting instance',
-      ]}"
-      .displayable="${(row: any, field: string) => !['nameLink', 'imageLink'].includes(field)}"
-      .rows="${this.additionalDisks.map((disk) => {
-        const urlPattern =
-          /https:\/\/www\.googleapis\.com\/compute\/v1\/projects\/([^\/]+)\/global\/images\/([^\/]+)/
+      ></table-view>`
+    // todo(sebastian): this is busted
+    // <h4>Additional disks</h4>
+    // <table-view
+    // .columns="${[
+    //   'Name',
+    //   'Image',
+    //   'Interface type',
+    //   'Size (GB)',
+    //   'Device name',
+    //   'Type',
+    //   'Architecture',
+    //   'Encryption',
+    //   'Mode',
+    //   'When deleting instance',
+    // ]}"
+    // .displayable="${(row: any, field: string) => !['nameLink', 'imageLink'].includes(field)}"
+    // .rows="${this.additionalDisks.map((disk) => {
+    //   const urlPattern =
+    //     /https:\/\/www\.googleapis\.com\/compute\/v1\/projects\/([^\/]+)\/(?:global\/images|zones\/[^\/]+\/disks)\/([^\/]+)/
 
-        const match = disk?.sourceImage?.match(urlPattern)
+    //   const match = disk?.selfLink?.match(urlPattern)
 
-        let project,
-          image,
-          imageLink = ''
+    //   let project,
+    //     image,
+    //     imageLink = ''
 
-        if (match) {
-          project = match[1]
-          image = match[2]
-          imageLink = `${this.consoleUrl}/compute/imagesDetail/projects/${project}/global/images/${image}?project=${this.projectId}`
-        }
+    //   if (match) {
+    //     project = match[1]
+    //     image = match[2]
+    //     imageLink = `${this.consoleUrl}/compute/imagesDetail/projects/${project}/global/images/${image}?project=${this.projectId}`
+    //   }
 
-        const instanceDisk = this.instance.disks?.find((d) => d.deviceName === disk.name)
+    //   const instanceDisk = this.instance.disks?.find((d) => d.deviceName === disk.name)
 
-        return [
-          {
-            name: disk.name,
-            nameLink: `${this.consoleUrl}/compute/disksDetail/zones/${this.zone}/disks/${disk.name}?project=${this.projectId}`,
-            image: image,
-            imageLink: imageLink,
-            interfaceType: instanceDisk?.interface || '-',
-            size: disk.sizeGb,
-            deviceName: disk.name,
-            type: disk?.type?.split?.('/')?.pop?.(),
-            architecture: disk.architecture,
-            encryption: '-',
-            mode: instanceDisk?.mode,
-            whenDeletingInstance: instanceDisk?.autoDelete ? 'On instance deletion' : 'Never',
-          },
-        ]
-      })}"
-        .renderer="${(row: any, field: string) => {
-          switch (field) {
-            case 'name':
-              return html`<vscode-link class="link" href="${row.nameLink}">
-                ${row.name}
-              </vscode-link>`
-            case 'image':
-              if (row.imageLink) {
-                return html`<vscode-link class="link" href="${row.imageLink}">
-                  ${row.image}
-                </vscode-link>`
-              }
-            default:
-              return html`${row[field]}`
-          }
-        }}"
-      /></table-view>`
+    //   return [
+    //     {
+    //       name: disk.name,
+    //       nameLink: `${this.consoleUrl}/compute/disksDetail/zones/${this.zone}/disks/${disk.name}?project=${this.projectId}`,
+    //       image: image,
+    //       imageLink: imageLink,
+    //       interfaceType: instanceDisk?.interface || '-',
+    //       size: disk.sizeGb,
+    //       deviceName: disk.name,
+    //       type: disk?.type?.split?.('/')?.pop?.(),
+    //       architecture: disk.architecture,
+    //       encryption: '-',
+    //       mode: instanceDisk?.mode,
+    //       whenDeletingInstance: instanceDisk?.autoDelete ? 'On instance deletion' : 'Never',
+    //     },
+    //   ]
+    // })}"
+    //   .renderer="${(rows: any[]) => {
+    //     return rows.map((row: any) => {
+    //       return Object.keys(row).map((field: string) => {
+    //         switch (field) {
+    //           case 'name':
+    //             return html`<vscode-link class="link" href="${row.nameLink}">
+    //               ${row.name}
+    //             </vscode-link>`
+    //           case 'image':
+    //             if (row.imageLink) {
+    //               return html`<vscode-link class="link" href="${row.imageLink}">
+    //                 ${row.image}
+    //               </vscode-link>`
+    //             }
+    //           default:
+    //             return html`${row[field]}`
+    //         }
+    //       })
+    //     })
+    //   }}"
+    // /></table-view>
   }
 
   private get securityAndAccess() {
