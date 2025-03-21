@@ -77,8 +77,9 @@ export const gcp: IKernelExecutor = async (executor) => {
           throw new Error('Could not resolve Google Cloud Platform resource')
         }
 
-        const promises = vmInstance?.disks?.map(async ({ deviceName }) => {
-          return await getDisk(project, location, deviceName as string)
+        const promises = vmInstance?.disks?.map(async (disk) => {
+          const deviceName = disk.boot ? vmInstance.name : disk.deviceName
+          return await getDisk(project, location, deviceName!)
         })
 
         const disks = await Promise.all(promises!)

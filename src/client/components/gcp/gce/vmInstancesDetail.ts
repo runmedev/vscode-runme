@@ -132,15 +132,15 @@ export class VMInstancesDetail extends LitElement implements Disposable {
   }
 
   private get bootDisk() {
-    return this.disks.filter((disk) => {
-      const attachedDisk = this.instance.disks?.find((ad) => ad.deviceName === disk.name)
+    return this.disks.filter(() => {
+      const attachedDisk = this.instance.disks?.find((ad) => ad.boot)
       return attachedDisk?.boot
     })?.[0]
   }
 
   private get additionalDisks() {
-    return this.disks.filter((disk) => {
-      const attachedDisk = this.instance.disks?.find((ad) => ad.deviceName === disk.name)
+    return this.disks.filter(() => {
+      const attachedDisk = this.instance.disks?.find((ad) => !ad.boot)
       return !attachedDisk?.boot
     })
   }
