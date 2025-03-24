@@ -1450,7 +1450,7 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-unicorn": "^56.0.1",
     "eslint-plugin-unused-imports": "^4.1.4",
-    "expect-webdriverio": "^4.15.4",
+    "expect-webdriverio": "^5.1.0",
     "fork-ts-checker-webpack-plugin": "^9.0.0",
     "husky": "^9.1.7",
     "msw": "^2.7.0",
