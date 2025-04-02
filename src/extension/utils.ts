@@ -210,8 +210,8 @@ export function getKeyInfo(
     //   return { key: 'daggerCall', resource: 'DaggerObject' }
     // }
 
-    const frontmatterShell = parsedNotebookFrontmatter?.shell ?? ''
-    if (!cellAnnotations.background && isDaggerShell(frontmatterShell)) {
+    const customShell = cellAnnotations.interpreter || parsedNotebookFrontmatter?.shell || ''
+    if (!cellAnnotations.background && isDaggerShell(customShell)) {
       return { key: 'daggerShell', resource: 'None' }
     }
 
