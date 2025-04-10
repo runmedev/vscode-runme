@@ -1,12 +1,14 @@
 {
   "name": "vscode-runme",
-  "engineVersion": "v0.15.3",
-  "sdk": "typescript",
+  "engineVersion": "v0.18.2",
+  "sdk": {
+    "source": "typescript"
+  },
   "dependencies": [
     {
-      "name": "golang",
-      "source": "github.com/purpleclay/daggerverse/golang@7e83bccc350fa981e975ac0c8619f92a1b729958",
-      "pin": "7e83bccc350fa981e975ac0c8619f92a1b729958"
+      "name": "runme",
+      "source": "github.com/runmedev/runme",
+      "pin": "15b94571d4dc35688de18d276b0d3162a2177c34"
     }
   ],
   "source": "dagger"

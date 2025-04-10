@@ -1,4 +1,5 @@
 ---
+cwd: ../..
 runme:
   id: 01JMMSSHXM7N70W4KCJ5XGEE2A
   version: v3
@@ -10,28 +11,35 @@ terminalRows: 20
 
 Build notebook piplines using the brand new 🔥 dagger shell. New files with the `.dag` extension will default run via `dagger shell`.
 
+```sh {"name":"VscodeRunme"}
+### Exported in runme.dev as VscodeRunme
+# Use upstream module, on main branch (no --source)
+# github.com/runmedev/vscode-runme
+
+# Use local module, from current directory
+# . --source .
+.
+```
+
 ## Let's go
 
 We need some upstream artifacts. First, compile the Runme kernel binary.
 
-```sh {"interpreter":"zsh","name":"GitHubToken","promptEnv":"never","terminalRows":"2"}
-### Exported in runme.dev as GitHubToken
-export GITHUB_TOKEN=$(gh auth token)
+```sh {"interpreter":"zsh","name":"Target","promptEnv":"never","terminalRows":"3"}
+### Exported in runme.dev as Target
+direnv allow
+echo "Building for $TARGET_PLATFORM"
+```
+
+If the target platform is not set, reset your Runme session. It's likely that direnv wasn't authorized yet.
+
+```sh
+github.com/runmedev/runme | release --version latest | entries
 ```
 
 ```sh {"id":"01JMMSSHXM7N70W4KCHTX92MHE","name":"KernelBinary"}
 ### Exported in runme.dev as KernelBinary
-github.com/runmedev/runme | binary
-```
-
-Then, grab the presetup.sh script to provision the build container.
-
-```sh {"id":"01JMMSSHXM7N70W4KCHY04QVSE","name":"Presetup","terminalRows":"14"}
-### Exported in runme.dev as Presetup
-git https://github.com/runmedev/vscode-runme |
-  head |
-  tree |
-  file dagger/scripts/presetup.sh
+github.com/runmedev/runme | release-files --version latest $TARGET_PLATFORM
 ```
 
 ## Build the Runme VS Code Extension
@@ -40,8 +48,12 @@ Let's tie together above's artifacts via their respective cell names to build th
 
 ```sh {"id":"01JMMSSHXM7N70W4KCJ1N0DVXG","name":"Extension","terminalRows":"26"}
 ### Exported in runme.dev as Extension
-github.com/runmedev/vscode-runme |
-  with-remote github.com/runmedev/vscode-runme main |
-  with-container $(KernelBinary) $(Presetup) |
-  build-extension GITHUB_TOKEN
+VscodeRunme | build $(KernelBinary)
+```
+
+Export the extension to a VSIX file.
+
+```sh {"name":"ExtensionVsix"}
+### Exported in runme.dev as ExtensionVsix
+Extension | export "runme-extension.vsix"
 ```

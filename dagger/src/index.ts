@@ -5,38 +5,29 @@
  */
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Platform } from '@dagger.io/dagger'
-import { dag, Container, File, Directory, object, func, Secret } from '@dagger.io/dagger'
+import { Platform, dag, Container, File, Directory, object, func, Secret } from '@dagger.io/dagger'
 import * as os from 'os'
 @object()
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export class VscodeRunme {
   /**
-   * The working repository directory for the VscodeRunme instance.
+   * The source to build the extension from.
    */
   @func()
-  directory: Directory
+  source?: Directory
 
   /**
-   * The base container being used for building the extension.
+   * The presetup script to be added to the container.
    */
   @func()
-  container: Container
+  presetup?: File
 
-  /**
-   * Build from remote git repository.
-   * @param remote - Valid git remote url, aka repo to clone
-   * @param ref - Branch, tag, or commit to checkout
-   * @returns The modified VscodeRunme instance.
-   */
-  @func()
-  withRemote(remote: string, ref: string): VscodeRunme {
-    this.directory = dag
-      .git(`https://${remote}.git`)
-      .ref(ref)
-      .tree()
-
-    return this
+  constructor(source?: Directory) {
+    if (!source) {
+      source = dag.git('https://github.com/runmedev/vscode-runme.git').tag("main").tree()
+    }
+    this.source = source
+    this.presetup = source.file('dagger/scripts/presetup.sh')
   }
 
   /**
@@ -46,68 +37,32 @@ export class VscodeRunme {
    * @returns The modified VscodeRunme instance.
    */
   @func()
-  withContainer(binary: File, presetup: File): VscodeRunme {
+  container(): Container {
     const arch = os.arch() === 'x64' ? 'amd64' : 'arm64'
     const containerPlatform = `linux/${arch}` as Platform
-    this.container = dag
+    const binary = dag.runme().releaseFiles(containerPlatform, { version: 'latest' }).file('runme')
+
+    return dag
       .container({ platform: containerPlatform })
       .from('node:20')
+      .withEnvVariable('DAGGER_BUILD', '1')
       .withEnvVariable('EXTENSION_NAME', 'runme')
       .withFile('/usr/local/bin/runme', binary)
-      .withFile('/usr/local/bin/presetup', presetup)
+      .withFile('/usr/local/bin/presetup', this.presetup)
       .withEntrypoint([])
-      .withMountedDirectory('/mnt/vscode-runme', this.directory)
+      .withMountedDirectory('/mnt/vscode-runme', this.source)
       .withWorkdir('/mnt/vscode-runme')
       .withExec('bash /usr/local/bin/presetup'.split(' '))
-
-    return this
   }
 
   /**
-   * Sets up the container for the VscodeRunme instance.
-   * @param path - Path to file inside the container.
-   * @returns The file or error
-   */
-  @func()
-  async getFile(path: string): Promise<File> {
-    return this.container.file(path)
-  }
-
-  /**
-   * Sets up the container for the VscodeRunme instance.
-   * @param path - Path to file inside the container.
-   * @returns The file or error
-   */
-  @func()
-  async getRepoFile(repo: string, path: string): Promise<File> {
-    return dag
-      .git(repo)
-      .head()
-      .tree()
-      .file(path)
-  }
-
-  /**
-   * Sets up the container for the VscodeRunme instance.
-   * @param name - Name of the secret.
-   * @param plain - Plaintext.
-   * @returns The Secret or error
-   */
-  @func()
-  async withSecret(name: string, value: Secret): Promise<Secret> {
-    const plain = await value.plaintext()
-    return dag.setSecret(name, plain)
-  }
-
-  /**
-   * Sets up the container for the VscodeRunme instance.
-   * @param githubTokenSecret - Valid GitHub access token for API access passed as secret.
+   * Builds the VSIX extension file.
    * @returns The packaged VSIX extension file.
    */
   @func()
-  async buildExtension(githubTokenSecret: Secret): Promise<File> {
-    return this.container
-      .withSecretVariable('GITHUB_TOKEN', githubTokenSecret)
+  async build(runmeRelease: Directory): Promise<File> {
+    return this.container()
+      .withMountedDirectory('/mnt/vscode-runme/bin', runmeRelease)
       .withExec('runme run setup build bundle'.split(' '))
       .file('runme-extension.vsix')
   }
