@@ -11,49 +11,45 @@ terminalRows: 20
 
 Build notebook piplines using the brand new 🔥 dagger shell. New files with the `.dag` extension will default run via `dagger shell`.
 
-```sh {"name":"VscodeRunme"}
-### Exported in runme.dev as VscodeRunme
-# Use upstream module, on main branch (no --source)
-# github.com/runmedev/vscode-runme
+Initialize the VscodeRunme Dagger module.
 
-# Use local module, from current directory
-# . --source .
-.
+```sh {"name":"VscodeRunmeModule","terminalRows":"10"}
+### Exported in runme.dev as VscodeRunmeModule
+. --source .
+```
+
+Let'see what the module's got to offer.
+
+```sh {"terminalRows":"18"}
+VscodeRunmeModule | .help
 ```
 
 ## Let's go
 
-We need some upstream artifacts. First, compile the Runme kernel binary.
+We need some upstream artifacts. First, let's grab the pre-built binary for the Runme kernel.
 
-```sh {"interpreter":"zsh","name":"Target","promptEnv":"never","terminalRows":"3"}
-### Exported in runme.dev as Target
-direnv allow
-echo "Building for $TARGET_PLATFORM"
-```
-
-If the target platform is not set, reset your Runme session. It's likely that direnv wasn't authorized yet.
-
-```sh
+```sh {"terminalRows":"13"}
 github.com/runmedev/runme | release --version latest | entries
 ```
 
-```sh {"id":"01JMMSSHXM7N70W4KCHTX92MHE","name":"KernelBinary"}
-### Exported in runme.dev as KernelBinary
-github.com/runmedev/runme | release-files --version latest $TARGET_PLATFORM
+Specifically the one for Linux x64/AMD64.
+
+```sh {"id":"01JMMSSHXM7N70W4KCHTX92MHE","name":"KernelLinux","terminalRows":"13"}
+### Exported in runme.dev as KernelLinux
+github.com/runmedev/runme | release-files --version latest "linux/amd64"
 ```
 
 ## Build the Runme VS Code Extension
 
 Let's tie together above's artifacts via their respective cell names to build the Runme VS Code extension.
 
-```sh {"id":"01JMMSSHXM7N70W4KCJ1N0DVXG","name":"Extension","terminalRows":"26"}
-### Exported in runme.dev as Extension
-VscodeRunme | build $(KernelBinary)
+```sh {"id":"01JMMSSHXM7N70W4KCJ1N0DVXG","name":"ExtensionLinux","terminalRows":"17"}
+### Exported in runme.dev as ExtensionLinux
+VscodeRunmeModule | build $(KernelLinux)
 ```
 
 Export the extension to a VSIX file.
 
-```sh {"name":"ExtensionVsix"}
-### Exported in runme.dev as ExtensionVsix
-Extension | export "runme-extension.vsix"
+```sh
+ExtensionLinux | export "runme-extension-linux-amd64.vsix"
 ```
