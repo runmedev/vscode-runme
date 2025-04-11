@@ -1,5 +1,5 @@
 ---
-terminalRows: 20
+terminalRows: 14
 ---
 
 # Runme ▶️ for Dagger
@@ -12,24 +12,23 @@ Showcase the notebook experience to **author, debug, express, and run** Dagger p
 
 ## Build the Runme binary using `dagger shell`
 
-```sh {"terminalRows":"3"}
-export GOARCH=$(go env GOARCH)
-export GOOS=$(go env GOOS)
-echo "Building Runme binary for $GOOS/$GOARCH"
-```
-
-```sh {"interpreter":"dagger shell","name":"Version"}
-### Exported in runme.dev as Version
-git github.com/stateful/runme | tag v3.12.2 | tree
+```sh {"interpreter":"dagger shell","name":"Binary"}
+### Exported in runme.dev as Binary
+github.com/runmedev/runme | binary
 ```
 
 ```sh {"interpreter":"dagger shell","name":"ExportBinary"}
 ### Exported in runme.dev as ExportBinary
-github.com/purpleclay/daggerverse/golang $(Version) |
-    build --arch $GOARCH --os $GOOS |
-    file runme |
-    export runme-binary
+Binary | export runme-binary
 ```
+
+Alternatively, use pre-build versions (goreleaser) for different platforms.
+
+```sh {"interpreter":"dagger shell"}
+github.com/runmedev/runme | release --version "v3.12.2" | entries
+```
+
+The `release-files` function is available to narrow down to a specific platform's release.
 
 ### Now let the 🐮 cow speak
 
@@ -44,21 +43,16 @@ github.com/shykes/dagger/modules/wolfi@6124f75ef216c8c61e9f36bd6feb2a96047a9051 
 
 ```sh {"id":"01HZSMYF33TFKMEVRX5P64BNTB","interactive":"true"}
 dagger call \
-    -m github.com/purpleclay/daggerverse/golang@v0.3.0 \
-    --src "https://github.com/stateful/runme#v3.12.2" \
-    build \
-        --arch $(go env GOARCH) \
-        --os $(go env GOOS) \
-    file \
-        --path runme \
-        --output runme-binary
+  -m github.com/runmedev/runme \
+    binary \
+      --output runme-binary
 ```
 
 ### What does the 🐮 cow say using `dagger call`?
 
 ```sh {"id":"01J022WD7Z6TM1QQ075X09BTK4","interactive":"true"}
 dagger call \
-    -m github.com/shykes/dagger/modules/wolfi@6124f75ef216c8c61e9f36bd6feb2a96047a9051 \
+      -m github.com/shykes/dagger/modules/wolfi@6124f75ef216c8c61e9f36bd6feb2a96047a9051 \
     container \
         --packages=cowsay \
     with-exec --args="cowsay","hi there!" \
