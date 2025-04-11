@@ -104,4 +104,4 @@ aws ec2-instance-connect ssh --instance-id $EC2_INSTANCE_ID --os-user=ubuntu
 ### Feedback welcome!
 
 Do you have feedback or new ideas ? what about more Runme Cloud renderers for AWS features ?
-Feel free to [reach out to us](https://github.com/stateful/runme?tab=readme-ov-file#feedback)
+Feel free to [reach out to us](https://github.com/runmedev/runme?tab=readme-ov-file#feedback)

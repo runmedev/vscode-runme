@@ -77,4 +77,4 @@ https://$EKS_REGION.console.aws.amazon.com/eks/home?region=$EKS_REGION#/clusters
 ### Feedback welcome!
 
 Do you have feedback or new ideas ? what about more Runme Cloud renderers for AWS features ?
-Feel free to [reach out to us](https://github.com/stateful/runme?tab=readme-ov-file#feedback)
+Feel free to [reach out to us](https://github.com/runmedev/runme?tab=readme-ov-file#feedback)

@@ -14,7 +14,7 @@ Showcase the notebook experience to **author, debug, express, and run** Dagger p
 
 ```sh {"interpreter":"dagger shell","name":"Binary"}
 ### Exported in runme.dev as Binary
-github.com/stateful/runme | binary
+github.com/runmedev/runme | binary
 ```
 
 ```sh {"interpreter":"dagger shell","name":"ExportBinary"}
@@ -25,7 +25,7 @@ Binary | export runme-binary
 Alternatively, use pre-build versions (goreleaser) for different platforms.
 
 ```sh {"interpreter":"dagger shell"}
-github.com/stateful/runme | release --version "v3.12.2" | entries
+github.com/runmedev/runme | release --version "v3.12.2" | entries
 ```
 
 The `release-files` function is available to narrow down to a specific platform's release.
@@ -43,7 +43,7 @@ github.com/shykes/dagger/modules/wolfi@6124f75ef216c8c61e9f36bd6feb2a96047a9051 
 
 ```sh {"id":"01HZSMYF33TFKMEVRX5P64BNTB","interactive":"true"}
 dagger call \
-  -m github.com/stateful/runme \
+  -m github.com/runmedev/runme \
     binary \
       --output runme-binary
 ```
