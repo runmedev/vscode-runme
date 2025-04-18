@@ -112,7 +112,7 @@ export async function assertDocumentContainsSpinner(
   matcher: string,
   exact: boolean = false,
   retries: number = 10,
-  interval: number = 500,
+  interval: number = 1000,
 ) {
   try {
     await assertDocumentContains(absDocPath, matcher, exact)
