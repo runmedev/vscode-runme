@@ -21,8 +21,6 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: ">=1.24"
-      - name: Install xvfb
-        run: sudo apt-get update -y && sudo apt-get install xvfb
       - name: Install direnv
         run: curl -fsSL https://direnv.net/install.sh | bash
       - name: Authorize direnv
