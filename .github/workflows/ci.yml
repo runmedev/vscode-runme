@@ -37,6 +37,8 @@ jobs:
         uses: stateful/runme-action@v2
         with:
           workflows: print-target
+        env:
+          SHELL: /bin/bash
       - name: 🧪 Run Unit + Integration Pipeline
         run: runme run --direnv test:pipeline
         env:
