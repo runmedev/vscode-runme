@@ -1,4 +1,4 @@
-name: Tests
+name: Legacy
 on:
   pull_request:
   push:
