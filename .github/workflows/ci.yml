@@ -47,8 +47,8 @@ jobs:
           RUNME_TEST_TOKEN: ${{ secrets.RUNME_TEST_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
-          FORK_OWNER: ${{ github.event.pull_request.head.repo.owner.login || '' }}
-          BASE_OWNER: ${{ github.repository_owner || '' }}
+          FORK_OWNER: ${{ github.event.pull_request.head.repo.owner.login || 'unknown' }}
+          BASE_OWNER: ${{ github.repository_owner || 'unknown' }}
       - name: 🔼 Upload Artifacts
         uses: actions/upload-artifact@v4
         if: failure()
