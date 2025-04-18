@@ -31,22 +31,18 @@ jobs:
           version: "latest"
           verb: core
           args: "engine local-cache"
-      - name: Install Runme
+      - name: 🧪 Run Unit + Integration Pipeline
         uses: stateful/runme-action@v2
         with:
-          workflows: print-target
-        env:
-          SHELL: /bin/bash
-      - name: 🧪 Run Unit + Integration Pipeline
-        run: runme run --direnv test:pipeline
+          workflows: test:pipeline
         env:
           SHELL: /bin/bash
           DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUNME_TEST_TOKEN: ${{ secrets.RUNME_TEST_TOKEN }}
           # gha job metadata
-          BASE_OWNER: ${{ github.repository_owner || 'unknown' }}
-          FORK_OWNER: ${{ github.event.pull_request.head.repo.owner.login || 'unknown' }}
+          BASE_OWNER: ${{ github.repository_owner }}
+          FORK_OWNER: ${{ github.event.pull_request.head.repo.owner.login }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
       - name: 🔼 Upload Artifacts
