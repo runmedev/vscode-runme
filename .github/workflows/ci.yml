@@ -34,9 +34,10 @@ jobs:
           verb: core
           args: "engine local-cache"
       - name: 🧪 Run Full Pipeline (Unit + Integration Tests)
-        uses: stateful/runme-action@v2
-        with:
-          workflows: test:pipeline
+        run: runme run test:pipeline
+      #   uses: stateful/runme-action@v2
+      #   with:
+      #     workflows: test:pipeline
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUNME_TEST_TOKEN: ${{ secrets.RUNME_TEST_TOKEN }}
