@@ -28,7 +28,7 @@ jobs:
       - name: Authorize and source direnv
         run: direnv allow && direnv export bash
       - name: Setup Dagger
-        uses: dagger/dagger-for-github@v8
+        uses: dagger/dagger-for-github@8.0.0
         with:
           version: "latest"
           verb: core
