@@ -17,12 +17,16 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - name: Setup go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ">=1.24"
       - name: Install xvfb
         run: sudo apt-get update -y && sudo apt-get install xvfb
       - name: Install direnv
         run: curl -fsSL https://direnv.net/install.sh | bash
-      - name: Authorize direnv
-        run: direnv allow
+      - name: Authorize and source direnv
+        run: direnv allow && direnv export bash
       - name: Setup Dagger
         uses: dagger/dagger-for-github@v7
         with:
