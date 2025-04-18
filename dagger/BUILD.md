@@ -65,7 +65,7 @@ Extension | bundle | export $EXTENSION_VSIX
 
 First let's run the unit tests. They give us fast feedback.
 
-```sh {"name":"UnitTests"}
+```sh {"interpreter":"dagger shell --progress=plain","name":"UnitTests"}
 ### Exported in runme.dev as UnitTests
 Extension | unit-test | stdout
 ```
@@ -79,7 +79,7 @@ Extension | integration-test --runme-test-token RUNME_TEST_TOKEN | stdout
 
 Inside of GitHub Actions, we pass additional job information into the test suite.
 
-```sh {"name":"GhaIntegrationTests"}
+```sh {"interpreter":"dagger shell --progress=plain","name":"GhaIntegrationTests"}
 ### Exported in runme.dev as GhaIntegrationTests
 Extension |
   gha-job $GITHUB_ACTOR $GITHUB_EVENT_NAME $FORK_OWNER $BASE_OWNER |
