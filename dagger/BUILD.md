@@ -51,7 +51,8 @@ VscodeRunme | build $(KernelBinary)
 
 Export the extension to a VSIX file.
 
-```sh {"interpreter":"bash","terminalRows":"3"}
+```sh {"interpreter":"bash","name":"print-target","terminalRows":"3"}
+### Exported in runme.dev as print-target
 echo "Exporting extension to $EXTENSION_VSIX"
 ```
 

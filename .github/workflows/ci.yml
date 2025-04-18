@@ -36,7 +36,7 @@ jobs:
       - name: Install Runme
         uses: stateful/runme-action@v2
         with:
-          workflows: Target
+          workflows: print-target
       - name: 🧪 Run Unit + Integration Pipeline
         run: runme run --direnv test:pipeline
         env:
