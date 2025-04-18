@@ -43,6 +43,7 @@ jobs:
         run: runme run --direnv test:pipeline
         env:
           SHELL: /bin/bash
+          DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUNME_TEST_TOKEN: ${{ secrets.RUNME_TEST_TOKEN }}
           # gha job metadata
