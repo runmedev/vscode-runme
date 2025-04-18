@@ -74,17 +74,32 @@ Then, let's run the end-to-end tests. These require a virtual X server frame buf
 
 ```sh {"name":"IntegrationTests","terminalRows":"37"}
 ### Exported in runme.dev as IntegrationTests
-Extension | integration-test | stdout
+Extension | integration-test --runme-test-token RUNME_TEST_TOKEN | stdout
 ```
+
+Inside of GitHub Actions, we pass additional job information into the test suite.
+
+```sh {"name":"GhaIntegrationTests"}
+### Exported in runme.dev as GhaIntegrationTests
+Extension |
+  gha-job $GITHUB_ACTOR $GITHUB_EVENT_NAME $FORK_OWNER $BASE_OWNER |
+  integration-test --runme-test-token RUNME_TEST_TOKEN | stdout
+```
+
+### Troubleshooting
 
 It's simple to just run a specific integration test spec with the following line. Omit the "tests/e2e" directory.
 
 ```sh
-Extension | integration-test --spec "specs/identity/identity.existent-cell.all.e2e.ts" | stdout
+Extension |
+  integration-test --runme-test-token RUNME_TEST_TOKEN --spec "specs/githubAction.e2e.ts" |
+  stdout
 ```
 
 If they fail, you can re-run them with the `--debug` flag and grab logs and screenshots inside of `/tmp/e2e-logs`.
 
-```sh {"terminalRows":"35"}
-Extension | integration-test --debug | directory "tests/e2e/logs" | export /tmp/e2e-logs
+```sh
+Extension | integration-test --debug --runme-test-token RUNME_TEST_TOKEN --spec "specs/githubAction.e2e.ts" |
+  directory "tests/e2e/logs" |
+  export /tmp/e2e-logs
 ```

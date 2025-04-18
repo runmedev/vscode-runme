@@ -1,0 +1,54 @@
+name: CI
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install xvfb
+        run: sudo apt-get update -y && sudo apt-get install xvfb
+      - name: Install direnv
+        run: curl -fsSL https://direnv.net/install.sh | bash
+      - name: Authorize direnv
+        run: direnv allow
+      - name: Setup Dagger
+        uses: dagger/dagger-for-github@v7
+        with:
+          version: "latest"
+          verb: core
+          args: "engine local-cache"
+      - name: 🧪 Run Full Pipeline (Unit + Integration Tests)
+        uses: stateful/runme-action@v2
+        with:
+          workflows: test:pipeline
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUNME_TEST_TOKEN: ${{ secrets.RUNME_TEST_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          FORK_OWNER: ${{ github.event.pull_request.head.repo.owner.login }}
+          BASE_OWNER: ${{ github.repository_owner }}
+      - name: 🔼 Upload Artifacts
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: logs
+          path: |
+            tests/e2e/logs
+      - name: 🐛 Debug Build
+        uses: stateful/vscode-server-action@v1
+        if: failure()
+        with:
+          timeout: "300000"

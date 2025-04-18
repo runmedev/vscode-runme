@@ -235,6 +235,10 @@ npx wdio run ./tests/e2e/wdio.conf.ts
 
 The process for testing in CI is a bit more complicated as we try to test closer to the real environment the extension will be executed in. If a user uses Runme, the extension will be shipped with no `node_modules`. Everything is bundled through Webpack including dependencies. Now this can become problematic because if we miss to add the dependency to the `package.json`, Webpack creates a production bundle that won't include that dependency and will fail in the users environment.
 
+```sh {"interactive":"true","name":"test:pipeline","terminalRows":"41"}
+runme run UnitTests GhaIntegrationTests
+```
+
 Therefore to test in a closer production environment, run:
 
 ```sh {"id":"01HF7VQMH8ESX1EFV4PYWC0M3X","name":"test:e2e:ci"}
