@@ -82,7 +82,7 @@ Inside of GitHub Actions, we pass additional job information into the test suite
 ```sh {"interpreter":"dagger shell --progress=plain","name":"GhaIntegrationTests"}
 ### Exported in runme.dev as GhaIntegrationTests
 Extension |
-  gha-job $GITHUB_ACTOR $GITHUB_EVENT_NAME $FORK_OWNER $BASE_OWNER |
+  gha-job $BASE_OWNER $FORK_OWNER $GITHUB_ACTOR $GITHUB_EVENT_NAME |
   integration-test --runme-test-token RUNME_TEST_TOKEN | stdout
 ```
 

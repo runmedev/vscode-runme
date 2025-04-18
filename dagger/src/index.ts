@@ -15,16 +15,6 @@ import {
   Secret,
 } from '@dagger.io/dagger'
 
-/**
- * GitHub Actions information
- */
-interface GhaJobInfo {
-  actor: string
-  eventName: string
-  forkOwner: string
-  baseOwner: string
-}
-
 @object()
 export class VscodeRunme {
   /**
@@ -44,8 +34,6 @@ export class VscodeRunme {
    */
   @func()
   presetup?: File
-
-  private _ghaInfo?: GhaJobInfo
 
   constructor(source?: Directory) {
     if (!source) {
@@ -90,12 +78,6 @@ export class VscodeRunme {
       .withEnvVariable('CI', '1')
       .withEnvVariable('SHELL', 'bash')
       .withEnvVariable('EXTENSION_NAME', 'runme')
-
-      // GitHub Actions-integration only for internal PRs
-      .withEnvVariable('GITHUB_ACTOR', this._ghaInfo?.actor || '')
-      .withEnvVariable('GITHUB_EVENT_NAME', this._ghaInfo?.eventName || '')
-      .withEnvVariable('FORK_OWNER', this._ghaInfo?.forkOwner || '')
-      .withEnvVariable('BASE_OWNER', this._ghaInfo?.baseOwner || '')
 
       .withFile('/usr/local/bin/runme', binary)
       .withFile('/usr/local/bin/presetup', this.presetup)
@@ -195,16 +177,19 @@ export class VscodeRunme {
   @func()
   async ghaJob(
     actor: string,
+    baseOwner: string,
     eventName: string,
     forkOwner: string,
-    baseOwner: string,
   ): Promise<VscodeRunme> {
-    this._ghaInfo = {
-      actor,
-      eventName,
-      forkOwner,
-      baseOwner,
-    }
+    await this.base()
+
+    // GitHub Actions metadata only for internal PRs
+    this.container = this.container
+      .withEnvVariable('BASE_OWNER', baseOwner)
+      .withEnvVariable('FORK_OWNER', forkOwner)
+      .withEnvVariable('GITHUB_ACTOR', actor)
+      .withEnvVariable('GITHUB_EVENT_NAME', eventName)
+
     return this
   }
 }

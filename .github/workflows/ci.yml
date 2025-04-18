@@ -45,10 +45,11 @@ jobs:
           SHELL: /bin/bash
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUNME_TEST_TOKEN: ${{ secrets.RUNME_TEST_TOKEN }}
+          # gha job metadata
+          BASE_OWNER: ${{ github.repository_owner || 'unknown' }}
+          FORK_OWNER: ${{ github.event.pull_request.head.repo.owner.login || 'unknown' }}
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
-          FORK_OWNER: ${{ github.event.pull_request.head.repo.owner.login || 'unknown' }}
-          BASE_OWNER: ${{ github.repository_owner || 'unknown' }}
       - name: 🔼 Upload Artifacts
         uses: actions/upload-artifact@v4
         if: failure()
