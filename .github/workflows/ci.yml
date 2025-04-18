@@ -40,6 +40,7 @@ jobs:
       - name: 🧪 Run Full Pipeline (Unit + Integration Tests)
         run: runme run --direnv test:pipeline
         env:
+          SHELL: /bin/bash
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUNME_TEST_TOKEN: ${{ secrets.RUNME_TEST_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
