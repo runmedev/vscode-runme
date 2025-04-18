@@ -20,7 +20,7 @@ Initialize the VscodeRunme Dagger module using the local source code.
 
 The VS Code extension wraps the Runme kernel binary (platform-specific). Let's use the host's platform.
 
-```sh {"interpreter":"zsh","promptEnv":"never","terminalRows":"3"}
+```sh {"interpreter":"bash","promptEnv":"never","terminalRows":"3"}
 direnv allow
 echo "Building for $TARGET_PLATFORM"
 ```
