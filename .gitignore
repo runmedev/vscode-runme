@@ -19,3 +19,5 @@ assets
 .venv
 **/*-01*.md
 secrets
+.env
+.env.local
