@@ -33,11 +33,10 @@ jobs:
           version: "latest"
           verb: core
           args: "engine local-cache"
+      - name: Install Runme
+        uses: stateful/runme-action@v2
       - name: 🧪 Run Full Pipeline (Unit + Integration Tests)
         run: runme run test:pipeline
-      #   uses: stateful/runme-action@v2
-      #   with:
-      #     workflows: test:pipeline
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RUNME_TEST_TOKEN: ${{ secrets.RUNME_TEST_TOKEN }}
