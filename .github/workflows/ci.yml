@@ -35,6 +35,8 @@ jobs:
           args: "engine local-cache"
       - name: Install Runme
         uses: stateful/runme-action@v2
+        with:
+          workflows: Target
       - name: 🧪 Run Full Pipeline (Unit + Integration Tests)
         run: runme run test:pipeline
         env:
