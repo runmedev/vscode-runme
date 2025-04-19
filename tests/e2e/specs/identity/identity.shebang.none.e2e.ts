@@ -74,8 +74,8 @@ describe('Test suite: Shebang with setting None (0)', async () => {
     )
   })
 
-  after(() => {
+  after(async () => {
     //revert changes we made during the test
-    revertChanges('shebang.md')
+    await revertChanges('shebang.md')
   })
 })

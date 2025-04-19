@@ -2,6 +2,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import cp from 'node:child_process'
 import url from 'node:url'
+import { promisify } from 'node:util'
 
 import * as jsonc from 'comment-json'
 import clipboard from 'clipboardy'
@@ -126,7 +127,7 @@ export async function assertDocumentContainsSpinner(
   }
 }
 
-export function revertChanges(fileName: string) {
+export async function revertChanges(fileName: string) {
   //revert changes we made during the test
   const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
   const mdPath = path.resolve(
@@ -140,7 +141,8 @@ export function revertChanges(fileName: string) {
     fileName,
   )
   const settingsPath = path.resolve(__dirname, '..', '..', '..', '.vscode', 'settings.json')
-  cp.execSync(`git checkout -- ${mdPath} ${settingsPath}`)
+  const exec = promisify(cp.exec)
+  await exec(`git checkout -f ${mdPath} ${settingsPath}`)
 }
 
 const osPlatform = process.platform.toString()

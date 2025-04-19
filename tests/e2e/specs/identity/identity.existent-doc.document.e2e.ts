@@ -74,8 +74,8 @@ describe('Test suite: Document with existent identity and setting Document only 
     )
   })
 
-  after(() => {
+  after(async () => {
     //revert changes we made during the test
-    revertChanges('existent-doc-id.md')
+    await revertChanges('existent-doc-id.md')
   })
 })

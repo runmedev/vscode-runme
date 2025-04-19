@@ -65,8 +65,8 @@ describe('Test suite: Cell with existent identity and setting document only (2)'
     )
   })
 
-  after(() => {
+  after(async () => {
     //revert changes we made during the test
-    revertChanges('existent-cell-id.md')
+    await revertChanges('existent-cell-id.md')
   })
 })

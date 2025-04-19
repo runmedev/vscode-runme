@@ -37,8 +37,8 @@ describe('Test suite: Empty file with setting All (1)', async () => {
     await assertDocumentContainsSpinner(absDocPath, '')
   })
 
-  after(() => {
+  after(async () => {
     //revert changes we made during the test
-    revertChanges('empty-file.md')
+    await revertChanges('empty-file.md')
   })
 })
