@@ -1488,7 +1488,7 @@
     "@kubernetes/client-node": "^1.2.0",
     "@protobuf-ts/grpc-transport": "^2.9.5",
     "@protobuf-ts/runtime": "^2.10.0",
-    "@protobuf-ts/runtime-rpc": "^2.9.1",
+    "@protobuf-ts/runtime-rpc": "^2.10.0",
     "@vercel/client": "^13.4.12",
     "@vscode/vscode-languagedetection": "^1.0.22",
     "@vscode/webview-ui-toolkit": "^1.2.2",
