@@ -1507,7 +1507,7 @@
     "filesize": "^10.1.6",
     "get-port": "^7.0.0",
     "got": "^11.8.2",
-    "graphql": "^16.10.0",
+    "graphql": "^16.11.0",
     "jsonc-parser": "^3.2.1",
     "jsonwebtoken": "^9.0.2",
     "lit": "^3.2.1",
