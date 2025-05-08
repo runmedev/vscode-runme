@@ -105,10 +105,18 @@ Extension | integration-test --debug --runme-test-token RUNME_TEST_TOKEN --spec 
 
 ### Releases
 
-```sh {"terminalRows":"14"}
-. | list-release | entries
+```sh
+. | list-release --version prerelease | entries
 ```
 
-```sh {"terminalRows":"10"}
-. | link-release --version 3.13.3-edge.0 $TARGET_PLATFORM | name
+```sh {"name":"PreReleaseVsix"}
+### Exported in runme.dev as PreReleaseVsix
+. | link-release --version prerelease $TARGET_PLATFORM
+```
+
+```sh {"name":"PreReleaseIntegrationTests"}
+### Exported in runme.dev as PreReleaseIntegrationTests
+VscodeRunme | prebuild $(PreReleaseVsix) |
+  integration-test --runme-test-token RUNME_TEST_TOKEN |
+  stdout
 ```

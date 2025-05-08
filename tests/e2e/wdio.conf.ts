@@ -6,7 +6,8 @@ import { Key } from 'webdriverio'
 import type { Options } from '@wdio/types'
 
 const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
-const extensionPath = path.join(__dirname, '..', '..')
+const workspacePath = path.join(__dirname, '..', '..')
+const extensionPath = process.env.RUNME_TEST_EXTENSION || workspacePath
 
 export const config: Options.Testrunner = {
   //
@@ -95,8 +96,8 @@ export const config: Options.Testrunner = {
       browserVersion: 'stable',
       'wdio:vscodeOptions': {
         extensionPath,
-        workspacePath: extensionPath,
-        filePath: path.join(extensionPath, 'tests', 'fixtures', 'README.md'),
+        workspacePath,
+        filePath: path.join(workspacePath, 'tests', 'fixtures', 'README.md'),
         userSettings: {
           'terminal.integrated.defaultProfile.osx': 'bash',
         },

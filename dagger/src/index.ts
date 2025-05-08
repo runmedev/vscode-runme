@@ -31,6 +31,12 @@ export class VscodeRunme {
   container?: Container
 
   /**
+   * The extension to perform operations on if different from the source.
+   */
+  @func()
+  extension?: Directory
+
+  /**
    * The presetup script to be added to the container.
    */
   @func()
@@ -106,6 +112,16 @@ export class VscodeRunme {
     return this
   }
 
+  @func()
+  async prebuild(extensionVsix: File): Promise<VscodeRunme> {
+    await this.base()
+
+    this.extension = await this.unpackExtension(extensionVsix)
+    this.container = this.container.withExec('runme run configureNPM setup'.split(' '))
+
+    return this
+  }
+
   /**
    * Bundles the VSIX extension file.
    * @returns The modified VscodeRunme instance.
@@ -150,11 +166,18 @@ export class VscodeRunme {
     }
 
     const expect = debug ? ReturnType.Any : ReturnType.Success
-
     let container = this.container
+
     if (runmeTestToken) {
       // GitHub Actions-integration e2e tests
       container = container.withSecretVariable('RUNME_TEST_TOKEN', runmeTestToken)
+    }
+
+    if (this.extension) {
+      const path = '/tmp/runme-test-extension'
+      container = container
+        .withMountedDirectory(path, this.extension)
+        .withEnvVariable('RUNME_TEST_EXTENSION', path)
     }
 
     return (
@@ -200,40 +223,24 @@ export class VscodeRunme {
    * @param version Release version to fetch, defaults to 'latest'
    */
   @func()
-  async listRelease(githubToken?: string, version: string = 'latest'): Promise<Directory> {
-    const octokit = new Octokit({
-      auth: githubToken || undefined,
-    })
-    let release
-    if (version === 'latest') {
-      const { data } = await octokit.rest.repos.getLatestRelease({
-        owner: 'runmedev',
-        repo: 'vscode-runme',
-      })
-      release = data
-    } else {
-      const { data } = await octokit.rest.repos.getReleaseByTag({
-        owner: 'runmedev',
-        repo: 'vscode-runme',
-        tag: version,
-      })
-      release = data
-    }
+  async listRelease(githubToken?: Secret, version: string = 'latest'): Promise<Directory> {
+    const release = await this.getReleaseByVersion(githubToken, version)
     if (!release) {
       throw new Error('Failed to get release')
     }
-    // Simulate a directory structure in memory (or use a temp dir if needed)
-    // Here, we use a Dagger Directory abstraction
-    let ctr = await this.base()
+    const containerPlatform = await this.defaultPlatform()
+    let container = dag.container({ platform: containerPlatform }).from('alpine')
     const releaseDir = `/releases/${version}`
     for (const asset of release.assets) {
-      if (!asset.name.endsWith('.vsix')) continue
-      ctr.container = ctr.container.withFile(
+      if (!asset.name.endsWith('.vsix')) {
+        continue
+      }
+      container = container.withFile(
         `${releaseDir}/${asset.name}`,
         dag.http(asset.browser_download_url),
       )
     }
-    return ctr.container.directory(releaseDir)
+    return container.directory(releaseDir)
   }
 
   /**
@@ -245,12 +252,18 @@ export class VscodeRunme {
   @func()
   async linkRelease(
     platform: string,
-    githubToken?: string,
+    githubToken?: Secret,
     version: string = 'latest',
   ): Promise<File> {
+    if (version === 'latest' || version === 'prerelease') {
+      const release = await this.getReleaseByVersion(githubToken, version)
+      version = release.name
+    }
+
     const [os, arch] = platform.split('/')
     const archMap: Record<string, string> = {
-      amd64: 'x86_64',
+      x86_64: 'x64',
+      amd64: 'x64',
       arm64: 'arm64',
       wasm: 'wasm',
     }
@@ -259,5 +272,53 @@ export class VscodeRunme {
     const releaseDir = await this.listRelease(githubToken, version)
 
     return releaseDir.file(filename)
+  }
+
+  @func()
+  async unpackExtension(extensionVsix: File): Promise<Directory> {
+    const containerPlatform = await this.defaultPlatform()
+    let container = dag
+      .container({ platform: containerPlatform })
+      .from('alpine')
+      .withFile('/tmp/runme-extension.vsix.zip', extensionVsix)
+      .withWorkdir('/tmp/')
+      .withExec(['unzip', 'runme-extension.vsix.zip'])
+
+    return container.directory('/tmp/extension')
+  }
+
+  /**
+   * Fetches a GitHub release by version or tag.
+   * @param githubToken - Optional GitHub token for authentication
+   * @param version - The version to fetch ('latest' or a specific tag)
+   * @returns The GitHub release data
+   */
+  private async getReleaseByVersion(githubToken?: Secret, version: string = 'latest') {
+    const octokit = new Octokit({
+      auth: githubToken ? await githubToken.plaintext() : undefined,
+    })
+
+    const repoParams = {
+      owner: 'runmedev',
+      repo: 'vscode-runme',
+    }
+
+    if (version === 'latest') {
+      const { data } = await octokit.rest.repos.getLatestRelease(repoParams)
+      return data
+    }
+
+    if (version === 'prerelease') {
+      const { data } = await octokit.rest.repos.listReleases(repoParams)
+      const prereleases = data.filter((release) => release.prerelease)
+      return prereleases[0] // Returns the most recent prerelease
+    }
+
+    const { data } = await octokit.rest.repos.getReleaseByTag({
+      ...repoParams,
+      tag: version,
+    })
+
+    return data
   }
 }
