@@ -1,61 +1,11 @@
-import url from 'node:url'
-import path from 'node:path'
+import { runIdentityTestSuite } from '../../helpers/identity.shared'
 
-import { Key } from 'webdriverio'
-
-import { RunmeNotebook } from '../../pageobjects/notebook.page.js'
-import {
-  assertDocumentContainsSpinner,
-  revertChanges,
-  saveFile,
-  switchLifecycleIdentity,
-} from '../../helpers/index.js'
-import { removeAllNotifications } from '../notifications.js'
-
-const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
-
-describe('Test suite: Document with existent identity and setting Document only (2)', async () => {
-  before(async () => {
-    await removeAllNotifications()
-  })
-
-  const notebook = new RunmeNotebook()
-  it('open identity markdown file', async () => {
-    const workbench = await browser.getWorkbench()
-    await switchLifecycleIdentity(workbench, 'Doc')
-
-    await browser.executeWorkbench(async (vscode) => {
-      const doc = await vscode.workspace.openTextDocument(
-        vscode.Uri.file(`${vscode.workspace.rootPath}/tests/fixtures/identity/existent-doc-id.md`),
-      )
-      return vscode.window.showNotebookDocument(doc, {
-        viewColumn: vscode.ViewColumn.Active,
-      })
-    })
-  })
-
-  it('selects Runme kernel', async () => {
-    const workbench = await browser.getWorkbench()
-    await workbench.executeCommand('Select Notebook Kernel')
-    await browser.keys([Key.Enter])
-  })
-
-  it('should not remove the front matter with the identity', async () => {
-    const absDocPath = await browser.executeWorkbench(async (vscode, documentPath) => {
-      return `${vscode.workspace.rootPath}${documentPath}`
-    }, '/tests/fixtures/identity/existent-doc-id.md')
-
-    await notebook.focusDocument()
-    const workbench = await browser.getWorkbench()
-    await workbench.executeCommand('Notebook: Focus First Cell')
-    await browser.keys([Key.Enter])
-    const cell = await notebook.getCell('console.log("Run scripts via Shebang!")')
-    await cell.focus()
-    await saveFile(browser)
-
-    await assertDocumentContainsSpinner(
-      absDocPath,
-      `---
+runIdentityTestSuite({
+  suiteName: 'Test suite: Document with existent identity and setting Document only (2)',
+  lifecycleSetting: 'Doc',
+  fixtureFile: '/tests/fixtures/identity/existent-doc-id.md',
+  cellSelector: 'console.log("Run scripts via Shebang!")',
+  expectedOutput: `---
       foo:
         bar: baz
       runme:
@@ -74,13 +24,6 @@ describe('Test suite: Document with existent identity and setting Document only 
 
       \`\`\`
 
-
       `,
-    )
-  })
-
-  after(async () => {
-    //revert changes we made during the test
-    await revertChanges('existent-doc-id.md')
-  })
+  revertFile: 'existent-doc-id.md',
 })

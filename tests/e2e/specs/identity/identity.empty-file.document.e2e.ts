@@ -1,49 +1,9 @@
-import { Key } from 'webdriverio'
+import { runIdentityTestSuite } from '../../helpers/identity.shared'
 
-import {
-  assertDocumentContainsSpinner,
-  revertChanges,
-  saveFile,
-  switchLifecycleIdentity,
-} from '../../helpers/index.js'
-import { removeAllNotifications } from '../notifications.js'
-
-describe('Test suite: Empty file with setting Document (2)', async () => {
-  before(async () => {
-    await removeAllNotifications()
-  })
-
-  it('open identity markdown file', async () => {
-    const workbench = await browser.getWorkbench()
-    await switchLifecycleIdentity(workbench, 'Doc')
-
-    await browser.executeWorkbench(async (vscode) => {
-      const doc = await vscode.workspace.openTextDocument(
-        vscode.Uri.file(`${vscode.workspace.rootPath}/tests/fixtures/identity/empty-file.md`),
-      )
-      return vscode.window.showNotebookDocument(doc, {
-        viewColumn: vscode.ViewColumn.Active,
-      })
-    })
-  })
-
-  it('selects Runme kernel', async () => {
-    const workbench = await browser.getWorkbench()
-    await workbench.executeCommand('Select Notebook Kernel')
-    await browser.keys([Key.Enter])
-  })
-
-  it('should not remove the front matter with the identity', async () => {
-    const absDocPath = await browser.executeWorkbench(async (vscode, documentPath) => {
-      return `${vscode.workspace.rootPath}${documentPath}`
-    }, '/tests/fixtures/identity/empty-file.md')
-
-    await saveFile(browser)
-    await assertDocumentContainsSpinner(absDocPath, '')
-  })
-
-  after(async () => {
-    //revert changes we made during the test
-    await revertChanges('empty-file.md')
-  })
+runIdentityTestSuite({
+  suiteName: 'Test suite: Empty file with setting Document (2)',
+  lifecycleSetting: 'Doc',
+  fixtureFile: '/tests/fixtures/identity/empty-file.md',
+  expectedOutput: '',
+  revertFile: 'empty-file.md',
 })
