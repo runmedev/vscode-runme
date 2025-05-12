@@ -1,4 +1,4 @@
-import { runIdentityTestSuite } from '../../helpers/identity.shared'
+import { runIdentityTestSuite } from '../../helpers/identity.shared.js'
 
 runIdentityTestSuite({
   suiteName: 'Test suite: Shebang with setting Document only (2)',
