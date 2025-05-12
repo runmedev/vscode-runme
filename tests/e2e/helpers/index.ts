@@ -87,7 +87,11 @@ function sanitizeOutput(output: string) {
   return output.trim().replace(/^\s+/gm, '')
 }
 
-async function assertDocumentContains(absDocPath: string, matcher: string, exact: boolean = false) {
+async function assertDocumentContains(
+  absDocPath: string,
+  matcher: string,
+  exact: boolean = false,
+): Promise<void> {
   const source = await fs.readFile(absDocPath, 'utf-8')
   const savedContent = sanitizeOutput(source.toString()).split('\n')
   const matcherParts = sanitizeOutput(matcher).split('\n')
@@ -166,4 +170,15 @@ export const JSON_ULID = /\"id\":\"([0123456789ABCDEFGHJKMNPQRSTVWXYZ]{26})\"/
 export async function getRepoBasename(): Promise<string> {
   const filePath = new URL('../../..', import.meta.url)
   return path.basename(filePath.pathname)
+}
+
+export async function switchLifecycleIdentity(
+  workbench: Workbench,
+  identity: 'None' | 'Doc' | 'Cell' | 'All',
+) {
+  // run three times to ensure it takes effect
+  for (let i = 0; i < 3; i++) {
+    await workbench.executeCommand(`Runme: Lifecycle Identity - ${identity}`)
+    await sleep(100)
+  }
 }
