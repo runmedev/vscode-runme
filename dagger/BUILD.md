@@ -103,6 +103,16 @@ Extension | integration-test --debug --runme-test-token RUNME_TEST_TOKEN --spec 
   export /tmp/e2e-logs
 ```
 
+Troubleshooting flakieness in lifecycle identity tests.
+
+```sh {"interpreter":"dagger shell --progress=plain","terminalRows":"66"}
+VscodeRunme | prebuild $(. | link-release $TARGET_PLATFORM) |
+  integration-test --debug --spec "specs/identity/*.e2e.ts" |
+  stdout
+  # directory "logs" |
+  # export /tmp/e2e-logs
+```
+
 ### Releases
 
 ```sh

@@ -93,6 +93,11 @@ async function assertDocumentContains(absDocPath: string, matcher: string, exact
   const matcherParts = sanitizeOutput(matcher).split('\n')
   const maxContentLines = Math.min(matcherParts.length, savedContent.length)
 
+  console.log('source:', source)
+  console.log('savedContent', savedContent)
+  console.log('matcherParts', matcherParts)
+  console.log('maxContentLines', maxContentLines)
+
   for (let index = 0; index < maxContentLines; index++) {
     if (exact) {
       await expect(savedContent[index].trim()).toMatch(matcherParts[index].trim())
