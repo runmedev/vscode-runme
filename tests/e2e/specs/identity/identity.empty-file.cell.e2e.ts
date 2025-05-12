@@ -1,6 +1,11 @@
 import { Key } from 'webdriverio'
 
-import { assertDocumentContainsSpinner, revertChanges, saveFile } from '../../helpers/index.js'
+import {
+  assertDocumentContainsSpinner,
+  revertChanges,
+  saveFile,
+  switchLifecycleIdentity,
+} from '../../helpers/index.js'
 import { removeAllNotifications } from '../notifications.js'
 
 describe('Test suite: Empty file with setting Cell (3)', async () => {
@@ -9,7 +14,7 @@ describe('Test suite: Empty file with setting Cell (3)', async () => {
   })
   it('open identity markdown file', async () => {
     const workbench = await browser.getWorkbench()
-    await workbench.executeCommand('Runme: Lifecycle Identity - Cell')
+    await switchLifecycleIdentity(workbench, 'Cell')
 
     await browser.executeWorkbench(async (vscode) => {
       const doc = await vscode.workspace.openTextDocument(

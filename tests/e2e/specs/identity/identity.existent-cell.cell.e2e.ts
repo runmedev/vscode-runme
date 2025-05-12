@@ -1,7 +1,12 @@
 import { Key } from 'webdriverio'
 
 import { RunmeNotebook } from '../../pageobjects/notebook.page.js'
-import { assertDocumentContainsSpinner, revertChanges, saveFile } from '../../helpers/index.js'
+import {
+  assertDocumentContainsSpinner,
+  revertChanges,
+  saveFile,
+  switchLifecycleIdentity,
+} from '../../helpers/index.js'
 import { removeAllNotifications } from '../notifications.js'
 
 describe('Test suite: Cell with existent identity and setting cell only (3)', async () => {
@@ -12,7 +17,7 @@ describe('Test suite: Cell with existent identity and setting cell only (3)', as
   const notebook = new RunmeNotebook()
   it('open identity markdown file', async () => {
     const workbench = await browser.getWorkbench()
-    await workbench.executeCommand('Runme: Lifecycle Identity - Cell')
+    await switchLifecycleIdentity(workbench, 'Cell')
 
     await browser.executeWorkbench(async (vscode) => {
       const doc = await vscode.workspace.openTextDocument(

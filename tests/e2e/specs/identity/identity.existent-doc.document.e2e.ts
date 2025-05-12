@@ -4,7 +4,12 @@ import path from 'node:path'
 import { Key } from 'webdriverio'
 
 import { RunmeNotebook } from '../../pageobjects/notebook.page.js'
-import { assertDocumentContainsSpinner, revertChanges, saveFile } from '../../helpers/index.js'
+import {
+  assertDocumentContainsSpinner,
+  revertChanges,
+  saveFile,
+  switchLifecycleIdentity,
+} from '../../helpers/index.js'
 import { removeAllNotifications } from '../notifications.js'
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
@@ -17,7 +22,7 @@ describe('Test suite: Document with existent identity and setting Document only 
   const notebook = new RunmeNotebook()
   it('open identity markdown file', async () => {
     const workbench = await browser.getWorkbench()
-    await workbench.executeCommand('Runme: Lifecycle Identity - Doc')
+    await switchLifecycleIdentity(workbench, 'Doc')
 
     await browser.executeWorkbench(async (vscode) => {
       const doc = await vscode.workspace.openTextDocument(
