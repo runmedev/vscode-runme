@@ -179,6 +179,6 @@ export async function switchLifecycleIdentity(
   // run three times to ensure it takes effect
   for (let i = 0; i < 3; i++) {
     await workbench.executeCommand(`Runme: Lifecycle Identity - ${identity}`)
-    await sleep(100)
+    await sleep(200)
   }
 }
