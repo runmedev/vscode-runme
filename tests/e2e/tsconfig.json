@@ -18,7 +18,6 @@
     "specs",
     "./wdio.conf.ts",
     "pageobjects",
-    "helpers/identity.shared.ts"
   ],
   "exclude": []
 }

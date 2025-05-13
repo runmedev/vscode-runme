@@ -1,11 +1,11 @@
-import { runIdentityTestSuite } from '../../helpers/identity.shared'
+import { runIdentityTests } from './identity.shared'
 
-runIdentityTestSuite({
-  suiteName: 'Test suite: Document with existent identity and setting All (1)',
-  lifecycleSetting: 'All',
-  fixtureFile: '/tests/fixtures/identity/existent-doc-id.md',
-  cellSelector: 'console.log("Run scripts via Shebang!")',
-  expectedOutput: `---
+describe('Test suite: Document with existent identity and setting All (1)', () => {
+  runIdentityTests({
+    lifecycleSetting: 'All',
+    fixtureFile: '/tests/fixtures/identity/existent-doc-id.md',
+    cellSelector: 'console.log("Run scripts via Shebang!")',
+    expectedOutput: `---
       foo:
         bar: baz
       runme:
@@ -19,11 +19,13 @@ runIdentityTestSuite({
 
       ## Scenario
 
-      \`\`\`js {"id":"01HFA08N6F66WSG09RR9XEP0T6","name":"foo"}
+      \`\`\`js {"name":"foo","id":"01HEJKW1A2QKJQJQJQJQJQJQJQ"}
       console.log("Run scripts via Shebang!")
 
       \`\`\`
 
       `,
-  revertFile: 'existent-doc-id.md',
+    revertFile: 'existent-doc-id.md',
+    assertOptions: { strict: true },
+  })
 })

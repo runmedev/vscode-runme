@@ -1,11 +1,11 @@
-import { runIdentityTestSuite } from '../../helpers/identity.shared'
+import { runIdentityTests } from './identity.shared'
 
-runIdentityTestSuite({
-  suiteName: 'Test suite: Shebang with setting Cell only (3)',
-  lifecycleSetting: 'Cell',
-  fixtureFile: '/tests/fixtures/identity/shebang.md',
-  cellSelector: 'console.log("Scenario 1: Run scripts via Shebang!")',
-  expectedOutput: `
+describe('Test suite: Shebang with setting Cell only (3)', () => {
+  runIdentityTests({
+    lifecycleSetting: 'Cell',
+    fixtureFile: '/tests/fixtures/identity/shebang.md',
+    cellSelector: 'console.log("Scenario 1: Run scripts via Shebang!")',
+    expectedOutput: `
       ## Shebang
       Example file used as part of the end to end suite
 
@@ -17,5 +17,6 @@ runIdentityTestSuite({
       \`\`\`
 
       `,
-  revertFile: 'shebang.md',
+    revertFile: 'shebang.md',
+  })
 })

@@ -1,11 +1,11 @@
-import { runIdentityTestSuite } from '../../helpers/identity.shared.js'
+import { runIdentityTests } from './identity.shared.js'
 
-runIdentityTestSuite({
-  suiteName: 'Test suite: Shebang with setting Document only (2)',
-  lifecycleSetting: 'Doc',
-  fixtureFile: '/tests/fixtures/identity/shebang.md',
-  cellSelector: 'console.log("Scenario 1: Run scripts via Shebang!")',
-  expectedOutput: `---
+describe('Test suite: Shebang with setting Document (2)', () => {
+  runIdentityTests({
+    lifecycleSetting: 'Doc',
+    fixtureFile: '/tests/fixtures/identity/shebang.md',
+    cellSelector: 'console.log("Scenario 1: Run scripts via Shebang!")',
+    expectedOutput: `---
       runme:
         id: 01HEXJ9KWG7BYSFYCNKSRE4JZR
         version: v3
@@ -22,5 +22,6 @@ runIdentityTestSuite({
       \`\`\`
 
       `,
-  revertFile: 'shebang.md',
+    revertFile: 'shebang.md',
+  })
 })

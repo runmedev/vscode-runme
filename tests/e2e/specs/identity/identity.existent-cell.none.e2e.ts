@@ -1,22 +1,31 @@
-import { runIdentityTestSuite } from '../../helpers/identity.shared'
+import { runIdentityTests } from './identity.shared'
 
-runIdentityTestSuite({
-  suiteName: 'Test suite: Cell with existent identity and setting None (0)',
-  lifecycleSetting: 'None',
-  fixtureFile: '/tests/fixtures/identity/existent-cell-id.md',
-  cellSelector: 'console.log("Hello via Shebang")',
-  expectedOutput: `
-      ## Existent ID
+describe('Test suite: Cell with existent identity and setting None (0)', () => {
+  runIdentityTests({
+    lifecycleSetting: 'None',
+    fixtureFile: '/tests/fixtures/identity/existent-cell-id.md',
+    cellSelector: 'console.log("Run scripts via Shebang!")',
+    expectedOutput: `---
+      foo:
+        bar: baz
+      runme:
+        id: 01HEJKW1A2QKJQJQJQJQJQJQJQ
+        version: v3
+      ---
+
+      ## Cell with id
+
       Example file used as part of the end to end suite
 
       ## Scenario
 
-      \`\`\`js
-      console.log("Hello via Shebang")
+      \`\`\`js {"name":"foo"}
+      console.log("Run scripts via Shebang!")
 
       \`\`\`
 
       `,
-  revertFile: 'existent-cell-id.md',
-  assertOptions: { strict: true },
+    revertFile: 'existent-cell-id.md',
+    assertOptions: { strict: true },
+  })
 })
