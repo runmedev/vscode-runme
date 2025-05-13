@@ -172,9 +172,11 @@ export async function getRepoBasename(): Promise<string> {
   return path.basename(filePath.pathname)
 }
 
+export type RunmeLifecycleIdentity = 'None' | 'Doc' | 'Cell' | 'All'
+
 export async function switchLifecycleIdentity(
   workbench: Workbench,
-  identity: 'None' | 'Doc' | 'Cell' | 'All',
+  identity: RunmeLifecycleIdentity,
 ) {
   // run three times to ensure it takes effect
   for (let i = 0; i < 3; i++) {
