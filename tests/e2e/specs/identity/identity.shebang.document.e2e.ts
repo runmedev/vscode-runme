@@ -22,6 +22,5 @@ describe('Test suite: Shebang with setting Document (2)', () => {
       \`\`\`
 
       `,
-    revertFile: 'shebang.md',
   })
 })

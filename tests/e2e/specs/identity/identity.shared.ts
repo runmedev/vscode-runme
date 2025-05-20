@@ -1,3 +1,5 @@
+import path from 'node:path'
+
 import { Key } from 'webdriverio'
 
 import { RunmeNotebook } from '../../pageobjects/notebook.page.js'
@@ -15,7 +17,6 @@ interface IdentityTestSuiteConfig {
   fixtureFile: string
   cellSelector?: string
   expectedOutput: string
-  revertFile: string
   assertOptions?: {
     strict?: boolean
   }
@@ -26,7 +27,6 @@ export function runIdentityTests({
   fixtureFile,
   cellSelector,
   expectedOutput,
-  revertFile,
   assertOptions = {},
 }: IdentityTestSuiteConfig) {
   before(async () => {
@@ -75,6 +75,7 @@ export function runIdentityTests({
   })
 
   after(async () => {
+    const revertFile = path.basename(fixtureFile)
     await revertChanges(revertFile)
   })
 }

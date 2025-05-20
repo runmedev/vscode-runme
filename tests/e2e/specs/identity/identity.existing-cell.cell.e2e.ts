@@ -18,6 +18,5 @@ describe('Test suite: Cell with existing identity and setting Cell only (3)', ()
       \`\`\`
 
       `,
-    revertFile: 'existing-cell-id.md',
   })
 })

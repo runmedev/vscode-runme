@@ -18,7 +18,6 @@ describe('Test suite: Cell with existing identity and setting None (0)', () => {
       \`\`\`
 
       `,
-    revertFile: 'existing-cell-id.md',
     assertOptions: { strict: true },
   })
 })

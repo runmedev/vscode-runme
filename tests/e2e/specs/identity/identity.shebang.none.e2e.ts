@@ -30,7 +30,6 @@ describe('Test suite: Shebang with setting None (0)', () => {
 
       \`\`\`
       `,
-    revertFile: 'shebang.md',
     assertOptions: { strict: true },
   })
 })
