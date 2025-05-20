@@ -205,7 +205,7 @@ export class VscodeRunme {
     baseOwner: string,
     eventName: string,
     forkOwner: string,
-    specRetries: number = 5,
+    specRetries: number = 3,
   ): Promise<VscodeRunme> {
     await this.base()
 

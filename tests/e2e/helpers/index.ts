@@ -97,10 +97,10 @@ async function assertDocumentContains(
   const matcherParts = sanitizeOutput(matcher).split('\n')
   const maxContentLines = Math.min(matcherParts.length, savedContent.length)
 
-  console.log('source:', source)
-  console.log('savedContent', savedContent)
-  console.log('matcherParts', matcherParts)
-  console.log('maxContentLines', maxContentLines)
+  // console.log('source:', source)
+  // console.log('savedContent', savedContent)
+  // console.log('matcherParts', matcherParts)
+  // console.log('maxContentLines', maxContentLines)
 
   for (let index = 0; index < maxContentLines; index++) {
     if (exact) {
