@@ -17,7 +17,7 @@
   "include": [
     "specs",
     "./wdio.conf.ts",
-    "pageobjects"
+    "pageobjects",
   ],
   "exclude": []
 }

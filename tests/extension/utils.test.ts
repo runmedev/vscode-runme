@@ -637,7 +637,7 @@ suite('getNotebookCategories', () => {
     expect(categories).toStrictEqual(['shell scripts', 'node.js examples'])
   })
 
-  test('should get empty categories array for non-existent notebook state', async () => {
+  test('should get empty categories array for non-existing notebook state', async () => {
     const contextMock: ExtensionContext = {
       globalState: {
         get: vi.fn().mockReturnValue({

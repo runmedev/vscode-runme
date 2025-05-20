@@ -97,10 +97,10 @@ async function assertDocumentContains(
   const matcherParts = sanitizeOutput(matcher).split('\n')
   const maxContentLines = Math.min(matcherParts.length, savedContent.length)
 
-  console.log('source:', source)
-  console.log('savedContent', savedContent)
-  console.log('matcherParts', matcherParts)
-  console.log('maxContentLines', maxContentLines)
+  // console.log('source:', source)
+  // console.log('savedContent', savedContent)
+  // console.log('matcherParts', matcherParts)
+  // console.log('maxContentLines', maxContentLines)
 
   for (let index = 0; index < maxContentLines; index++) {
     if (exact) {
@@ -172,9 +172,11 @@ export async function getRepoBasename(): Promise<string> {
   return path.basename(filePath.pathname)
 }
 
+export type RunmeLifecycleIdentity = 'None' | 'Doc' | 'Cell' | 'All'
+
 export async function switchLifecycleIdentity(
   workbench: Workbench,
-  identity: 'None' | 'Doc' | 'Cell' | 'All',
+  identity: RunmeLifecycleIdentity,
 ) {
   // run three times to ensure it takes effect
   for (let i = 0; i < 3; i++) {
