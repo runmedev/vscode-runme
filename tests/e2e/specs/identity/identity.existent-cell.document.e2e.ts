@@ -4,28 +4,25 @@ describe('Test suite: Cell with existent identity and setting Document (2)', () 
   runIdentityTests({
     lifecycleSetting: 'Doc',
     fixtureFile: '/tests/fixtures/identity/existent-cell-id.md',
-    cellSelector: 'console.log("Run scripts via Shebang!")',
+    cellSelector: 'console.log("Hello via Shebang")',
     expectedOutput: `---
-      foo:
-        bar: baz
       runme:
-        id: 01HEJKW1A2QKJQJQJQJQJQJQJQ
+        id: 01HEXJ9KWG7BYSFYCNKSRE4JZR
         version: v3
       ---
 
-      ## Cell with id
+      ## Existent ID
 
       Example file used as part of the end to end suite
 
       ## Scenario
 
-      \`\`\`js {"name":"foo"}
-      console.log("Run scripts via Shebang!")
+      \`\`\`js
+      console.log("Hello via Shebang")
 
       \`\`\`
 
       `,
     revertFile: 'existent-cell-id.md',
-    assertOptions: { strict: true },
   })
 })

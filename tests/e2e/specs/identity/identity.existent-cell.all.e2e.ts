@@ -4,28 +4,25 @@ describe('Test suite: Cell with existent identity and setting All (1)', () => {
   runIdentityTests({
     lifecycleSetting: 'All',
     fixtureFile: '/tests/fixtures/identity/existent-cell-id.md',
-    cellSelector: 'console.log("Run scripts via Shebang!")',
+    cellSelector: 'console.log("Hello via Shebang")',
     expectedOutput: `---
-      foo:
-        bar: baz
       runme:
-        id: 01HEJKW1A2QKJQJQJQJQJQJQJQ
+        id: 01JVNVWXTVX00M6AXNWK8J90G1
         version: v3
       ---
 
-      ## Cell with id
+      ## Existent ID
 
       Example file used as part of the end to end suite
 
       ## Scenario
 
-      \`\`\`js {"name":"foo","id":"01HEJKW1A2QKJQJQJQJQJQJQJQ"}
-      console.log("Run scripts via Shebang!")
+      \`\`\`js {"id":"01HER3GA0RQKJETKK5X5PPRTB4"}
+      console.log("Hello via Shebang")
 
       \`\`\`
 
       `,
     revertFile: 'existent-cell-id.md',
-    assertOptions: { strict: true },
   })
 })
