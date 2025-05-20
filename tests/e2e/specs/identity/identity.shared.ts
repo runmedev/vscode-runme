@@ -37,14 +37,14 @@ export function runIdentityTests({
   it('open identity markdown file', async () => {
     const workbench = await browser.getWorkbench()
     await switchLifecycleIdentity(workbench, lifecycleSetting)
-    await browser.executeWorkbench(async (vscode) => {
+    await browser.executeWorkbench(async (vscode, docPath) => {
       const doc = await vscode.workspace.openTextDocument(
-        vscode.Uri.file(`${vscode.workspace.rootPath}${fixtureFile}`),
+        vscode.Uri.file(`${vscode.workspace.rootPath}${docPath}`),
       )
       return vscode.window.showNotebookDocument(doc, {
         viewColumn: vscode.ViewColumn.Active,
       })
-    })
+    }, fixtureFile)
   })
 
   it('selects Runme kernel', async () => {

@@ -1,4 +1,4 @@
-import { runIdentityTests } from './identity.shared'
+import { runIdentityTests } from './identity.shared.js'
 
 describe('Test suite: Document with existent identity and setting All (1)', () => {
   runIdentityTests({
