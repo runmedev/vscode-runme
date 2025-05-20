@@ -3,7 +3,7 @@ import { runIdentityTests } from './identity.shared.js'
 describe('Test suite: Document with existent identity and setting None (0)', () => {
   runIdentityTests({
     lifecycleSetting: 'None',
-    fixtureFile: '/tests/fixtures/identity/existent-doc-id.md',
+    fixtureFile: '/tests/fixtures/identity/existing-doc-id.md',
     cellSelector: 'console.log("Run scripts via Shebang!")',
     expectedOutput: `---
       foo:
@@ -25,7 +25,7 @@ describe('Test suite: Document with existent identity and setting None (0)', () 
       \`\`\`
 
       `,
-    revertFile: 'existent-doc-id.md',
+    revertFile: 'existing-doc-id.md',
     assertOptions: { strict: true },
   })
 })
