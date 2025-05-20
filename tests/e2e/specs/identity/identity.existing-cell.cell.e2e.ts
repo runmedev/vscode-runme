@@ -1,12 +1,12 @@
 import { runIdentityTests } from './identity.shared.js'
 
-describe('Test suite: Cell with existent identity and setting Cell only (3)', () => {
+describe('Test suite: Cell with existing identity and setting Cell only (3)', () => {
   runIdentityTests({
     lifecycleSetting: 'Cell',
-    fixtureFile: '/tests/fixtures/identity/existent-cell-id.md',
+    fixtureFile: '/tests/fixtures/identity/existing-cell-id.md',
     cellSelector: 'console.log("Hello via Shebang")',
     expectedOutput: `
-      ## Existent ID
+      ## Existing ID
 
       Example file used as part of the end to end suite
 
@@ -18,6 +18,6 @@ describe('Test suite: Cell with existent identity and setting Cell only (3)', ()
       \`\`\`
 
       `,
-    revertFile: 'existent-cell-id.md',
+    revertFile: 'existing-cell-id.md',
   })
 })
