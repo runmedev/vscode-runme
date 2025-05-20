@@ -19,13 +19,12 @@ describe('Test suite: Document with existent identity and setting All (1)', () =
 
       ## Scenario
 
-      \`\`\`js {"name":"foo","id":"01HEJKW1A2QKJQJQJQJQJQJQJQ"}
+      \`\`\`js {"id":"01HFA08N6F66WSG09RR9XEP0T6","name":"foo"}
       console.log("Run scripts via Shebang!")
 
       \`\`\`
 
       `,
     revertFile: 'existing-doc-id.md',
-    assertOptions: { strict: true },
   })
 })

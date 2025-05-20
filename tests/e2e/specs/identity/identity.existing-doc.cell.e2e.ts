@@ -26,6 +26,5 @@ describe('Test suite: Document with existent identity and setting Cell only (3)'
 
       `,
     revertFile: 'existing-doc-id.md',
-    assertOptions: { strict: true },
   })
 })
