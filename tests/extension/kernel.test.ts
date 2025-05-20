@@ -345,7 +345,7 @@ suite('_executeAll', async () => {
     })
   })
 
-  test('does not runs any cells for non-existent cell category', async () => {
+  test('does not runs any cells for non-existing cell category', async () => {
     window.showQuickPick = vi.fn().mockReturnValue(new Promise(() => {}))
     const k = new Kernel({} as any)
     k.setCategory('shellscripts')

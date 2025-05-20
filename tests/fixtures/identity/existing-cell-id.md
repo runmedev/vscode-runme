@@ -1,4 +1,4 @@
-## Existent ID
+## Existing ID
 
 Example file used as part of the end to end suite
 

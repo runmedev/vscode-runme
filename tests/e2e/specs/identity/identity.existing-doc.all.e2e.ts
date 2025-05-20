@@ -1,6 +1,6 @@
 import { runIdentityTests } from './identity.shared.js'
 
-describe('Test suite: Document with existent identity and setting All (1)', () => {
+describe('Test suite: Document with existing identity and setting All (1)', () => {
   runIdentityTests({
     lifecycleSetting: 'All',
     fixtureFile: '/tests/fixtures/identity/existing-doc-id.md',

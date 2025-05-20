@@ -1,6 +1,6 @@
 import { runIdentityTests } from './identity.shared.js'
 
-describe('Test suite: Document with existent identity and setting Cell only (3)', () => {
+describe('Test suite: Document with existing identity and setting Cell only (3)', () => {
   runIdentityTests({
     lifecycleSetting: 'Cell',
     fixtureFile: '/tests/fixtures/identity/existing-doc-id.md',
