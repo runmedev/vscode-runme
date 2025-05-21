@@ -5,6 +5,7 @@
     "amodio.tsl-problem-matcher",
     "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
-    "graphql.vscode-graphql"
+    "graphql.vscode-graphql",
+    "dedale-dev.ariana"
   ]
 }
