@@ -650,12 +650,12 @@
       "notebook/toolbar": [
         {
           "command": "runme.envVarModeDocs",
-          "when": "false && notebookType == runme && notebookMode != sessionOutputs && notebookEnvVarMode == 'docs'",
+          "when": "notebookType == runme && notebookMode != sessionOutputs && notebookEnvVarMode == 'docs'",
           "group": "navigation@10"
         },
         {
           "command": "runme.envVarModeShell",
-          "when": "false && notebookType == runme && notebookMode != sessionOutputs && notebookEnvVarMode!= 'docs'",
+          "when": "notebookType == runme && notebookMode != sessionOutputs && notebookEnvVarMode!= 'docs'",
           "group": "navigation@10"
         },
         {
