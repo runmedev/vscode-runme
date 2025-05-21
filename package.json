@@ -1445,7 +1445,7 @@
     "chromedriver": "^136.0.0",
     "comment-json": "^4.2.5",
     "eslint": "^8.57.1",
-    "eslint-config-prettier": "^10.1.2",
+    "eslint-config-prettier": "^10.1.5",
     "eslint-import-resolver-typescript": "^3.7.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-unicorn": "^56.0.1",
