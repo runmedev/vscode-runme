@@ -1049,7 +1049,7 @@
               "Use when document has placeholders for user confirmation and always retain values of environment variables resolved from the first run",
               "Use when document is expected to behave like a shell script, skip prompts, and retain values of environment variables resolved from the last run"
             ],
-            "markdownDescription": "Automatically save cell execution output"
+            "markdownDescription": "Select default mode for environment variable retention"
           },
           "runme.codelens.enable": {
             "type": "boolean",
