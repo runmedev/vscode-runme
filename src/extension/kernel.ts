@@ -104,7 +104,11 @@ import handleGitHubMessage, { handleGistMessage } from './messages/github'
 import { getNotebookCategories } from './utils'
 import PanelManager from './panels/panelManager'
 import { isDocumentSessionOutputs, ISerializer } from './serializer'
-import { askAlternativeOutputsAction, openSplitViewAsMarkdownText } from './commands'
+import {
+  askAlternativeOutputsAction,
+  askVarModeMismatch,
+  openSplitViewAsMarkdownText,
+} from './commands'
 import { handlePlatformApiMessage } from './messages/platformRequest'
 import { handleGCPMessage } from './messages/gcp'
 import { IPanel } from './panels/base'
@@ -703,6 +707,11 @@ export class Kernel implements Disposable {
     if (sessionOutputsDoc) {
       const { notebook } = sessionOutputsDoc
       await askAlternativeOutputsAction(path.dirname(notebook.uri.fsPath), notebook.metadata)
+      return
+    }
+
+    const notebookFrontmatter = cells[0]?.notebook.metadata[RUNME_FRONTMATTER_PARSED]
+    if (await askVarModeMismatch(notebookFrontmatter.envVarMode, this)) {
       return
     }
 
