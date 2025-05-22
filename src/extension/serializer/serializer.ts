@@ -141,7 +141,7 @@ export abstract class GrpcSerializer implements ISerializer {
 
   private async applyFrontmatterForFileExtension(notebook: NotebookDocument): Promise<boolean> {
     // don't tamper with existing docs
-    if (notebook.cellCount > 0 || !!notebook.metadata?.['runme.dev/frontmatterParsed']) {
+    if (notebook.cellCount > 0 || !!notebook.metadata?.[RUNME_FRONTMATTER_PARSED]) {
       return false
     }
 
@@ -150,7 +150,7 @@ export abstract class GrpcSerializer implements ISerializer {
       const metadata = {
         ...notebook.metadata,
         'runme.dev/frontmatter': '---\n\shell: dagger shell\n---',
-        'runme.dev/frontmatterParsed': { shell: 'dagger shell' },
+        RUNME_FRONTMATTER_PARSED: { shell: 'dagger shell' },
       }
       const notebookEdit = NotebookEdit.updateNotebookMetadata(metadata)
       const edit = new WorkspaceEdit()

@@ -51,6 +51,7 @@ import {
   NOTEBOOK_MODE,
   NotebookMode,
   OutputType,
+  RUNME_FRONTMATTER_PARSED,
 } from '../constants'
 import { API } from '../utils/deno/api'
 import { postClientMessage } from '../utils/messaging'
@@ -853,7 +854,7 @@ export class Kernel implements Disposable {
     const { key: execKey, resource } = getKeyInfo(
       runningCell,
       annotations,
-      cell.notebook.metadata['runme.dev/frontmatterParsed'],
+      cell.notebook.metadata[RUNME_FRONTMATTER_PARSED],
     )
 
     let successfulCellExecution: boolean
