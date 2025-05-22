@@ -150,7 +150,7 @@ export abstract class GrpcSerializer implements ISerializer {
       const metadata = {
         ...notebook.metadata,
         'runme.dev/frontmatter': '---\n\shell: dagger shell\n---',
-        RUNME_FRONTMATTER_PARSED: { shell: 'dagger shell' },
+        [RUNME_FRONTMATTER_PARSED]: { shell: 'dagger shell' },
       }
       const notebookEdit = NotebookEdit.updateNotebookMetadata(metadata)
       const edit = new WorkspaceEdit()

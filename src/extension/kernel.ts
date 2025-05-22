@@ -710,8 +710,8 @@ export class Kernel implements Disposable {
       return
     }
 
-    const notebookFrontmatter = cells[0]?.notebook.metadata[RUNME_FRONTMATTER_PARSED]
-    if (await askVarModeMismatch(notebookFrontmatter.envVarMode, this)) {
+    const notebookFrontmatter = cells[0]?.notebook?.metadata?.[RUNME_FRONTMATTER_PARSED]
+    if (await askVarModeMismatch(notebookFrontmatter?.envVarMode, this)) {
       return
     }
 
