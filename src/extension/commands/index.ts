@@ -355,16 +355,13 @@ export async function askAlternativeOutputsAction(
 }
 
 export async function askVarModeMismatch(
-  frontmatterMode: string | undefined,
+  documentMode: string | undefined,
   kernel: Kernel,
 ): Promise<boolean> {
-  const currentMode = ContextState.getKey<EnvVarMode>(NOTEBOOK_ENV_VAR_MODE)
-  if (!currentMode || !frontmatterMode) {
-    return false
-  }
+  const currentMode = ContextState.getKey<EnvVarMode>(NOTEBOOK_ENV_VAR_MODE) || EnvVarMode.Default
 
   let requiredMode = EnvVarMode.Docs
-  switch (frontmatterMode) {
+  switch (documentMode) {
     case 'shell':
       requiredMode = EnvVarMode.Shell
       break
@@ -483,7 +480,7 @@ export async function askChangeVarMode(varMode: EnvVarMode, kernel: Kernel) {
   if (notebook) {
     const unparsed = notebook.metadata['runme.dev/frontmatter']
     let fm: any
-    if (unparsed.startsWith('---')) {
+    if (unparsed && unparsed.startsWith('---')) {
       const parsed = YAML.parseAllDocuments(unparsed)
       fm = parsed?.[0].toJS?.()
       delete fm['envVarMode']
@@ -501,9 +498,9 @@ export async function askChangeVarMode(varMode: EnvVarMode, kernel: Kernel) {
     }
 
     if (varMode !== EnvVarMode.Default) {
-      newMetadata['envVarMode'] = varMode.toString()
       fm['envVarMode'] = varMode.toString()
     }
+    newMetadata['envVarMode'] = varMode.toString()
     const yamlStr = YAML.stringify(fm)
     newMetadata['runme.dev/frontmatter'] = `---\n${yamlStr}\n---`
 

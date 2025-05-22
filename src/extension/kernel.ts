@@ -52,6 +52,7 @@ import {
   NotebookMode,
   OutputType,
   RUNME_FRONTMATTER_PARSED,
+  NOTEBOOK_ENV_VAR_MODE,
 } from '../constants'
 import { API } from '../utils/deno/api'
 import { postClientMessage } from '../utils/messaging'
@@ -710,8 +711,10 @@ export class Kernel implements Disposable {
       return
     }
 
-    const notebookFrontmatter = cells[0]?.notebook?.metadata?.[RUNME_FRONTMATTER_PARSED]
-    if (await askVarModeMismatch(notebookFrontmatter?.envVarMode, this)) {
+    const notebookMetadata = cells[0]?.notebook?.metadata
+    const envVarMode = (notebookMetadata?.envVarMode ??
+      notebookMetadata?.[NOTEBOOK_ENV_VAR_MODE]?.envVarMode) as string | undefined
+    if (await askVarModeMismatch(envVarMode, this)) {
       return
     }
 
