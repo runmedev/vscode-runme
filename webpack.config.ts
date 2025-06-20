@@ -51,6 +51,7 @@ const baseConfig: Partial<Configuration> = {
 
 const rendererConfig: Configuration = {
   ...baseConfig,
+  devtool: 'nosources-source-map',
   entry: path.resolve('src', 'client', 'index.ts'),
   experiments: { outputModule: true },
   output: {
@@ -62,7 +63,12 @@ const rendererConfig: Configuration = {
   target: 'web',
   module: {
     rules: [
-      ...(baseConfig.module?.rules || []),
+      {
+        test: /\.m?js/,
+        resolve: {
+          fullySpecified: false
+        }
+      },
       {
         test: /\.ts$/,
         exclude: /node_modules/,
@@ -70,7 +76,10 @@ const rendererConfig: Configuration = {
           {
             loader: 'ts-loader',
             options: {
-              transpileOnly: false
+              transpileOnly: true,
+              compilerOptions: {
+                sourceMap: false,
+              }
             }
           }
         ],
