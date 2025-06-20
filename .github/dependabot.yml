@@ -68,6 +68,13 @@ updates:
         update-types:
           - minor
           - patch
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/coverage-v8"
+        update-types:
+          - minor
+          - patch
   - package-ecosystem: npm
     directory: "/examples/k8s"
     schedule:
