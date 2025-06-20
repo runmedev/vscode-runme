@@ -51,7 +51,6 @@ const baseConfig: Partial<Configuration> = {
 
 const rendererConfig: Configuration = {
   ...baseConfig,
-  devtool: undefined,
   entry: path.resolve('src', 'client', 'index.ts'),
   experiments: { outputModule: true },
   output: {
@@ -63,12 +62,7 @@ const rendererConfig: Configuration = {
   target: 'web',
   module: {
     rules: [
-      {
-        test: /\.m?js/,
-        resolve: {
-          fullySpecified: false
-        }
-      },
+      ...(baseConfig.module?.rules || []),
       {
         test: /\.ts$/,
         exclude: /node_modules/,
@@ -76,10 +70,7 @@ const rendererConfig: Configuration = {
           {
             loader: 'ts-loader',
             options: {
-              transpileOnly: true,
-              compilerOptions: {
-                sourceMap: false,
-              }
+              transpileOnly: false
             }
           }
         ],
