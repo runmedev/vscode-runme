@@ -8,6 +8,7 @@ import {
 import stripAnsi from 'strip-ansi'
 import { Observable } from 'rxjs'
 import { bufferTime, map, endWith, startWith } from 'rxjs/operators'
+import { ulid } from 'ulidx'
 
 import type { DisposableAsync, Serializer } from '../../types'
 import {
@@ -726,11 +727,10 @@ export class GrpcRunnerProgramSession implements IRunnerProgramSession {
       return
     }
 
-    this.session.requests.send(
-      ExecuteRequestImpl().create({
-        stop: this.isPseudoterminal() ? ExecuteStopEnum().INTERRUPT : ExecuteStopEnum().KILL,
-      }),
-    )
+    const execReq = ExecuteRequestImpl().create()
+    execReq.stop = this.isPseudoterminal() ? ExecuteStopEnum().INTERRUPT : ExecuteStopEnum().KILL
+
+    this.session.requests.send(execReq)
   }
 
   /**
@@ -837,6 +837,9 @@ export class GrpcRunnerProgramSession implements IRunnerProgramSession {
       // undefined
     }
 
+    // This is used to identify the run end to end across client and server.
+    const runId = ulid()
+
     // attempt to satisfy both v1 and v2
     const execReq: any = {
       arguments: args,
@@ -856,6 +859,7 @@ export class GrpcRunnerProgramSession implements IRunnerProgramSession {
       commandMode,
       knownId,
       knownName,
+      runId,
       // runnerv2's program config
       config: {
         arguments: args,
@@ -870,6 +874,7 @@ export class GrpcRunnerProgramSession implements IRunnerProgramSession {
         source,
         knownId,
         knownName,
+        runId,
       },
     }
 

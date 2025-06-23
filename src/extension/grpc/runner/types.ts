@@ -94,7 +94,9 @@ export type SessionEnvStoreType = v1.SessionEnvStoreType | v2.SessionEnvStoreTyp
 
 export type Winsize = v1.Winsize | v2.Winsize
 
-export const CreateSessionRequestImpl = () => {
+export const CreateSessionRequestImpl: () =>
+  | typeof v1.CreateSessionRequest
+  | typeof v2.CreateSessionRequest = () => {
   if (v2.matches(getServerRunnerVersion())) {
     return v2.CreateSessionRequest
   }
@@ -105,35 +107,39 @@ export const SessionEnvStoreSeedingEnum = () => {
   return v2.CreateSessionRequest_Config_SessionEnvStoreSeeding
 }
 
-export const GetSessionRequestImpl = () => {
+export const GetSessionRequestImpl: () =>
+  | typeof v1.GetSessionRequest
+  | typeof v2.GetSessionRequest = () => {
   if (v2.matches(getServerRunnerVersion())) {
     return v2.GetSessionRequest
   }
   return v1.GetSessionRequest
 }
 
-export const ExecuteRequestImpl = () => {
+export const ExecuteRequestImpl: () => typeof v1.ExecuteRequest | typeof v2.ExecuteRequest = () => {
   if (v2.matches(getServerRunnerVersion())) {
     return v2.ExecuteRequest
   }
   return v1.ExecuteRequest
 }
 
-export const ExecuteStopEnum = () => {
+export const ExecuteStopEnum: () => typeof v1.ExecuteStop | typeof v2.ExecuteStop = () => {
   if (v2.matches(getServerRunnerVersion())) {
     return v2.ExecuteStop
   }
   return v1.ExecuteStop
 }
 
-export const WinsizeImpl = () => {
+export const WinsizeImpl: () => typeof v1.Winsize | typeof v2.Winsize = () => {
   if (v2.matches(getServerRunnerVersion())) {
     return v2.Winsize
   }
   return v1.Winsize
 }
 
-export const ResolveProgramRequestImpl = () => {
+export const ResolveProgramRequestImpl: () =>
+  | typeof v1.ResolveProgramRequest
+  | typeof v2.ResolveProgramRequest = () => {
   if (v2.matches(getServerRunnerVersion())) {
     return v2.ResolveProgramRequest
   }
