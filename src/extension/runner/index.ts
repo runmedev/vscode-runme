@@ -726,11 +726,10 @@ export class GrpcRunnerProgramSession implements IRunnerProgramSession {
       return
     }
 
-    this.session.requests.send(
-      ExecuteRequestImpl().create({
-        stop: this.isPseudoterminal() ? ExecuteStopEnum().INTERRUPT : ExecuteStopEnum().KILL,
-      }),
-    )
+    const execReq = ExecuteRequestImpl().create()
+    execReq.stop = this.isPseudoterminal() ? ExecuteStopEnum().INTERRUPT : ExecuteStopEnum().KILL
+
+    this.session.requests.send(execReq)
   }
 
   /**
