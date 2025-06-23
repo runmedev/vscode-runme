@@ -73,23 +73,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Package (Edge)
+      - name: Build Package
         run: npm run build:prod
         env:
           NODE_ENV: production
           NODE_OPTIONS: --max-old-space-size=8192
           INSTRUMENTATION_KEY: ${{ secrets.INSTRUMENTATION_KEY }}
           CONNECTION_STR: ${{ secrets.CONNECTION_STR }}
-        if: ${{ github.event.inputs.releaseChannel == 'edge' }}
-
-      - name: Build Package (Stable)
-        run: npm run build:prod
-        env:
-          NODE_ENV: production
-          NODE_OPTIONS: --max-old-space-size=8192
-          INSTRUMENTATION_KEY: ${{ secrets.INSTRUMENTATION_KEY }}
-          CONNECTION_STR: ${{ secrets.CONNECTION_STR }}
-        if: ${{ github.event.inputs.releaseChannel == 'stable' }}
 
       - name: Run Tests
         run: xvfb-run --server-args="-screen 0 1600x1200x24" npm test
