@@ -1484,7 +1484,7 @@
     "@connectrpc/connect-node": "^1.6.1",
     "@google-cloud/compute": "^5.2.0",
     "@google-cloud/container": "^6.1.0",
-    "@google-cloud/run": "^2.0.1",
+    "@google-cloud/run": "^2.1.0",
     "@kubernetes/client-node": "^1.2.0",
     "@protobuf-ts/grpc-transport": "^2.9.5",
     "@protobuf-ts/runtime": "^2.11.0",
