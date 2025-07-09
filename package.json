@@ -133,7 +133,7 @@
         }
       },
       "RequireStatefulAuth": {
-        "enabled": true,
+        "enabled": false,
         "conditions": {
           "enabledForExtensions": {
             "stateful.platform": true,
@@ -142,7 +142,7 @@
         }
       },
       "SignedIn": {
-        "enabled": true,
+        "enabled": false,
         "conditions": {
           "statefulAuthRequired": true,
           "enabledForExtensions": {
@@ -152,7 +152,7 @@
         }
       },
       "ForceLogin": {
-        "enabled": true,
+        "enabled": false,
         "conditions": {
           "enabledForExtensions": {
             "stateful.platform": true,
@@ -161,7 +161,7 @@
         }
       },
       "Escalate": {
-        "enabled": true,
+        "enabled": false,
         "conditions": {
           "statefulAuthRequired": true,
           "enabledForExtensions": {
@@ -171,7 +171,7 @@
         }
       },
       "Share": {
-        "enabled": true,
+        "enabled": false,
         "conditions": {
           "enabledForExtensions": {
             "stateful.platform": true,
