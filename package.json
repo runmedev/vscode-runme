@@ -1241,7 +1241,8 @@
         {
           "id": "runme",
           "title": "Runme",
-          "icon": "assets/logo-sidebar.svg"
+          "icon": "assets/logo-sidebar.svg",
+          "when": "false"
         }
       ],
       "panel": [
@@ -1273,19 +1274,22 @@
           "id": "runme.cloud",
           "type": "webview",
           "name": "Cloud",
-          "visibility": "visible"
+          "visibility": "visible",
+          "when": "false"
         },
         {
           "id": "runme.chat",
           "type": "webview",
           "name": "Chat",
-          "visibility": "collapsed"
+          "visibility": "collapsed",
+          "when": "false"
         },
         {
           "id": "runme.search",
           "type": "webview",
           "name": "Search",
-          "visibility": "collapsed"
+          "visibility": "collapsed",
+          "when": "false"
         }
       ],
       "runme-notebook": [
