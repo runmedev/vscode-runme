@@ -1099,13 +1099,17 @@ export class TerminalView extends LitElement {
   }
 
   shouldRenderSaveButton() {
-    const isExitCodeValid = this.exitCode === undefined || this.exitCode === 0
-    return !this.platformId && isExitCodeValid && !this.isDaggerOutput
+    // todo(sebastian): deommissioned for now, remove eventually
+    // const isExitCodeValid = this.exitCode === undefined || this.exitCode === 0
+    // return !this.platformId && isExitCodeValid && !this.isDaggerOutput
+    return false
   }
 
   shouldRenderShareButton() {
-    const isFeatureEnabled = features.isOn(FeatureName.Share, this.featureState$)
-    return this.platformId && isFeatureEnabled && this.isShareReady
+    // todo(sebastian): deommissioned for now, remove eventually
+    // const isFeatureEnabled = features.isOn(FeatureName.Share, this.featureState$)
+    // return this.platformId && isFeatureEnabled && this.isShareReady
+    return false
   }
 }
 
