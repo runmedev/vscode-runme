@@ -114,7 +114,6 @@ import { uri as runUriResource } from './executors/resource'
 import { CommandModeEnum } from './grpc/runner/types'
 import { GrpcReporter } from './reporter'
 import { EnvStoreMonitorWithSession } from './panels/notebook'
-import { SignedIn } from './signedIn'
 
 enum ConfirmationItems {
   Yes = 'Yes',
@@ -131,7 +130,7 @@ export class Kernel implements Disposable {
 
   readonly #experiments = new Map<string, boolean>()
   readonly #featuresSettings = new Map<string, boolean>()
-  readonly #onlySignedIn: SignedIn
+  // readonly #onlySignedIn: SignedIn
 
   #disposables: Disposable[] = []
   #controller = notebooks.createNotebookController(
@@ -198,8 +197,8 @@ export class Kernel implements Disposable {
     )
 
     // group operations for signed in only users, all noops for unsigned in users
-    this.#onlySignedIn = new SignedIn(this)
-    this.#disposables.push(this.#onlySignedIn)
+    // this.#onlySignedIn = new SignedIn(this)
+    // this.#disposables.push(this.#onlySignedIn)
 
     const packageJSON = this.context?.extension?.packageJSON || {}
     const featContext: FeatureContext = {
@@ -900,13 +899,13 @@ export class Kernel implements Disposable {
 
     const endTime = Date.now()
     // noop unless signed into Stateful Cloud
-    this.#onlySignedIn.enqueueCellRun(
-      cell,
-      window.activeNotebookEditor,
-      successfulCellExecution,
-      startTime,
-      endTime,
-    )
+    // this.#onlySignedIn.enqueueCellRun(
+    //   cell,
+    //   window.activeNotebookEditor,
+    //   successfulCellExecution,
+    //   startTime,
+    //   endTime,
+    // )
 
     runmeExec.end(successfulCellExecution, endTime)
   }
