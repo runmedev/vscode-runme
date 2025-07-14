@@ -5,13 +5,15 @@ export const getLastStableRelease = async () => {
   const branch = process.env.GITHUB_REF_NAME ?? 'main'
   const suffix = branch === 'main' ? '/latest' : ''
 
+  const headers = {
+    'Accept': 'application/vnd.github+json',
+    ...(process.env.GITHUB_TOKEN ? { 'Authorization': `Bearer ${process.env.GITHUB_TOKEN}` } : {})
+  }
   /**
    * Unless we're not on the main branch latest release is the most recent non-prerelease, non-draft release
    */
   const response = (await fetch(`https://api.github.com/repos/stateful/runme/releases${suffix}`, {
-    headers: {
-      'Accept': 'application/vnd.github+json'
-    }
+    headers
   }))
   const json = await response.json().then(json => {
     return Array.isArray(json) ? json[0] : json
