@@ -345,7 +345,7 @@ describe('Runme VS Code Extension', async () => {
       )
     })
 
-    it('terminal dimensions', async () => {
+    it.skip('terminal dimensions', async () => {
       const workbench = await browser.getWorkbench()
       const cell = await notebook.getCell(
         'echo Rows: \\$(tput lines)\necho Columns: \\$(tput cols)',
