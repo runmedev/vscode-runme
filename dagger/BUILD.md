@@ -130,3 +130,11 @@ VscodeRunme | prebuild $(PreReleaseVsix) |
   integration-test --runme-test-token RUNME_TEST_TOKEN |
   stdout
 ```
+
+Or with a specific version of VS Code:
+
+```sh
+VscodeRunme | prebuild $(PreReleaseVsix) |
+  integration-test --runme-test-token RUNME_TEST_TOKEN --vscode-version 1.91.0 |
+  stdout
+```
