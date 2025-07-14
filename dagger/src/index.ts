@@ -157,7 +157,12 @@ export class VscodeRunme {
    * @returns Returns the container running the tests.
    */
   @func()
-  async integrationTest(runmeTestToken?: Secret, debug = false, spec?: string): Promise<Container> {
+  async integrationTest(
+    runmeTestToken?: Secret,
+    debug = false,
+    spec?: string,
+    vscodeVersion?: string,
+  ): Promise<Container> {
     await this.base()
 
     const e2eTestCommand = ['xvfb-run', 'npx wdio run ./wdio.conf.ts']
@@ -178,6 +183,10 @@ export class VscodeRunme {
       container = container
         .withMountedDirectory(path, this.extension)
         .withEnvVariable('RUNME_TEST_EXTENSION', path)
+    }
+
+    if (vscodeVersion) {
+      container = container.withEnvVariable('RUNME_TEST_VSCODE_VERSION', vscodeVersion)
     }
 
     return (
