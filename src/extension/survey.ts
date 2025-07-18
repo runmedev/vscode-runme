@@ -335,7 +335,9 @@ export class SurveyFeedbackButton extends Survey {
     TelemetryReporter.sendTelemetryEvent('survey.FeedbackButton', { never: 'false' })
     return commands.executeCommand(
       'vscode.open',
-      Uri.parse(`https://wfoq097ak2p.typeform.com/feedback#mid=${this.#mid}`),
+      Uri.parse(
+        'https://docs.google.com/forms/d/e/1FAIpQLScYDkaZJeqJg6dFoEopapzOVv8Dt76EXR4AJH2MYCOqyHbghg/viewform?usp=dialog',
+      ),
     )
   }
 }

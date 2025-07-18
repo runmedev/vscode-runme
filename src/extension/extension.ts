@@ -245,9 +245,7 @@ export class RunmeExtension {
     const surveys: Disposable[] = [
       winCodeLensRunSurvey,
       new survey.SurveyAddExtensionToRepo(context),
-      new survey.SurveyActiveUserFeedback(context),
       new survey.SurveyFeedbackButton(context),
-      new survey.SurveyNotifyV2(context),
     ]
     const stopBackgroundTaskProvider = new StopBackgroundTaskProvider()
 
