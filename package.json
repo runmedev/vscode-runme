@@ -1506,7 +1506,7 @@
     "clipboardy": "^4.0.0",
     "cross-fetch": "^4.1.0",
     "data-guardian": "^1.1.2",
-    "dotenv": "^17.2.0",
+    "dotenv": "^17.2.1",
     "filenamify": "^6.0.0",
     "filesize": "^10.1.6",
     "get-port": "^7.0.0",
