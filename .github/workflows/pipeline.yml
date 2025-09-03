@@ -54,4 +54,4 @@ jobs:
         with:
           name: logs
           path: |
-            tests/e2e/logs
+            /tmp/e2e-logs

@@ -82,7 +82,7 @@ Inside of GitHub Actions, we pass additional job information into the test suite
 ### Exported in runme.dev as GhaIntegrationTests
 Extension |
   gha-job $GITHUB_ACTOR $BASE_OWNER $GITHUB_EVENT_NAME $FORK_OWNER |
-  integration-test --runme-test-token RUNME_TEST_TOKEN | stdout
+  integration-test --runme-test-token RUNME_TEST_TOKEN | export /tmp/e2e-logs
 ```
 
 ### Troubleshooting
