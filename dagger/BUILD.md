@@ -37,7 +37,7 @@ The previous command will list all the available platforms per version. Let's pi
 
 ```sh {"id":"01JMMSSHXM7N70W4KCHTX92MHE","name":"KernelBinary","terminalRows":"12"}
 ### Exported in runme.dev as KernelBinary
-RunmeKernel | link-release --github-token $GITHUB_TOKEN --version latest $TARGET_PLATFORM
+RunmeKernel | link-release --github-token GITHUB_TOKEN --version latest $TARGET_PLATFORM
 ```
 
 ## Build the Extension
