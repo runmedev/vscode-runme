@@ -16,6 +16,7 @@ import {
   ExtensionContext,
 } from 'vscode'
 
+import ContextState from '../../../src/extension/contextState'
 import {
   toggleTerminal,
   copyCellToClipboard,
@@ -32,6 +33,7 @@ import {
   askNewRunnerSession,
   askAlternativeOutputsAction,
   ASK_ALT_OUTPUTS_ACTION,
+  askVarModeMismatch,
 } from '../../../src/extension/commands'
 import {
   getTerminalByCell,
@@ -79,6 +81,8 @@ vi.mock('../../../src/extension/runner', () => ({
 }))
 
 vi.mock('../../../src/extension/grpc/runner/v1', () => ({}))
+
+vi.mock('../../../src/extension/contextState')
 
 beforeEach(() => {
   vi.mocked(window.showWarningMessage).mockClear()
@@ -377,6 +381,40 @@ suite('askAlternativeOutputsAction', () => {
 
     expect(commands.executeCommand).toBeCalledWith('vscode.openWith', uri, 'runme')
     expect(warning).toBeCalledTimes(1)
+  })
+})
+
+suite('askVarModeMismatch', () => {
+  const newRunnerEnvironment = vi.fn()
+  const kernel = {
+    getFrontmatter: vi.fn().mockResolvedValue({ envVarMode: 'shell' }),
+    newRunnerEnvironment,
+  }
+
+  test('returns true for mismatch and modal is canceled', async () => {
+    vi.mocked(newRunnerEnvironment).mockClear()
+    vi.mocked(window.showInformationMessage).mockResolvedValue(undefined)
+    vi.mocked(ContextState.getKey).mockImplementation(() => 'docs')
+    const result = await askVarModeMismatch('shell', kernel as any)
+    expect(result).toBe(true)
+    expect(newRunnerEnvironment).toBeCalledTimes(0)
+  })
+
+  test('returns false for mismatch and modal is okayed', async () => {
+    vi.mocked(newRunnerEnvironment).mockClear()
+    vi.mocked(window.showInformationMessage).mockResolvedValue('OK' as any)
+    vi.mocked(ContextState.getKey).mockImplementation(() => 'docs')
+    const result = await askVarModeMismatch('shell', kernel as any)
+    expect(result).toBe(false)
+    expect(newRunnerEnvironment).toBeCalledTimes(1)
+  })
+
+  test('returns false if no mismatch', async () => {
+    vi.mocked(newRunnerEnvironment).mockClear()
+    vi.mocked(ContextState.getKey).mockImplementation(() => 'shell')
+    const result = await askVarModeMismatch('shell', kernel as any)
+    expect(result).toBe(false)
+    expect(newRunnerEnvironment).toBeCalledTimes(0)
   })
 })
 
