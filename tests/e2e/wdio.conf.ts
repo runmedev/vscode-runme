@@ -9,7 +9,7 @@ const __dirname = url.fileURLToPath(new URL('.', import.meta.url))
 const workspacePath = path.join(__dirname, '..', '..')
 const extensionPath = process.env.RUNME_TEST_EXTENSION || workspacePath
 const specFileRetries = Number(process.env.RUNME_TEST_SPEC_RETRIES) ?? 1
-const browserVersion = process.env.RUNME_TEST_VSCODE_VERSION || 'stable'
+const browserVersion = process.env.RUNME_TEST_VSCODE_VERSION || '1.102.3'
 
 export const config: Options.Testrunner = {
   //
