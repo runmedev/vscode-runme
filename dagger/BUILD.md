@@ -9,6 +9,13 @@ terminalRows: 30
 
 # Build the Runme VS Code extension (via Dagger)
 
+Install prerequisites.
+
+```sh
+curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=$HOME/.local/bin sh
+curl -sfL https://direnv.net/install.sh | bash
+```
+
 Initialize the VscodeRunme Dagger module using the local source code.
 
 ```sh {"name":"VscodeRunme"}
