@@ -11,7 +11,7 @@ terminalRows: 30
 
 Install prerequisites.
 
-```sh
+```sh {"interpreter":"bash"}
 curl -fsSL https://dl.dagger.io/dagger/install.sh | BIN_DIR=$HOME/.local/bin sh
 curl -sfL https://direnv.net/install.sh | bash
 ```
