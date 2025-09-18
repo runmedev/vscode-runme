@@ -2,7 +2,9 @@ import { ChildProcessWithoutNullStreams, spawn } from 'node:child_process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import crypto from 'node:crypto'
+import os from 'node:os'
 import tls from 'node:tls'
+import { pathToFileURL } from 'node:url'
 
 import { ChannelCredentials } from '@grpc/grpc-js'
 import { GrpcTransport } from '@protobuf-ts/grpc-transport'
@@ -174,9 +176,13 @@ class KernelServer implements IServer {
       this.#socketId = rndBytes.toString('hex')
     }
 
-    const sockPath = path.join('/tmp', `/runme-${this.#socketId}.sock`)
-    const unix = `unix://${sockPath}`
-    return unix
+    const sockPath = path.normalize(path.join(this.getRuntimeDir(), `runme-${this.#socketId}.sock`))
+    const encodedPath = pathToFileURL(sockPath).pathname
+    return `unix://${encodedPath}`
+  }
+
+  protected getRuntimeDir(): string {
+    return process.env.XDG_RUNTIME_DIR || os.tmpdir()
   }
 
   private get externalServer(): boolean {
@@ -246,7 +252,7 @@ class KernelServer implements IServer {
     let createTransport
     if (protocol === 'connect') {
       createTransport = createConnectTransport
-    } else if (address.startsWith('unix://')) {
+    } else if (address.startsWith('unix:/')) {
       createTransport = createGrpcUdsTransport
     } else {
       createTransport = createGrpcHttpTransport
