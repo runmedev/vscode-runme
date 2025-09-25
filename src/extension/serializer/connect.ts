@@ -72,7 +72,7 @@ export class ConnectSerializer extends GrpcSerializer {
     lifecycleIdentity: Serializer.LifecycleIdentity,
   ): Promise<boolean> {
     // skip session outputs files
-    if (!!notebook.metadata['runme.dev/frontmatterParsed']?.runme?.session?.id) {
+    if (!!notebook.metadata[RUNME_FRONTMATTER_PARSED]?.runme?.session?.id) {
       return false
     }
 
@@ -296,6 +296,7 @@ export class ConnectSerializer extends GrpcSerializer {
         shell: '',
         skipPrompts: false,
         terminalRows: '',
+        envVarMode: '',
       })
     }
 
