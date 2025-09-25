@@ -199,8 +199,12 @@ suite('Kernel server GRPC transport', () => {
       false,
     )
 
+    const runtimeDirSpy = vi
+      .spyOn(server as any, 'getRuntimeDir')
+      .mockReturnValue('/run/user/runme-test')
     const address = server['address']()
-    expect(address).toStrictEqual('unix:///tmp/runme-abcdefgh.sock')
+    runtimeDirSpy.mockRestore()
+    expect(address).toStrictEqual('unix:///run/user/runme-test/runme-abcdefgh.sock')
   })
 
   test('uses TCP socket by default', async () => {
@@ -253,10 +257,14 @@ suite('Kernel server GRPC transport', () => {
       false,
     )
 
+    const runtimeDirSpy = vi
+      .spyOn(server as any, 'getRuntimeDir')
+      .mockReturnValue('/run/user/runme-test')
     const url = new URL(server['connectAddress']())
+    runtimeDirSpy.mockRestore()
 
     expect(url.protocol).toStrictEqual('unix:')
-    expect(url.pathname).toStrictEqual('/tmp/runme-abcdefgh.sock')
+    expect(url.pathname).toStrictEqual('/run/user/runme-test/runme-abcdefgh.sock')
   })
 
   test('#connectTransport returns non-UDS transport matching protocols', async () => {
@@ -300,6 +308,9 @@ suite('Kernel server GRPC transport', () => {
       false,
     )
 
+    const firstRuntimeDirSpy = vi
+      .spyOn(server as any, 'getRuntimeDir')
+      .mockReturnValue('/run/user/runme-test')
     // transport type is set in constuctor
     server = new Server(
       Uri.file('/Users/user/.vscode/extension/stateful.runme'),
@@ -311,11 +322,16 @@ suite('Kernel server GRPC transport', () => {
       false,
     )
 
+    const runtimeDirSpy = vi
+      .spyOn(server as any, 'getRuntimeDir')
+      .mockReturnValue('/run/user/runme-test')
     await server['connectTransport']('grpc')
     expect(createGrpcUdsTransport).toBeCalledWith({
-      baseUrl: 'unix:///tmp/runme-abcdefgh.sock',
+      baseUrl: 'unix:///run/user/runme-test/runme-abcdefgh.sock',
       httpVersion: '2',
     })
+    firstRuntimeDirSpy.mockRestore()
+    runtimeDirSpy.mockRestore()
   })
 })
 
