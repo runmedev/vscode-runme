@@ -1485,7 +1485,7 @@
     "@buf/stateful_runme.bufbuild_es": "^1.10.0-20250206174444-18b490372055.1",
     "@buf/stateful_runme.community_timostamm-protobuf-ts": "^2.11.1-20250528202426-1ee80741ba94.1",
     "@connectrpc/connect": "^1.4.0",
-    "@connectrpc/connect-node": "^1.6.1",
+    "@connectrpc/connect-node": "^1.7.0",
     "@google-cloud/compute": "^5.2.0",
     "@google-cloud/container": "^6.1.0",
     "@google-cloud/run": "^3.0.0",
