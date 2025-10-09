@@ -1,8 +1,8 @@
 import { vi, test } from 'vitest'
-import * as agent_pb from '@buf/jlewi_foyle.bufbuild_es/foyle/v1alpha1/agent_pb'
-import * as parser_pb from '@buf/stateful_runme.bufbuild_es/runme/parser/v1/parser_pb'
+import * as agent_pb from '@buf/runmedev_foyle.bufbuild_es/foyle/v1alpha1/agent_pb'
+import * as parser_pb from '@buf/runmedev_runme.bufbuild_es/runme/parser/v1/parser_pb'
 import { ulid } from 'ulidx'
-import { AIService } from '@buf/jlewi_foyle.connectrpc_es/foyle/v1alpha1/agent_connect'
+import { AIService } from '@buf/runmedev_foyle.connectrpc_es/foyle/v1alpha1/agent_connect'
 import { createClient } from '@connectrpc/connect'
 import { createConnectTransport } from '@connectrpc/connect-node'
 

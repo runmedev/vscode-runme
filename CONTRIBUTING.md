@@ -133,7 +133,7 @@ If you want to run the extension against a specific runme kernel binary, you can
 To upgrade the kernel gRPC dependencies, you can run the following command. Be sure to release the `runme` kernel binary before a stable merge/release.
 
 ```sh {"background":"false","id":"01JAQYD2R3KN63QZ7EC2T2AB58"}
-npm install -s "@buf/stateful_runme.community_timostamm-protobuf-ts@latest"
+npm install -s "@buf/runmedev_runme.community_timostamm-protobuf-ts@latest"
 ```
 
 ### Debug Project

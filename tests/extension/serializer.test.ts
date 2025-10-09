@@ -1,7 +1,7 @@
 import { CancellationTokenSource, NotebookData, NotebookEdit, workspace } from 'vscode'
 import { expect, vi, it, describe } from 'vitest'
 import { isValid } from 'ulidx'
-import { RunmeIdentity, Notebook } from '@buf/stateful_runme.bufbuild_es/runme/parser/v1/parser_pb'
+import { RunmeIdentity, Notebook } from '@buf/runmedev_runme.bufbuild_es/runme/parser/v1/parser_pb'
 
 import { ConnectSerializer } from '../../src/extension/serializer'
 import {

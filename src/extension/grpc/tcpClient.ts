@@ -7,23 +7,23 @@ import {
   UnaryCall,
 } from '@protobuf-ts/runtime-rpc'
 // eslint-disable-next-line max-len
-import { ParserServiceClient } from '@buf/stateful_runme.community_timostamm-protobuf-ts/runme/parser/v1/parser_pb.client'
+import { ParserServiceClient } from '@buf/runmedev_runme.community_timostamm-protobuf-ts/runme/parser/v1/parser_pb.client'
 // eslint-disable-next-line max-len
-import { RunnerServiceClient as RunnerServiceClientV1 } from '@buf/stateful_runme.community_timostamm-protobuf-ts/runme/runner/v1/runner_pb.client'
+import { RunnerServiceClient as RunnerServiceClientV1 } from '@buf/runmedev_runme.community_timostamm-protobuf-ts/runme/runner/v1/runner_pb.client'
 // eslint-disable-next-line max-len
-import { RunnerServiceClient as RunnerServiceClientV2 } from '@buf/stateful_runme.community_timostamm-protobuf-ts/runme/runner/v2/runner_pb.client'
+import { RunnerServiceClient as RunnerServiceClientV2 } from '@buf/runmedev_runme.community_timostamm-protobuf-ts/runme/runner/v2/runner_pb.client'
 // eslint-disable-next-line max-len
-import { ProjectServiceClient } from '@buf/stateful_runme.community_timostamm-protobuf-ts/runme/project/v1/project_pb.client'
+import { ProjectServiceClient } from '@buf/runmedev_runme.community_timostamm-protobuf-ts/runme/project/v1/project_pb.client'
 // eslint-disable-next-line max-len
-import { ReporterServiceClient } from '@buf/stateful_runme.community_timostamm-protobuf-ts/runme/reporter/v1alpha1/reporter_pb.client'
+import { ReporterServiceClient } from '@buf/runmedev_runme.community_timostamm-protobuf-ts/runme/reporter/v1alpha1/reporter_pb.client'
 // eslint-disable-next-line max-len
-import { NotebookServiceClient } from '@buf/stateful_runme.community_timostamm-protobuf-ts/runme/notebook/v1alpha1/notebook_pb.client'
+import { NotebookServiceClient } from '@buf/runmedev_runme.community_timostamm-protobuf-ts/runme/notebook/v1alpha1/notebook_pb.client'
 import { HealthClient } from '@buf/grpc_grpc.community_timostamm-protobuf-ts/grpc/health/v1/health_pb.client'
 import { GrpcTransport } from '@protobuf-ts/grpc-transport'
 import {
   TransformRequest,
   TransformResponse,
-} from '@buf/stateful_runme.community_timostamm-protobuf-ts/runme/reporter/v1alpha1/reporter_pb'
+} from '@buf/runmedev_runme.community_timostamm-protobuf-ts/runme/reporter/v1alpha1/reporter_pb'
 
 import { getServerRunnerVersion } from '../../utils/configuration'
 

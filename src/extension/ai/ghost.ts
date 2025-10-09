@@ -1,6 +1,6 @@
 import * as vscode from 'vscode'
-import * as agent_pb from '@buf/jlewi_foyle.bufbuild_es/foyle/v1alpha1/agent_pb'
-import { StreamGenerateRequest_Trigger } from '@buf/jlewi_foyle.bufbuild_es/foyle/v1alpha1/agent_pb'
+import * as agent_pb from '@buf/runmedev_foyle.bufbuild_es/foyle/v1alpha1/agent_pb'
+import { StreamGenerateRequest_Trigger } from '@buf/runmedev_foyle.bufbuild_es/foyle/v1alpha1/agent_pb'
 import { workspace } from 'vscode'
 import { share, Subject } from 'rxjs'
 

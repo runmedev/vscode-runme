@@ -3,7 +3,7 @@
 // See ../vscode_apis.md for an exlanation. It is very helpful for understanding this folder.
 
 import * as vscode from 'vscode'
-import * as parser_pb from '@buf/stateful_runme.bufbuild_es/runme/parser/v1/parser_pb'
+import * as parser_pb from '@buf/runmedev_runme.bufbuild_es/runme/parser/v1/parser_pb'
 
 import { ServerLifecycleIdentity, getServerConfigurationValue } from '../../utils/configuration'
 import { Serializer } from '../../types'
