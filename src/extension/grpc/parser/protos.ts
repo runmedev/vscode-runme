@@ -1,4 +1,4 @@
-import * as parser_pb from '@buf/stateful_runme.bufbuild_es/runme/parser/v1/parser_pb'
+import * as parser_pb from '@buf/runmedev_runme.bufbuild_es/runme/parser/v1/parser_pb'
 
 import * as parserTypes from './tcp/types'
 

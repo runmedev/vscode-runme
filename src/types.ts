@@ -76,7 +76,15 @@ export namespace Serializer {
 
   export type Cell = Omit<
     Grpc.Cell,
-    'kind' | 'metadata' | 'languageId' | 'outputs' | 'executionSummary'
+    | 'kind'
+    | 'metadata'
+    | 'languageId'
+    | 'outputs'
+    | 'executionSummary'
+    | 'refId'
+    | 'role'
+    | 'callId'
+    | 'docResults'
   > & {
     metadata?: Metadata
     kind: NotebookCellKind

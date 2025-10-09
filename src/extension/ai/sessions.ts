@@ -1,4 +1,4 @@
-import { LogEvent, LogEventType } from '@buf/jlewi_foyle.bufbuild_es/foyle/v1alpha1/agent_pb'
+import { LogEvent, LogEventType } from '@buf/runmedev_foyle.bufbuild_es/foyle/v1alpha1/agent_pb'
 import { ulid } from 'ulidx'
 import * as vscode from 'vscode'
 

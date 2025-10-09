@@ -2,7 +2,7 @@ import * as vscode from 'vscode'
 import {
   GenerateCellsRequest,
   GenerateCellsResponse,
-} from '@buf/jlewi_foyle.bufbuild_es/foyle/v1alpha1/agent_pb'
+} from '@buf/runmedev_foyle.bufbuild_es/foyle/v1alpha1/agent_pb'
 
 import getLogger from '../logger'
 import * as protos from '../grpc/parser/protos'

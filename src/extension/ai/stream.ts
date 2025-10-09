@@ -3,7 +3,7 @@ import {
   StreamGenerateRequest,
   StreamGenerateResponse,
   StreamGenerateRequest_Trigger,
-} from '@buf/jlewi_foyle.bufbuild_es/foyle/v1alpha1/agent_pb'
+} from '@buf/runmedev_foyle.bufbuild_es/foyle/v1alpha1/agent_pb'
 import {
   buffer,
   debounceTime,

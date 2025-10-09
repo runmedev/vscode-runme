@@ -1,7 +1,7 @@
 import { vi, suite, test, expect } from 'vitest'
 import { workspace } from 'vscode'
-import * as agent_pb from '@buf/jlewi_foyle.bufbuild_es/foyle/v1alpha1/agent_pb'
-import * as parser_pb from '@buf/stateful_runme.bufbuild_es/runme/parser/v1/parser_pb'
+import * as agent_pb from '@buf/runmedev_foyle.bufbuild_es/foyle/v1alpha1/agent_pb'
+import * as parser_pb from '@buf/runmedev_runme.bufbuild_es/runme/parser/v1/parser_pb'
 
 import { GhostCellGenerator } from '../../../src/extension/ai/ghost'
 import { cellToCellData } from '../../../src/extension/ai/converters'

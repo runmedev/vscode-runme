@@ -8,10 +8,14 @@ exports[`GhostCellGenerator > Build requests for event stream 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "h",
         },
       },
@@ -24,10 +28,14 @@ exports[`GhostCellGenerator > Build requests for event stream 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "he",
         },
       },
@@ -40,10 +48,14 @@ exports[`GhostCellGenerator > Build requests for event stream 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "hel",
         },
       },
@@ -56,10 +68,14 @@ exports[`GhostCellGenerator > Build requests for event stream 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "hell",
         },
       },
@@ -73,10 +89,14 @@ exports[`GhostCellGenerator > Build requests for event stream 1`] = `
         "notebook": {
           "cells": [
             {
+              "callId": "",
+              "docResults": [],
               "kind": "CELL_KIND_MARKUP",
               "languageId": "markdown",
               "metadata": {},
               "outputs": [],
+              "refId": "",
+              "role": "CELL_ROLE_UNSPECIFIED",
               "value": "hello",
             },
           ],
@@ -95,10 +115,14 @@ exports[`GhostCellGenerator > Build requests for event stream 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "how",
         },
       },
@@ -111,10 +135,14 @@ exports[`GhostCellGenerator > Build requests for event stream 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "how are",
         },
       },
@@ -128,10 +156,14 @@ exports[`GhostCellGenerator > Build requests for event stream 1`] = `
         "notebook": {
           "cells": [
             {
+              "callId": "",
+              "docResults": [],
               "kind": "CELL_KIND_MARKUP",
               "languageId": "markdown",
               "metadata": {},
               "outputs": [],
+              "refId": "",
+              "role": "CELL_ROLE_UNSPECIFIED",
               "value": "how are you?",
             },
           ],
@@ -151,10 +183,14 @@ exports[`GhostCellGenerator > Build requests for event stream 1`] = `
         "notebook": {
           "cells": [
             {
+              "callId": "",
+              "docResults": [],
               "kind": "CELL_KIND_MARKUP",
               "languageId": "markdown",
               "metadata": {},
               "outputs": [],
+              "refId": "",
+              "role": "CELL_ROLE_UNSPECIFIED",
               "value": "Is it me you're looking for?",
             },
           ],
@@ -174,10 +210,14 @@ exports[`GhostCellGenerator > Build requests for event stream 1`] = `
         "notebook": {
           "cells": [
             {
+              "callId": "",
+              "docResults": [],
               "kind": "CELL_KIND_MARKUP",
               "languageId": "markdown",
               "metadata": {},
               "outputs": [],
+              "refId": "",
+              "role": "CELL_ROLE_UNSPECIFIED",
               "value": "here we go",
             },
           ],
@@ -197,10 +237,14 @@ exports[`GhostCellGenerator > Build requests for event stream 1`] = `
         "notebook": {
           "cells": [
             {
+              "callId": "",
+              "docResults": [],
               "kind": "CELL_KIND_MARKUP",
               "languageId": "markdown",
               "metadata": {},
               "outputs": [],
+              "refId": "",
+              "role": "CELL_ROLE_UNSPECIFIED",
               "value": "again",
             },
           ],
@@ -220,10 +264,14 @@ exports[`GhostCellGenerator > Build requests for event stream 1`] = `
         "notebook": {
           "cells": [
             {
+              "callId": "",
+              "docResults": [],
               "kind": "CELL_KIND_MARKUP",
               "languageId": "markdown",
               "metadata": {},
               "outputs": [],
+              "refId": "",
+              "role": "CELL_ROLE_UNSPECIFIED",
               "value": "down the only road I have ever known",
             },
           ],
@@ -247,10 +295,14 @@ exports[`GhostCellGenerator > Process events for debouncing 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "h",
         },
       },
@@ -263,10 +315,14 @@ exports[`GhostCellGenerator > Process events for debouncing 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "he",
         },
       },
@@ -279,10 +335,14 @@ exports[`GhostCellGenerator > Process events for debouncing 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "hel",
         },
       },
@@ -295,10 +355,14 @@ exports[`GhostCellGenerator > Process events for debouncing 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "hell",
         },
       },
@@ -311,10 +375,14 @@ exports[`GhostCellGenerator > Process events for debouncing 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "hello",
         },
       },
@@ -327,10 +395,14 @@ exports[`GhostCellGenerator > Process events for debouncing 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "how",
         },
       },
@@ -343,10 +415,14 @@ exports[`GhostCellGenerator > Process events for debouncing 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "how are",
         },
       },
@@ -359,10 +435,14 @@ exports[`GhostCellGenerator > Process events for debouncing 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "how are you?",
         },
       },
@@ -375,10 +455,14 @@ exports[`GhostCellGenerator > Process events for debouncing 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "Is it me you're looking for?",
         },
       },
@@ -391,10 +475,14 @@ exports[`GhostCellGenerator > Process events for debouncing 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "here we go",
         },
       },
@@ -407,10 +495,14 @@ exports[`GhostCellGenerator > Process events for debouncing 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "again",
         },
       },
@@ -423,10 +515,14 @@ exports[`GhostCellGenerator > Process events for debouncing 1`] = `
       "trigger": "CELL_TEXT_CHANGE",
       "update": {
         "cell": {
+          "callId": "",
+          "docResults": [],
           "kind": "CELL_KIND_MARKUP",
           "languageId": "markdown",
           "metadata": {},
           "outputs": [],
+          "refId": "",
+          "role": "CELL_ROLE_UNSPECIFIED",
           "value": "down the only road I have ever known",
         },
       },

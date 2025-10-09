@@ -11,7 +11,7 @@ import {
 import * as vscode from 'vscode'
 import { createClient, Client, Transport } from '@connectrpc/connect'
 import { createConnectTransport } from '@connectrpc/connect-node'
-import { AIService } from '@buf/jlewi_foyle.connectrpc_es/foyle/v1alpha1/agent_connect'
+import { AIService } from '@buf/runmedev_foyle.connectrpc_es/foyle/v1alpha1/agent_connect'
 
 import { Kernel } from '../kernel'
 import getLogger from '../logger'
