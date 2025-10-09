@@ -20,6 +20,10 @@ updates:
       - dependency-name: "vscode-uri"
       # Deprecated
       - dependency-name: "@vercel/client"
+      # Node.js
+      - dependency-name: "@types/node"
+        update-types:
+          - version-update:semver-minor
       # VS Code
       - dependency-name: "@types/vscode"
         update-types:
