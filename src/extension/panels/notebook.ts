@@ -82,6 +82,7 @@ export class EnvStorePanel extends TanglePanel {
   private sanitizeVariables(variables: SnapshotEnvs) {
     variables.forEach((variable: SnapshotEnv) => {
       variable.originalValue = variable.originalValue.replace(/'/g, '&#39;')
+      variable.description = variable.description.replace(/'/g, '&#39;')
     })
     return variables
   }
