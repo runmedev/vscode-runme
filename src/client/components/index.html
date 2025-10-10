@@ -3,53 +3,21 @@
   <head>
     <script type="module" src="../../../out/client.js"></script>
   <body>
-    <div>
+    <div id="shell">
       <h1>Shell Output</h1>
-      <shell-output content="foo
-bar" />
-    </div>
-    <div id="vercel">
-      <h1>Vercel Output</h1>
     </div>
     <script type="text/javascript">
-      const elem = document.createElement('vercel-output')
-      elem.setAttribute('content', JSON.stringify({
-        type: 'building',
-        payload: {
-          alias: ['runme-deploy-demo-christian-bromann.vercel.app'],
-          aliasAssigned: false,
-          bootedAt: 1664260170658,
-          build: {
-            env: ['foo', 'bar']
-          },
-          buildingAt: 1664260171040,
-          builds: [],
-          createdAt: 1664260170658,
-          createdIn: "sfo1",
-          creator: {uid: '2tsxYL9F1wZnPYMUZoGv84Rs', username: 'christian-bromann'},
-          env: [],
-          functions: null,
-          id: "dpl_8RRE7CFjLwJW3opKjaMdBL9m8q8y",
-          initReadyAt: 1664260171040,
-          inspectorUrl: "https://vercel.com/christian-bromann/runme-deploy-demo/8RRE7CFjLwJW3opKjaMdBL9m8q8y",
-          meta: {},
-          name: "runme-deploy-demo",
-          ownerId: "2tsxYL9F1wZnPYMUZoGv84Rs",
-          plan: "hobby",
-          projectId: "prj_2VQkD7K7QGgLT3UlsozajmLM0r9x",
-          public: false,
-          ready: 1664260171040,
-          readyState: "BUILDING",
-          regions: ['iad1'],
-          routes: null,
-          status: "BUILDING",
-          target: null,
-          type: "LAMBDAS",
-          url: "runme-deploy-demo-23aso42zn-christian-bromann.vercel.app",
-          version: 2
-        }
-      }))
-      document.querySelector('#vercel').appendChild(elem)
+      const shell = document.querySelector('#shell')
+      const outputs = [{ id: "01JBMNPWRYRFP68BEZ06GG27TQ", content: "30.4 GiB gs://runme-artifacts-41eac6\n" }]
+      outputs.forEach(output => {
+        const o = document.createElement('shell-output')
+        o.innerHTML = output.content
+        shell.appendChild(o)
+        const oi = document.createElement('shell-output-items')
+        oi.setAttribute('id', output.id)
+        oi.setAttribute('content', output.content)
+        shell.appendChild(oi)
+      })
     </script>
   </head>
   </body>
