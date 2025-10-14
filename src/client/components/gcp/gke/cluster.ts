@@ -2,14 +2,13 @@ import { LitElement, html } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { Disposable } from 'vscode'
 import { when } from 'lit/directives/when.js'
+import { getContext } from '@runmedev/renderers'
 
-import '../../table'
 import '../statusIcon'
 
 import { ClientMessages } from '../../../../constants'
 import { ClientMessage, GcpGkeCluster } from '../../../../types'
 import { onClientMessage } from '../../../../utils/messaging'
-import { getContext } from '../../../utils'
 import { ArrowLeft } from '../../icons/arrowLeft'
 import { ClusterIcon } from '../../icons/cluster'
 

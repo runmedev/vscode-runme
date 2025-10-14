@@ -1,10 +1,10 @@
 import { LitElement, css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { Disposable } from 'vscode'
+import { getContext } from '@runmedev/renderers'
 
 import './statusIcon'
 
-import { getContext } from '../../utils'
 import { ClientMessages } from '../../../constants'
 import { onClientMessage, postClientMessage } from '../../../utils/messaging'
 

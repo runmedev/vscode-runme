@@ -1,10 +1,10 @@
 import { LitElement, css, html } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { Disposable } from 'vscode'
+import { getContext } from '@runmedev/renderers'
 
 import { ClientMessages } from '../../../constants'
 import { onClientMessage, postClientMessage } from '../../../utils/messaging'
-import { getContext } from '../../utils'
 import { CloudShellIcon } from '../icons/cloudShell'
 import { AWSActionType, AWSEC2Instance } from '../../../types'
 import { ClusterIcon } from '../icons/cluster'
