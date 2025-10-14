@@ -1,14 +1,13 @@
 import { LitElement, css, html } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { Disposable } from 'vscode'
+import { getContext } from '@runmedev/renderers'
 
-import '../../table'
 import '../resourceStatus'
 
 import { GceActionType, InstanceStatusType, type GcpGceVMInstance } from '../../../../types'
 import { ClientMessages } from '../../../../constants'
 import { onClientMessage, postClientMessage } from '../../../../utils/messaging'
-import { getContext } from '../../../utils'
 import { CloudShellIcon } from '../../icons/cloudShell'
 import { StopIcon } from '../../icons/stop'
 import { SuspendIcon } from '../../icons/suspend'

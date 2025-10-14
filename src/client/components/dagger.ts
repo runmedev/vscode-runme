@@ -3,10 +3,10 @@ import { customElement, property } from 'lit/decorators.js'
 import { when } from 'lit/directives/when.js'
 import { Disposable } from 'vscode'
 import { filesize } from 'filesize'
+import { getContext } from '@runmedev/renderers'
 
 import { DaggerState, DaggerStateAction } from '../../types'
 import { RENDERERS, ClientMessages } from '../../constants'
-import { getContext } from '../utils'
 import { onClientMessage, postClientMessage } from '../../utils/messaging'
 
 import { DaggerIcon, DaggerLogo } from './icons/dagger'

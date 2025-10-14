@@ -2,9 +2,9 @@ import { LitElement, css, html } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { when } from 'lit/directives/when.js'
 import { Disposable } from 'vscode'
+import { getContext } from '@runmedev/renderers'
 
 import { type GcpGkeCluster } from '../../../../types'
-import '../../table'
 import { GKEIcon } from '../../icons/gkeIcon'
 import './clusterStatus'
 import './cluster'
@@ -12,7 +12,6 @@ import { ClusterIcon } from '../../icons/cluster'
 import { CloudLogsIcon } from '../../icons/cloudLogs'
 import { ClientMessages } from '../../../../constants'
 import { onClientMessage, postClientMessage } from '../../../../utils/messaging'
-import { getContext } from '../../../utils'
 
 const HIDDEN_COLUMNS = ['statusMessage', 'clusterId', 'clusterLink']
 const COLUMNS = [
