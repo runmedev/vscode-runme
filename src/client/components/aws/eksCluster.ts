@@ -3,10 +3,8 @@ import { LitElement, html } from 'lit'
 import { customElement, property, state } from 'lit/decorators.js'
 import { when } from 'lit/directives/when.js'
 
-import '../table'
 import './ec2InstanceActions'
 import './clusterStatus'
-import '../copyButton'
 
 import { type IndexableCluster } from '../../../extension/executors/aws/types'
 import { EKSIcon } from '../icons/eks'
