@@ -735,6 +735,7 @@ export enum NotebookAutoSaveSetting {
 export enum EnvVarMode {
   Docs = 'docs',
   Shell = 'shell',
+  Default = 'docs',
 }
 
 export type SnapshotEnv = MonitorEnvStoreResponseSnapshot_SnapshotEnv & StringIndexable
