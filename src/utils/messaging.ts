@@ -1,3 +1,7 @@
+/**
+ * @deprecated This file is deprecated and will be removed in a future release.
+ */
+
 import { Disposable } from 'vscode'
 
 import { ClientMessages } from '../constants'
