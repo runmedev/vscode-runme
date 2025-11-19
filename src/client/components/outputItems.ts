@@ -1,13 +1,12 @@
 import { LitElement, css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
+import { getContext } from '@runmedev/renderers'
 
 import '@vscode/webview-ui-toolkit/dist/button/index'
 
-import { closeOutput, getContext } from '../utils'
+import { closeOutput } from '../utils'
 import { ClientMessage } from '../../types'
 import { ClientMessages, RENDERERS, OutputType } from '../../constants'
-
-import './closeCellButton'
 
 @customElement(RENDERERS.ShellOutputItems)
 export class ShellOutputItems extends LitElement {
