@@ -1,6 +1,6 @@
 {
   "name": "runme",
-  "version": "3.15.6-edge.1",
+  "version": "3.15.6",
   "publisher": "stateful",
   "displayName": "Runme Notebooks for DevOps",
   "description": "Notebooks for DevOps written in Markdown. Runnable, configurable commands/code and embedded terminals. Integrated with cloud consoles, containers and pipelines.",
