@@ -403,12 +403,19 @@ interface Payload {
   [OutputType.daggerCall]?: DaggerState
 }
 
+/**
+ * @deprecated ClientMessages is deprecated and will be removed in a future release.
+ */
 export type ClientMessage<T extends ClientMessages> = T extends any
   ? {
       type: T
       output: ClientMessagePayload[T]
     }
   : never
+
+/**
+ * @deprecated ClientMessagePayload is deprecated and will be removed in a future release.
+ */
 export interface ClientMessagePayload {
   [ClientMessages.denoUpdate]: DenoState
   [ClientMessages.denoPromote]: {

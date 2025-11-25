@@ -3,6 +3,9 @@
  * Only export cross compatible objects here.
  */
 
+/**
+ * @deprecated OutputType is deprecated and will be removed in a future release.
+ */
 export enum OutputType {
   vercel = 'stateful.runme/vercel-stdout',
   deno = 'stateful.runme/deno-stdout',
@@ -18,6 +21,9 @@ export enum OutputType {
   daggerShell = 'stateful.runme/dagger',
 }
 
+/**
+ * @deprecated ClientMessages is deprecated and will be removed in a future release.
+ */
 export enum ClientMessages {
   infoMessage = 'common:infoMessage',
   errorMessage = 'common:errorMessage',

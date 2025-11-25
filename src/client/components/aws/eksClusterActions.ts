@@ -1,10 +1,10 @@
 import { LitElement, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { Disposable } from 'vscode'
+import { getContext } from '@runmedev/renderers'
 
 import { ClientMessages } from '../../../constants'
 import { postClientMessage } from '../../../utils/messaging'
-import { getContext } from '../../utils'
 import { AWSActionType } from '../../../types'
 import { ClusterIcon } from '../icons/cluster'
 import { IndexableCluster } from '../../../extension/executors/aws/types'

@@ -1,6 +1,7 @@
 import { LitElement, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { when } from 'lit/directives/when.js'
+import { getContext } from '@runmedev/renderers'
 
 import type {
   ClientMessage,
@@ -16,11 +17,10 @@ import {
   RENDERERS,
   CATEGORY_SEPARATOR,
 } from '../../../constants'
-import { closeOutput, getContext } from '../../utils'
+import { closeOutput } from '../../utils'
 import { postClientMessage, onClientMessage } from '../../../utils/messaging'
 import { ExternalLinkIcon } from '../icons/external'
 
-import '../closeCellButton'
 import './categorySelector'
 import styles from './styles'
 

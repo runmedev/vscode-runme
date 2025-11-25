@@ -3,7 +3,6 @@ import { LitElement, css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { when } from 'lit/directives/when.js'
 
-import '../table'
 import './ec2InstanceActions'
 import { EC2Icon } from '../icons/ec2'
 import { AWSEC2Instance } from '../../../types'

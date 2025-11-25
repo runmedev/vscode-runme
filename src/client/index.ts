@@ -1,9 +1,10 @@
 import type { ActivationFunction } from 'vscode-notebook-renderer'
+import '@runmedev/renderers'
+import { setContext } from '@runmedev/renderers'
 
 import { ClientMessages, OutputType, RENDERERS } from '../constants'
 import type { CellOutput } from '../types'
 
-import { setContext } from './utils'
 import './components'
 
 // ----------------------------------------------------------------------------
@@ -95,6 +96,7 @@ export const activate: ActivationFunction<void> = (context) => {
           break
         case OutputType.terminal:
           const terminalElement = document.createElement(RENDERERS.TerminalView)
+          terminalElement.setAttribute('theme', 'vscode')
           terminalElement.setAttribute('id', payload.output['runme.dev/id'])
           terminalElement.setAttribute('fontFamily', payload.output.fontFamily)
           if (typeof payload.output.fontSize === 'number') {

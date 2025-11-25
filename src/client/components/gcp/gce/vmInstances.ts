@@ -2,7 +2,6 @@ import { LitElement, css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { Disposable } from 'vscode'
 
-import '../../table'
 import '../resourceStatus'
 import './vmInstanceActions'
 

@@ -1,12 +1,11 @@
 import { LitElement, css, html } from 'lit'
 import { customElement, property } from 'lit/decorators.js'
 import { when } from 'lit/directives/when.js'
+import { getContext } from '@runmedev/renderers'
 
 import { ClientMessages, RENDERERS, OutputType } from '../../constants'
 import type { ClientMessage } from '../../types'
-import { closeOutput, getContext } from '../utils'
-
-import './closeCellButton'
+import { closeOutput } from '../utils'
 
 @customElement(RENDERERS.VercelOutput)
 export class VercelOutput extends LitElement {
