@@ -221,7 +221,7 @@ export function getCellProgram(
   }
 
   const { interpreter: cellInterpreter } = getAnnotations(cell.metadata)
-  const parsedFrontmatterShell = notebook.metadata?.['runme.dev/frontmatterParsed']?.shell
+  const parsedFrontmatterShell = notebook.metadata?.[RUNME_FRONTMATTER_PARSED]?.shell
   const cellBeatsFrontmatter: string | undefined = cellInterpreter || parsedFrontmatterShell
 
   // TODO(sebastian): make empty case configurable?
