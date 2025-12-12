@@ -77,7 +77,7 @@ jobs:
         run: npm run build:prod
         env:
           NODE_ENV: production
-          NODE_OPTIONS: --max-old-space-size=8192
+          NODE_OPTIONS: --max-old-space-size=10240
           INSTRUMENTATION_KEY: ${{ secrets.INSTRUMENTATION_KEY }}
           CONNECTION_STR: ${{ secrets.CONNECTION_STR }}
 
