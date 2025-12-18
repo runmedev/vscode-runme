@@ -16,6 +16,9 @@ vsc-extension-quickstart.md
 **/node_modules
 **/.node_modules
 tls
+.venv
+examples/.venv
+.env
 tests
 coverage
 dagger
