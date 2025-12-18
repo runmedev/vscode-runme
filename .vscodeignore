@@ -15,6 +15,7 @@ vsc-extension-quickstart.md
 **/*.tsbuildinfo
 **/node_modules
 **/.node_modules
+tls
 tests
 coverage
 dagger

@@ -96,6 +96,9 @@ jobs:
           workflows: overwrite-stateful
         if: env.EXTENSION_NAME != 'runme'
 
+      - name: Remove temp TLS certs
+        run: rm -rf tls/
+
       - name: Get Stable Releases
         uses: actions/github-script@v6
         with:
