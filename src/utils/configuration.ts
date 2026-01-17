@@ -73,7 +73,7 @@ const configurationSchema = {
   },
   notebook: {
     executionOrder: z.boolean().default(true),
-    envVarMode: z.enum([EnvVarMode.Docs, EnvVarMode.Shell]).default(EnvVarMode.Docs),
+    envVarMode: z.enum([EnvVarMode.Docs, EnvVarMode.Shell]).default(EnvVarMode.Default),
   },
   env: {
     workspaceFileOrder: z.array(z.string()).default(DEFAULT_WORKSPACE_FILE_ORDER),
@@ -344,7 +344,7 @@ const getNotebookExecutionOrder = (): boolean => {
 }
 
 const getEnvVarMode = (): EnvVarMode => {
-  return getNotebookConfigurationValue('envVarMode', EnvVarMode.Docs)
+  return getNotebookConfigurationValue('envVarMode', EnvVarMode.Default)
 }
 
 const registerExtensionEnvVarsMutation = (

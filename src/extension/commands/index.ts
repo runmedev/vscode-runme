@@ -16,7 +16,10 @@ import {
   ExtensionContext,
   authentication,
   ProgressLocation,
+  WorkspaceEdit,
+  NotebookEdit,
 } from 'vscode'
+import YAML from 'yaml'
 import { v4 as uuidv4 } from 'uuid'
 import { TelemetryReporter } from 'vscode-telemetry'
 
@@ -351,6 +354,46 @@ export async function askAlternativeOutputsAction(
   }
 }
 
+export async function askVarModeMismatch(
+  documentMode: string | undefined,
+  kernel: Kernel,
+): Promise<boolean> {
+  const currentMode = ContextState.getKey<EnvVarMode>(NOTEBOOK_ENV_VAR_MODE) || EnvVarMode.Default
+
+  let requiredMode = EnvVarMode.Docs
+  switch (documentMode) {
+    case 'shell':
+      requiredMode = EnvVarMode.Shell
+      break
+    default:
+      requiredMode = EnvVarMode.Default
+      break
+  }
+
+  if (currentMode === requiredMode) {
+    return false
+  }
+
+  const action = await window.showInformationMessage(
+    [
+      `The notebook is configured to use "${requiredMode}" environment variable mode, but the current session is using "${currentMode}".`,
+      'It is recommended to reset the session to match the notebook to avoid unexpected behavior.',
+    ].join(' '),
+    { modal: true },
+    'OK',
+  )
+  if (!action) {
+    return true
+  }
+
+  await ContextState.addKey(NOTEBOOK_PREVIEW_OUTPUTS, false)
+  await ContextState.addKey(NOTEBOOK_ENV_VAR_MODE, requiredMode)
+  await commands.executeCommand('workbench.action.files.save')
+  await kernel.newRunnerEnvironment({})
+  await commands.executeCommand('workbench.action.files.save')
+  return false
+}
+
 export async function createNewRunmeNotebook() {
   const newNotebook = await workspace.openNotebookDocument(
     Kernel.type,
@@ -427,6 +470,47 @@ export async function askChangeVarMode(varMode: EnvVarMode, kernel: Kernel) {
   if (!(await askNewRunnerSession(kernel))) {
     return
   }
+
+  const notebook = window.activeNotebookEditor?.notebook
+  const newMetadata = {
+    ...notebook?.metadata,
+  }
+  delete newMetadata['envVarMode']
+
+  if (notebook) {
+    const unparsed = notebook.metadata['runme.dev/frontmatter']
+    let fm: any
+    if (unparsed && unparsed.startsWith('---')) {
+      const parsed = YAML.parseAllDocuments(unparsed)
+      fm = parsed?.[0].toJS?.()
+      delete fm['envVarMode']
+    } else {
+      fm = Object.entries(notebook.metadata[RUNME_FRONTMATTER_PARSED] ?? {}).reduce(
+        (acc, [k, v]) => {
+          if (v === '' || !Boolean(v)) {
+            return acc
+          }
+          acc[k] = v
+          return acc
+        },
+        <any>{},
+      )
+    }
+
+    if (varMode !== EnvVarMode.Default) {
+      fm['envVarMode'] = varMode.toString()
+    }
+    newMetadata['envVarMode'] = varMode.toString()
+    const yamlStr = YAML.stringify(fm)
+    newMetadata['runme.dev/frontmatter'] = `---\n${yamlStr}\n---`
+
+    const notebookEdit = NotebookEdit.updateNotebookMetadata(newMetadata)
+    const edit = new WorkspaceEdit()
+    edit.set(notebook.uri, [notebookEdit])
+    await workspace.applyEdit(edit)
+    await notebook.save()
+  }
+
   return ContextState.addKey(NOTEBOOK_ENV_VAR_MODE, varMode)
 }
 

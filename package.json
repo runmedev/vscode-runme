@@ -650,12 +650,12 @@
       "notebook/toolbar": [
         {
           "command": "runme.envVarModeDocs",
-          "when": "false && notebookType == runme && notebookMode != sessionOutputs && notebookEnvVarMode == 'docs'",
+          "when": "notebookType == runme && notebookMode != sessionOutputs && notebookEnvVarMode == 'docs'",
           "group": "navigation@10"
         },
         {
           "command": "runme.envVarModeShell",
-          "when": "false && notebookType == runme && notebookMode != sessionOutputs && notebookEnvVarMode!= 'docs'",
+          "when": "notebookType == runme && notebookMode != sessionOutputs && notebookEnvVarMode!= 'docs'",
           "group": "navigation@10"
         },
         {
@@ -1049,7 +1049,7 @@
               "Use when document has placeholders for user confirmation and always retain values of environment variables resolved from the first run",
               "Use when document is expected to behave like a shell script, skip prompts, and retain values of environment variables resolved from the last run"
             ],
-            "markdownDescription": "Automatically save cell execution output"
+            "markdownDescription": "Select default mode for environment variable retention"
           },
           "runme.codelens.enable": {
             "type": "boolean",

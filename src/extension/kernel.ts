@@ -51,6 +51,8 @@ import {
   NOTEBOOK_MODE,
   NotebookMode,
   OutputType,
+  RUNME_FRONTMATTER_PARSED,
+  NOTEBOOK_ENV_VAR_MODE,
 } from '../constants'
 import { API } from '../utils/deno/api'
 import { postClientMessage } from '../utils/messaging'
@@ -103,7 +105,11 @@ import handleGitHubMessage, { handleGistMessage } from './messages/github'
 import { getNotebookCategories } from './utils'
 import PanelManager from './panels/panelManager'
 import { isDocumentSessionOutputs, ISerializer } from './serializer'
-import { askAlternativeOutputsAction, openSplitViewAsMarkdownText } from './commands'
+import {
+  askAlternativeOutputsAction,
+  askVarModeMismatch,
+  openSplitViewAsMarkdownText,
+} from './commands'
 import { handlePlatformApiMessage } from './messages/platformRequest'
 import { handleGCPMessage } from './messages/gcp'
 import { IPanel } from './panels/base'
@@ -704,6 +710,13 @@ export class Kernel implements Disposable {
       return
     }
 
+    const notebookMetadata = cells[0]?.notebook?.metadata
+    const envVarMode = (notebookMetadata?.envVarMode ??
+      notebookMetadata?.[NOTEBOOK_ENV_VAR_MODE]?.envVarMode) as string | undefined
+    if (await askVarModeMismatch(envVarMode, this)) {
+      return
+    }
+
     await commands.executeCommand('setContext', NOTEBOOK_HAS_CATEGORIES, false)
     const totalNotebookCells =
       (cells[0] &&
@@ -852,7 +865,7 @@ export class Kernel implements Disposable {
     const { key: execKey, resource } = getKeyInfo(
       runningCell,
       annotations,
-      cell.notebook.metadata['runme.dev/frontmatterParsed'],
+      cell.notebook.metadata[RUNME_FRONTMATTER_PARSED],
     )
 
     let successfulCellExecution: boolean
