@@ -35,6 +35,11 @@ const baseConfig: Partial<Configuration> = {
   module: {
     rules: [
       {
+        test: /\.d\.ts$/,
+        type: 'asset/source',
+        generator: { emit: false },
+      },
+      {
         test: /\.ts$/,
         exclude: /node_modules/,
         use: [{ loader: 'ts-loader' }],
