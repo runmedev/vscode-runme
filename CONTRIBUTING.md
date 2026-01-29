@@ -8,8 +8,6 @@ runme:
 
 **Thank you for your interest in `vscode-runme`. Your contributions are highly welcome.**
 
-[![](https://badgen.net/badge/Complete/Onboarding/5B3ADF?icon=https://runme.dev/img/logo.svg)](https://runme.dev/api/runme?repository=git%40github.com%3Astateful%2Fvscode-runme.git&fileToOpen=CONTRIBUTING.md)
-
 There are multiple ways of getting involved:
 
 - [Report a bug](#report-a-bug)
@@ -50,7 +48,7 @@ It is always best to discuss your plans beforehand, to ensure that your contribu
 - As you push your changes, update the pull request with new infomation and tasks as you complete them
 - Project maintainers might comment on your work as you progress
 - When you are done, remove the `work in progess` label and ping the maintainers for a review
-- Your pull request must receive a :thumbsup: from two [maintainers](MAINTAINERS)
+- Non-maintainer contributions require approval from at least one [maintainer](https://github.com/runmedev/runme/blob/main/MAINTAINERS.md)
 
 ### Prerequisites
 

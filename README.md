@@ -84,3 +84,7 @@ We would love to hear feedback, appreciate your patience, as Runme continutes to
 - [Submit an Issue](https://github.com/stateful/runme/issues)
 - [Contribute on GitHub](https://github.com/runmedev/vscode-runme/blob/main/CONTRIBUTING.md)
 - [Read the Docs](https://docs.runme.dev/)
+
+## Code of Conduct
+
+This project follows the [CNCF Code of Conduct](https://github.com/cncf/foundation/blob/main/code-of-conduct.md). See [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) for details.
