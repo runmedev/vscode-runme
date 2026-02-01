@@ -74,7 +74,7 @@ export default class StatefulFS implements FileSystemProvider {
       const workflow = await getOneWorkflow(id)
       const data = workflow.data.workflow.data || ''
       return new Uint8Array(data)
-    } catch (error) {
+    } catch (_error) {
       throw FileSystemError.FileNotFound(uri)
     }
   }

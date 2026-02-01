@@ -59,7 +59,7 @@ export async function updateGitIgnore(cwd: string, orgSlug: string, projectName:
       `Linked to ${orgSlug}/${projectName} ` +
         `(created ${VERCEL_DIR}${isGitIgnoreUpdated ? ' and added it to .gitignore' : ''})`,
     )
-  } catch (error) {
+  } catch (_error) {
     // ignore errors since this is non-critical
   }
 }

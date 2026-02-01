@@ -10,7 +10,7 @@ export const dagger: IKernelExecutor = async (executor) => {
 
   try {
     return runScript?.() ?? bash(executor)
-  } catch (err: any) {
+  } catch (_err: any) {
     updateCellMetadata(exec.cell, {
       'runme.dev/daggerState': {},
     })

@@ -629,7 +629,7 @@ export class StatefulAuthProvider implements AuthenticationProvider, Disposable 
     try {
       const sessions = JSON.parse(allSessions) as StatefulAuthSession[]
       return sessions
-    } catch (e) {
+    } catch (_e) {
       return []
     }
   }

@@ -96,7 +96,7 @@ export class RecommendedExtension {
         added: 'true',
         error: 'false',
       })
-    } catch (error) {
+    } catch (_error) {
       TelemetryReporter.sendTelemetryEvent(TELEMETRY_EVENTS.RecommendExtension, {
         added: 'false',
         error: 'true',

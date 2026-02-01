@@ -388,7 +388,7 @@ export async function tryIt(context: ExtensionContext) {
     const newNotebookUri = Uri.joinPath(projectUri, 'Welcome to Runme.md')
     await workspace.fs.writeFile(newNotebookUri, enc.encode(fileContent.toString()))
     await commands.executeCommand('vscode.openWith', newNotebookUri, Kernel.type)
-  } catch (err) {
+  } catch (_err) {
     const localMarkdown = Uri.joinPath(
       Uri.file(context.extensionPath),
       'walkthroughs',
@@ -405,7 +405,7 @@ export async function openFileInRunme(uri: Uri, selection?: Uri[]) {
 export async function authenticateWithGitHub() {
   try {
     await authentication.getSession('github', ['repo'], { createIfNone: true })
-  } catch (error) {
+  } catch (_error) {
     window.showErrorMessage('Failed to authenticate with GitHub')
   }
 }
