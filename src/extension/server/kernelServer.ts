@@ -363,7 +363,7 @@ class KernelServer implements IServer {
 
               try {
                 log = JSON.parse(line)
-              } catch (e) {
+              } catch (_e) {
                 continue
               }
 

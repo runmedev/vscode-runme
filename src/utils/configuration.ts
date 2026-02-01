@@ -101,8 +101,8 @@ const configurationSchema = {
   },
 }
 
-const notebookTerminalSchemaObject = z.object(notebookTerminalSchema)
-export type TerminalConfiguration = z.infer<typeof notebookTerminalSchemaObject>
+const _notebookTerminalSchemaObject = z.object(notebookTerminalSchema)
+export type TerminalConfiguration = z.infer<typeof _notebookTerminalSchemaObject>
 export type ServerTransportType = z.infer<typeof configurationSchema.server.transportType>
 export type ServerLifecycleIdentity = z.infer<typeof configurationSchema.server.lifecycleIdentity>
 export type ServerRunnerVersion = z.infer<typeof configurationSchema.server.runnerVersion>
@@ -295,14 +295,13 @@ const isNotebookTerminalFeatureEnabled = (
 }
 
 const getNotebookTerminalConfigurations = (metadata: Serializer.Metadata) => {
-  const schema = z.object(notebookTerminalSchema)
   const keys = Object.keys(notebookTerminalSchema) as Array<keyof typeof notebookTerminalSchema>
   const config = keys.reduce(
     (p, c) => {
       p[c] = getRunmeTerminalConfigurationValue<never>(c, undefined as never)
       return p
     },
-    {} as z.infer<typeof schema>,
+    {} as TerminalConfiguration,
   )
   const parsedFm = metadata?.[RUNME_FRONTMATTER_PARSED]
   if (parsedFm?.terminalRows) {
@@ -457,7 +456,6 @@ const getNotebookAutoSave = (): NotebookAutoSaveSetting => {
 }
 
 const getSessionOutputs = (): boolean => {
-  return getCloudConfigurationValue('sessionOutputs', true)
   return getCloudConfigurationValue('sessionOutputs', true)
 }
 

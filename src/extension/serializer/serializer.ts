@@ -235,7 +235,7 @@ export abstract class GrpcSerializer implements ISerializer {
     try {
       await workspace.fs.stat(sessionFilePath)
       return true
-    } catch (e) {
+    } catch (_e) {
       return false
     }
   }

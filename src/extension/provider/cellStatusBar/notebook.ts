@@ -36,7 +36,7 @@ export class NotebookCellStatusBarProvider implements NotebookCellStatusBarItemP
     this.#cellStatusBarItems.forEach((statusBarItem: CellStatusBarItem) => {
       try {
         statusBarItem.registerCommands()
-      } catch (error) {
+      } catch (_error) {
         console.error(`Failed to register commands for ${statusBarItem.constructor.name}`)
       }
     })

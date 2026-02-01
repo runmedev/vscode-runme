@@ -106,7 +106,7 @@ export async function getCluster(clusterName: string, location: string, project:
       name: `projects/${project}/locations/${location}/clusters/${clusterName}`,
     })
     return cluster
-  } catch (error) {
+  } catch (_error) {
     return [] // Prevent errors when fetching a removed cluster
   }
 }
