@@ -11,6 +11,8 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "experimentalDecorators": true,
+    "useDefineForClassFields": false,
+    "preserveSymlinks": true,
     "sourceMap": true,
     "strict": true,
     "declaration": true,
