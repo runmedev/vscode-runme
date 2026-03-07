@@ -296,13 +296,10 @@ const isNotebookTerminalFeatureEnabled = (
 
 const getNotebookTerminalConfigurations = (metadata: Serializer.Metadata) => {
   const keys = Object.keys(notebookTerminalSchema) as Array<keyof typeof notebookTerminalSchema>
-  const config = keys.reduce(
-    (p, c) => {
-      p[c] = getRunmeTerminalConfigurationValue<never>(c, undefined as never)
-      return p
-    },
-    {} as TerminalConfiguration,
-  )
+  const config = keys.reduce((p, c) => {
+    p[c] = getRunmeTerminalConfigurationValue<never>(c, undefined as never)
+    return p
+  }, {} as TerminalConfiguration)
   const parsedFm = metadata?.[RUNME_FRONTMATTER_PARSED]
   if (parsedFm?.terminalRows) {
     const rows = Number(parsedFm.terminalRows)
