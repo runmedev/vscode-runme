@@ -6,7 +6,7 @@ Learn more about Runme by visiting the [official docs](https://docs.runme.dev) a
 
 Join the Runme community on:
 
-- [Discord](https://discord.gg/runme)
+- [Discord](https://discord.gg/jFy92yxT)
 - [X](https://x.com/runmedev) with `#runme`
 - [YouTube](https://www.youtube.com/@runmedev)
 

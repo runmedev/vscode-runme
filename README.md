@@ -21,7 +21,7 @@ Please visit Runme's documentation to learn about its purpose, all its features,
 - [https://docs.runme.dev/](https://docs.runme.dev/)
 
 Feel free to submit any issues you may have via the
-[issue tracker](https://github.com/runmedev/vscode-runme/issues) or [tell us about it on Discord](https://discord.gg/runme).
+[issue tracker](https://github.com/runmedev/vscode-runme/issues) or [tell us about it on Discord](https://discord.gg/jFy92yxT).
 
 ## Guides
 
@@ -80,7 +80,7 @@ Runme is under active development. Please be aware of following known limitation
 
 We would love to hear feedback, appreciate your patience, as Runme continutes to harden. Get in touch please!
 
-- [Join our Discord](https://discord.gg/runme)
+- [Join our Discord](https://discord.gg/jFy92yxT)
 - [Submit an Issue](https://github.com/stateful/runme/issues)
 - [Contribute on GitHub](https://github.com/runmedev/vscode-runme/blob/main/CONTRIBUTING.md)
 - [Read the Docs](https://docs.runme.dev/)
