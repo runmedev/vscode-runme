@@ -1427,8 +1427,8 @@
     "codegen:platform": "graphql-codegen --config codegenPlatform.ts"
   },
   "devDependencies": {
-    "@graphql-codegen/cli": "^5.0.7",
-    "@graphql-codegen/client-preset": "^4.8.3",
+    "@graphql-codegen/cli": "^7.2.0",
+    "@graphql-codegen/client-preset": "^6.1.0",
     "@graphql-codegen/typescript": "^5.0.7",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "20.17.51",
