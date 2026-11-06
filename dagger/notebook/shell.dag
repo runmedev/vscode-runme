@@ -3,13 +3,13 @@ cwd: ../..
 runme:
   id: 01JMMSSHXM7N70W4KCJ5XGEE2A
   version: v3
-shell: dagger script
+shell: dagger shell
 terminalRows: 20
 ---
 
 # Dagger notebook `shell.dag`
 
-Build notebook pipelines using 🔥 Dagger scripts. New files with the `.dag` extension run via `dagger script` by default.
+Build notebook piplines using the brand new 🔥 dagger shell. New files with the `.dag` extension will default run via `dagger shell`.
 
 Initialize the VscodeRunme Dagger module.
 

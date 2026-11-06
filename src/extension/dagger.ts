@@ -1,11 +1,10 @@
 import path from 'node:path'
 
-export const DAGGER_LEGACY_COMMAND = 'dagger shell'
-export const DAGGER_COMMAND = 'dagger script'
-
 /**
  * Reports whether an interpreter invokes Dagger's legacy shell command or its
- * replacement, script. Execution canonicalization remains kernel-owned.
+ * replacement, script. Legacy shell interpreters must not have trailing
+ * arguments because those belong to Dagger v1's terminal shell command.
+ * Execution canonicalization remains kernel-owned.
  */
 export function isDaggerCommand(programName: string): boolean {
   const fields = programName.trim().split(/\s+/)
@@ -13,22 +12,33 @@ export function isDaggerCommand(programName: string): boolean {
     return false
   }
 
-  const executableName = (field: string) => path.posix.basename(field.replaceAll('\\', '/'))
+  const executableName = (field: string) =>
+    path.posix.basename(field.replaceAll('\\', '/')).replace(/\.exe$/i, '').toLowerCase()
 
-  let daggerIndex = 0
-  if (executableName(fields[0]) === 'env') {
-    daggerIndex++
-    while (
-      daggerIndex < fields.length &&
-      (fields[daggerIndex].startsWith('-') || fields[daggerIndex].includes('='))
-    ) {
-      daggerIndex++
-    }
+  let daggerIndex = -1
+  switch (executableName(fields[0])) {
+    case 'dagger':
+      daggerIndex = 0
+      break
+    case 'env':
+      daggerIndex = fields.findIndex((field, index) => index > 0 && executableName(field) === 'dagger')
+      break
+    default:
+      return false
   }
 
-  if (daggerIndex + 1 >= fields.length || executableName(fields[daggerIndex]) !== 'dagger') {
+  if (daggerIndex < 0) {
     return false
   }
 
-  return fields[daggerIndex + 1] === 'shell' || fields[daggerIndex + 1] === 'script'
+  for (let index = daggerIndex + 1; index < fields.length; index++) {
+    switch (fields[index]) {
+      case 'shell':
+        return index === fields.length - 1
+      case 'script':
+        return true
+    }
+  }
+
+  return false
 }

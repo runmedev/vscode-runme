@@ -147,10 +147,11 @@ export abstract class GrpcSerializer implements ISerializer {
 
     const fileExtension = path.extname(notebook.uri.fsPath)
     if (fileExtension.toLowerCase() === '.dag') {
+      // TODO: Default to dagger script once Dagger v1 is stable.
       const metadata = {
         ...notebook.metadata,
-        'runme.dev/frontmatter': '---\nshell: dagger script\n---',
-        'runme.dev/frontmatterParsed': { shell: 'dagger script' },
+        'runme.dev/frontmatter': '---\nshell: dagger shell\n---',
+        'runme.dev/frontmatterParsed': { shell: 'dagger shell' },
       }
       const notebookEdit = NotebookEdit.updateNotebookMetadata(metadata)
       const edit = new WorkspaceEdit()

@@ -147,12 +147,17 @@ suite('isDaggerCommand', () => {
     ['legacy', 'dagger shell', true],
     ['canonical', 'dagger script', true],
     ['path', '/usr/local/bin/dagger shell', true],
-    ['windows path', String.raw`C:\Dagger\dagger script`, true],
+    ['windows path', String.raw`C:\Dagger\dagger.exe script`, true],
     ['env', '/usr/bin/env dagger shell', true],
     ['env option', 'env -S dagger script', true],
     ['env assignment', 'env DAGGER_CLOUD_TOKEN=secret dagger script', true],
-    ['arguments', 'dagger script --debug', true],
+    ['global flag', 'dagger --progress=plain shell', true],
+    ['script arguments', 'dagger script --debug', true],
     ['whitespace', '  dagger   shell  ', true],
+    ['v1 terminal shell', 'dagger shell --container foo', false],
+    ['legacy shell argument', 'dagger shell --debug', false],
+    ['legacy progress argument', 'dagger shell --progress=plain', false],
+    ['wrapper', 'sudo dagger shell', false],
     ['unrelated', 'bash', false],
     ['substring', 'not dagger shell', false],
     ['suffix', 'dagger shellcheck', false],
@@ -178,6 +183,20 @@ test('getKeyInfo', () => {
     ),
   ).toStrictEqual({
     key: 'daggerShell',
+    resource: 'None',
+  })
+
+  expect(
+    getKeyInfo(
+      {
+        getText: vi.fn().mockReturnValue('echo terminal'),
+        languageId: 'sh',
+      } as any,
+      { interpreter: 'dagger shell --container alpine' } as any,
+      fakeFrontmatter,
+    ),
+  ).toStrictEqual({
+    key: 'sh',
     resource: 'None',
   })
 

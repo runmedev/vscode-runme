@@ -183,6 +183,7 @@ suite('getCellProgram', () => {
       'dagger shell',
       'dagger script',
       '/opt/homebrew/bin/dagger shell',
+      'dagger --progress=plain shell',
       '/usr/bin/env dagger script --progress=plain',
     ]) {
       expect(
@@ -194,17 +195,19 @@ suite('getCellProgram', () => {
     }
   })
 
-  test('does not enable DAGGER command mode for unrelated interpreters', async () => {
+  test('does not enable DAGGER command mode for terminal shell commands or unrelated interpreters', async () => {
     vi.mocked(getAnnotations).mockImplementation(((x: any) => ({
       interpreter: x.interpreter,
     })) as any)
 
-    expect(
-      getCellProgram({ metadata: { interpreter: 'not dagger shell' } } as any, {} as any, 'sh'),
-    ).toStrictEqual({
-      commandMode: COMMAND_MODE_INLINE_SHELL,
-      programName: 'not dagger shell',
-    })
+    for (const programName of ['dagger shell --container alpine', 'not dagger shell']) {
+      expect(
+        getCellProgram({ metadata: { interpreter: programName } } as any, {} as any, 'sh'),
+      ).toStrictEqual({
+        commandMode: COMMAND_MODE_INLINE_SHELL,
+        programName,
+      })
+    }
   })
 })
 

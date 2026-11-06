@@ -3,7 +3,7 @@ cwd: ..
 runme:
   id: 01JMMSSHXM7N70W4KCJ5XGEE2A
   version: v3
-shell: dagger script
+shell: dagger shell
 terminalRows: 30
 ---
 
@@ -71,7 +71,7 @@ Extension | bundle | export $EXTENSION_VSIX
 
 First let's run the unit tests. They give us fast feedback.
 
-```sh {"interpreter":"dagger script --progress=plain","name":"UnitTests"}
+```sh {"interpreter":"dagger --progress=plain shell","name":"UnitTests"}
 ### Exported in runme.dev as UnitTests
 Extension | unit-test | stdout
 ```
@@ -85,7 +85,7 @@ Extension | integration-test --runme-test-token RUNME_TEST_TOKEN | stdout
 
 Inside of GitHub Actions, we pass additional job information into the test suite.
 
-```sh {"interpreter":"dagger script --progress=plain","name":"GhaIntegrationTests"}
+```sh {"interpreter":"dagger --progress=plain shell","name":"GhaIntegrationTests"}
 ### Exported in runme.dev as GhaIntegrationTests
 Extension |
   gha-job $GITHUB_ACTOR $BASE_OWNER $GITHUB_EVENT_NAME $FORK_OWNER |
@@ -112,7 +112,7 @@ Extension | integration-test --debug --runme-test-token RUNME_TEST_TOKEN --spec 
 
 Troubleshooting flakieness in lifecycle identity tests.
 
-```sh {"interpreter":"dagger script --progress=plain","terminalRows":"66"}
+```sh {"interpreter":"dagger --progress=plain shell","terminalRows":"66"}
 VscodeRunme | prebuild $(. | link-release $TARGET_PLATFORM) |
   integration-test --debug --spec "specs/identity/*.e2e.ts" |
   stdout
