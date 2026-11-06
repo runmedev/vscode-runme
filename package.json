@@ -1494,7 +1494,7 @@
     "@protobuf-ts/runtime": "^2.11.1",
     "@protobuf-ts/runtime-rpc": "^2.11.1",
     "@runmedev/renderers": "^3.16.7",
-    "@vercel/client": "^17.2.53",
+    "@vercel/client": "^18.6.2",
     "@vscode/vscode-languagedetection": "^1.0.23",
     "@vscode/webview-ui-toolkit": "^1.2.2",
     "@xterm/addon-serialize": "^0.13.0",
