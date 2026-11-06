@@ -13,7 +13,10 @@ export function isDaggerCommand(programName: string): boolean {
   }
 
   const executableName = (field: string) =>
-    path.posix.basename(field.replaceAll('\\', '/')).replace(/\.exe$/i, '').toLowerCase()
+    path.posix
+      .basename(field.replaceAll('\\', '/'))
+      .replace(/\.exe$/i, '')
+      .toLowerCase()
 
   let daggerIndex = -1
   switch (executableName(fields[0])) {
@@ -21,7 +24,9 @@ export function isDaggerCommand(programName: string): boolean {
       daggerIndex = 0
       break
     case 'env':
-      daggerIndex = fields.findIndex((field, index) => index > 0 && executableName(field) === 'dagger')
+      daggerIndex = fields.findIndex(
+        (field, index) => index > 0 && executableName(field) === 'dagger',
+      )
       break
     default:
       return false
