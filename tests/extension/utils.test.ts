@@ -30,6 +30,7 @@ import {
   editJsonc,
   getGitContext,
 } from '../../src/extension/utils'
+import { isDaggerCommand } from '../../src/extension/dagger'
 import { ENV_STORE, DEFAULT_ENV } from '../../src/extension/constants'
 import { CellAnnotations } from '../../src/types'
 import { isInteractiveTerminalDefault } from '../../src/utils/configuration'
@@ -141,8 +142,87 @@ test('getTerminalByCell', () => {
   ).toBeUndefined()
 })
 
+suite('isDaggerCommand', () => {
+  const cases = [
+    ['legacy', 'dagger shell', true],
+    ['canonical', 'dagger script', true],
+    ['path', '/usr/local/bin/dagger shell', true],
+    ['windows path', String.raw`C:\Dagger\dagger script`, true],
+    ['env', '/usr/bin/env dagger shell', true],
+    ['env option', 'env -S dagger script', true],
+    ['env assignment', 'env DAGGER_CLOUD_TOKEN=secret dagger script', true],
+    ['arguments', 'dagger script --debug', true],
+    ['whitespace', '  dagger   shell  ', true],
+    ['unrelated', 'bash', false],
+    ['substring', 'not dagger shell', false],
+    ['suffix', 'dagger shellcheck', false],
+  ] as const
+
+  for (const [name, command, expected] of cases) {
+    test(name, () => {
+      expect(isDaggerCommand(command)).toBe(expected)
+    })
+  }
+})
+
 test('getKeyInfo', () => {
   const fakeFrontmatter = { shell: '' }
+  expect(
+    getKeyInfo(
+      {
+        getText: vi.fn().mockReturnValue('echo dagger'),
+        languageId: 'sh',
+      } as any,
+      { interpreter: 'dagger script' } as any,
+      fakeFrontmatter,
+    ),
+  ).toStrictEqual({
+    key: 'daggerShell',
+    resource: 'None',
+  })
+
+  expect(
+    getKeyInfo(
+      {
+        getText: vi.fn().mockReturnValue('echo dagger'),
+        languageId: 'sh',
+      } as any,
+      {} as any,
+      { shell: 'dagger shell' },
+    ),
+  ).toStrictEqual({
+    key: 'daggerShell',
+    resource: 'None',
+  })
+
+  expect(
+    getKeyInfo(
+      {
+        getText: vi.fn().mockReturnValue('echo shell'),
+        languageId: 'sh',
+      } as any,
+      { interpreter: 'bash' } as any,
+      { shell: 'dagger script' },
+    ),
+  ).toStrictEqual({
+    key: 'sh',
+    resource: 'None',
+  })
+
+  expect(
+    getKeyInfo(
+      {
+        getText: vi.fn().mockReturnValue('echo dagger'),
+        languageId: 'shellscript',
+      } as any,
+      { background: true } as any,
+      { shell: 'dagger script' },
+    ),
+  ).toStrictEqual({
+    key: 'shellscript',
+    resource: 'None',
+  })
+
   expect(
     getKeyInfo(
       {

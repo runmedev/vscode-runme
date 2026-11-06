@@ -414,7 +414,25 @@ describe('ConnectSerializer', () => {
       expect(applied).toBeFalsy()
     })
 
-    it('should apply dagger shell for .dag file extensions', async () => {
+    it('should preserve existing legacy Dagger frontmatter', async () => {
+      const serializer: any = new ConnectSerializer(context, new Server(), new Kernel())
+      const save = vi.fn()
+
+      const applied = await serializer['applyFrontmatterForFileExtension']({
+        cellCount: 0,
+        save,
+        uri: { fsPath: '/tmp/fake/source.dag' },
+        metadata: {
+          'runme.dev/frontmatter': '---\nshell: dagger shell\n---',
+          'runme.dev/frontmatterParsed': { shell: 'dagger shell' },
+        },
+      })
+
+      expect(applied).toBeFalsy()
+      expect(save).not.toBeCalled()
+    })
+
+    it('should apply dagger script for .dag file extensions', async () => {
       vi.mocked(workspace.applyEdit).mockResolvedValue(true)
 
       const fixture = deepCopyFixture()
@@ -441,8 +459,8 @@ describe('ConnectSerializer', () => {
             metadata: {
               'runme.dev/cacheId': '01J97S5FVEKBPD9GAH0AZBV0HB',
               'runme.dev/finalLineBreaks': '1',
-              'runme.dev/frontmatter': '---\nshell: dagger shell\n---',
-              'runme.dev/frontmatterParsed': { shell: 'dagger shell' },
+              'runme.dev/frontmatter': '---\nshell: dagger script\n---',
+              'runme.dev/frontmatterParsed': { shell: 'dagger script' },
             },
             type: 'updateNotebookMetadata',
           },

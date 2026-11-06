@@ -8,23 +8,23 @@ terminalRows: 14
 curl -s "https://framerusercontent.com/images/tpJEZ337KKxXU4q1SSUXDx4FG4.png?scale-down-to=512"
 ```
 
-Showcase the notebook experience to **author, debug, express, and run** Dagger pipelines. Both with Dagger Shell and Call (CLI).
+Showcase the notebook experience to **author, debug, express, and run** Dagger pipelines with Dagger scripts and Call (CLI).
 
-## Build the Runme binary using `dagger shell`
+## Build the Runme binary using `dagger script`
 
-```sh {"interpreter":"dagger shell","name":"Binary"}
+```sh {"interpreter":"dagger script","name":"Binary"}
 ### Exported in runme.dev as Binary
 github.com/runmedev/runme | binary
 ```
 
-```sh {"interpreter":"dagger shell","name":"ExportBinary"}
+```sh {"interpreter":"dagger script","name":"ExportBinary"}
 ### Exported in runme.dev as ExportBinary
 Binary | export runme-binary
 ```
 
 Alternatively, use pre-build versions (goreleaser) for different platforms.
 
-```sh {"interpreter":"dagger shell"}
+```sh {"interpreter":"dagger script"}
 github.com/runmedev/runme | release --version "v3.12.2" | entries
 ```
 
@@ -32,7 +32,7 @@ The `release-files` function is available to narrow down to a specific platform'
 
 ### Now let the 🐮 cow speak
 
-```sh {"interpreter":"dagger shell"}
+```sh {"interpreter":"dagger script"}
 github.com/shykes/dagger/modules/wolfi@6124f75ef216c8c61e9f36bd6feb2a96047a9051 |
     container --packages=cowsay |
     with-exec "cowsay","hi from Runme!" |

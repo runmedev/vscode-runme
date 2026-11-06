@@ -3,7 +3,7 @@ cwd: ..
 runme:
   id: 01HTNVRGFMWZERW6S2CZZ9E990
   version: v3
-shell: dagger shell
+shell: dagger script
 terminalRows: 16
 ---
 

@@ -20,7 +20,8 @@ import {
 import { DEFAULT_PROMPT_ENV, OutputType, RUNME_FRONTMATTER_PARSED } from '../../constants'
 import type { CellOutputPayload, Serializer, ShellType } from '../../types'
 import { NotebookCellOutputManager } from '../cell'
-import { getAnnotations, getWorkspaceFolder, isDaggerShell } from '../utils'
+import { getAnnotations, getWorkspaceFolder } from '../utils'
+import { isDaggerCommand } from '../dagger'
 import { CommandMode, CommandModeEnum } from '../grpc/runner/types'
 import { StatefulFsScheme } from '../provider/statefulFs'
 import { ENV_STORE } from '../constants'
@@ -213,7 +214,7 @@ export function getCellProgram(
   if (isShellLanguage(execKey)) {
     const shellPath = getCellShellPath(cell, notebook, execKey) ?? execKey
 
-    const isDagger = isDaggerShell(shellPath)
+    const isDagger = isDaggerCommand(shellPath)
     return {
       programName: shellPath,
       commandMode: isDagger ? DAGGER : INLINE_SHELL,

@@ -73,6 +73,7 @@ import { GCPResolver } from './resolvers/gcpResolver'
 import { AWSResolver } from './resolvers/awsResolver'
 import { RunmeIdentity } from './grpc/parser/tcp/types'
 import { StatefulAuthProvider } from './provider/statefulAuth'
+import { isDaggerCommand } from './dagger'
 
 const log = getLogger()
 
@@ -188,10 +189,6 @@ export function isDaggerCall(text: string): boolean {
   return simplified.includes('dagger call')
 }
 
-export function isDaggerShell(programName: string): boolean {
-  return programName.trim().includes('dagger shell')
-}
-
 export type ExecResourceType = 'None' | 'URI' | 'DaggerObject' | 'DaggerPlain'
 export interface IExecKeyInfo {
   key: string
@@ -211,7 +208,7 @@ export function getKeyInfo(
     // }
 
     const customShell = cellAnnotations.interpreter || parsedNotebookFrontmatter?.shell || ''
-    if (!cellAnnotations.background && isDaggerShell(customShell)) {
+    if (!cellAnnotations.background && isDaggerCommand(customShell)) {
       return { key: 'daggerShell', resource: 'None' }
     }
 
@@ -239,7 +236,7 @@ export function getKeyInfo(
 
   const { languageId } = runningCell
 
-  if (parsedNotebookFrontmatter?.shell === 'dagger shell') {
+  if (isDaggerCommand(parsedNotebookFrontmatter?.shell || '')) {
     return { key: languageId, resource: 'None' }
   }
 
