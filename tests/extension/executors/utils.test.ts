@@ -12,7 +12,7 @@ import {
   getCmdShellSeq,
   getCmdSeq,
 } from '../../../src/extension/executors/utils'
-import { getWorkspaceFolder, getAnnotations, isDaggerShell } from '../../../src/extension/utils'
+import { getWorkspaceFolder, getAnnotations } from '../../../src/extension/utils'
 import { getCellProgram } from '../../../src/extension/executors/utils'
 
 vi.mock('vscode-telemetry', () => ({}))
@@ -21,7 +21,6 @@ vi.mock('vscode')
 
 vi.mock('../../../src/extension/utils', () => {
   return {
-    isDaggerShell: vi.fn(),
     replaceOutput: vi.fn(),
     getWorkspaceFolder: vi.fn(),
     getAnnotations: vi.fn(),
@@ -175,29 +174,40 @@ suite('getCellProgram', () => {
     })
   })
 
-  test('enables DAGGER command mode for Dagger Shell', async () => {
+  test('enables DAGGER command mode for legacy and canonical Dagger commands', async () => {
     vi.mocked(getAnnotations).mockImplementation(((x: any) => ({
       interpreter: x.interpreter,
     })) as any)
-    vi.mocked(isDaggerShell).mockReturnValue(true)
 
-    expect(
-      getCellProgram({ metadata: { interpreter: 'dagger shell' } } as any, {} as any, 'sh'),
-    ).toStrictEqual({
-      commandMode: COMMAND_MODE_DAGGER,
-      programName: 'dagger shell',
-    })
+    for (const programName of [
+      'dagger shell',
+      'dagger script',
+      '/opt/homebrew/bin/dagger shell',
+      'dagger --progress=plain shell',
+      '/usr/bin/env dagger script --progress=plain',
+    ]) {
+      expect(
+        getCellProgram({ metadata: { interpreter: programName } } as any, {} as any, 'sh'),
+      ).toStrictEqual({
+        commandMode: COMMAND_MODE_DAGGER,
+        programName,
+      })
+    }
+  })
 
-    expect(
-      getCellProgram(
-        { metadata: { interpreter: '/opt/homebrew/bin/dagger shell' } } as any,
-        {} as any,
-        'sh',
-      ),
-    ).toStrictEqual({
-      commandMode: COMMAND_MODE_DAGGER,
-      programName: '/opt/homebrew/bin/dagger shell',
-    })
+  test('does not enable DAGGER command mode for terminal shell commands or unrelated interpreters', async () => {
+    vi.mocked(getAnnotations).mockImplementation(((x: any) => ({
+      interpreter: x.interpreter,
+    })) as any)
+
+    for (const programName of ['dagger shell --container alpine', 'not dagger shell']) {
+      expect(
+        getCellProgram({ metadata: { interpreter: programName } } as any, {} as any, 'sh'),
+      ).toStrictEqual({
+        commandMode: COMMAND_MODE_INLINE_SHELL,
+        programName,
+      })
+    }
   })
 })
 
