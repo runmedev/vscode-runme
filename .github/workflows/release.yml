@@ -50,6 +50,7 @@ jobs:
     permissions:
       contents: write
       deployments: write
+      id-token: write
       packages: write
     runs-on: ubuntu-latest
     env:
@@ -282,56 +283,56 @@ jobs:
 
       # Linux X86
       - name: Publish to Visual Studio Marketplace Linux X86 (Edge)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-linux-x64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json -p ${{ secrets.VSC_MKTP_PAT }} ${{ github.event.inputs.additionalFlags }}
+        run: npx vsce publish --packagePath "./$EXTENSION_NAME-linux-x64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
         if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'edge' }}
 
       - name: Publish to Visual Studio Marketplace Linux X86 (Stable)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-linux-x64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json -p ${{ secrets.VSC_MKTP_PAT }} ${{ github.event.inputs.additionalFlags }}
+        run: npx vsce publish --packagePath "./$EXTENSION_NAME-linux-x64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
         if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
 
       # Linux arm64
       - name: Publish to Visual Studio Marketplace Linux arm64 (Edge)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-linux-arm64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json -p ${{ secrets.VSC_MKTP_PAT }} ${{ github.event.inputs.additionalFlags }}
+        run: npx vsce publish --packagePath "./$EXTENSION_NAME-linux-arm64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
         if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'edge' }}
 
       - name: Publish to Visual Studio Marketplace Linux arm64 (Stable)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-linux-arm64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json -p ${{ secrets.VSC_MKTP_PAT }} ${{ github.event.inputs.additionalFlags }}
+        run: npx vsce publish --packagePath "./$EXTENSION_NAME-linux-arm64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
         if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
 
       # MacOS x86_64
       - name: Publish to Visual Studio Marketplace MacOS x86_64 (Edge)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-darwin-x64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json -p ${{ secrets.VSC_MKTP_PAT }} ${{ github.event.inputs.additionalFlags }}
+        run: npx vsce publish --packagePath "./$EXTENSION_NAME-darwin-x64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
         if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'edge' }}
 
       - name: Publish to Visual Studio Marketplace MacOS x86_64 (Stable)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-darwin-x64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json -p ${{ secrets.VSC_MKTP_PAT }} ${{ github.event.inputs.additionalFlags }}
+        run: npx vsce publish --packagePath "./$EXTENSION_NAME-darwin-x64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
         if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
 
       # MacOS arm64
       - name: Publish to Visual Studio Marketplace MacOS arm64 (Edge)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-darwin-arm64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json -p ${{ secrets.VSC_MKTP_PAT }} ${{ github.event.inputs.additionalFlags }}
+        run: npx vsce publish --packagePath "./$EXTENSION_NAME-darwin-arm64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
         if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'edge' }}
 
       - name: Publish to Visual Studio Marketplace MacOS arm64 (Stable)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-darwin-arm64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json -p ${{ secrets.VSC_MKTP_PAT }} ${{ github.event.inputs.additionalFlags }}
+        run: npx vsce publish --packagePath "./$EXTENSION_NAME-darwin-arm64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
         if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
 
       # Windows x64
       - name: Publish to Visual Studio Marketplace Windows x64 (Edge)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-win32-x64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json -p ${{ secrets.VSC_MKTP_PAT }} ${{ github.event.inputs.additionalFlags }}
+        run: npx vsce publish --packagePath "./$EXTENSION_NAME-win32-x64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
         if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'edge' }}
 
       - name: Publish to Visual Studio Marketplace MacOS x64 (Stable)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-win32-x64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json -p ${{ secrets.VSC_MKTP_PAT }} ${{ github.event.inputs.additionalFlags }}
+        run: npx vsce publish --packagePath "./$EXTENSION_NAME-win32-x64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
         if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
 
       # Windows arm64
       - name: Publish to Visual Studio Marketplace Windows arm64 (Edge)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-win32-arm64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json -p ${{ secrets.VSC_MKTP_PAT }} ${{ github.event.inputs.additionalFlags }}
+        run: npx vsce publish --packagePath "./$EXTENSION_NAME-win32-arm64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
         if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'edge' }}
 
       - name: Publish to Visual Studio Marketplace Windows arm64 (Stable)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-win32-arm64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json -p ${{ secrets.VSC_MKTP_PAT }} ${{ github.event.inputs.additionalFlags }}
+        run: npx vsce publish --packagePath "./$EXTENSION_NAME-win32-arm64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
         if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
 
       # VSX Registry (only Stable releases)
