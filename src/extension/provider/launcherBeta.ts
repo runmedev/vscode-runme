@@ -160,8 +160,8 @@ export class RunmeLauncherProvider implements RunmeTreeProvider {
         new RunmeFile(this.resolveLabel(relativePath), {
           documentPath: documentPath,
           collapsibleState: this.defaultItemState,
-          lightIcon: 'tree-notebook.gif',
-          darkIcon: 'tree-notebook.gif',
+          lightIcon: 'icon.png',
+          darkIcon: 'icon.png',
           contextValue: 'markdownNotebook',
         }),
       )
