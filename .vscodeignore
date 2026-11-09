@@ -19,6 +19,10 @@ vsc-extension-quickstart.md
 tls
 .venv
 examples/.venv
+examples/**
+assets/runme-*
+assets/platform-*
+README-platform.md
 .env
 tests
 coverage

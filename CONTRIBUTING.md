@@ -94,7 +94,7 @@ then ensure to install all project dependencies. Note GitHub token is required t
 $ export GITHUB_REF_NAME=$(git branch --show-current)
 $ export GITHUB_TOKEN=$(gh auth token)
 $ export EXTENSION_BASENAME=$(node -p 'let p = process.cwd().split("/").pop().split("-"); p[p.length-1]')
-$ cp -f "assets/$EXTENSION_BASENAME-icon.gif" "assets/icon.gif"
+$ cp -f "assets/$EXTENSION_BASENAME-icon.png" "assets/icon.png"
 $ cp -f "assets/$EXTENSION_BASENAME-logo-open-dark.svg" "assets/logo-open-dark.svg"
 $ cp -f "assets/$EXTENSION_BASENAME-logo-open-light.svg" "assets/logo-open-light.svg"
 $ cp -f "assets/$EXTENSION_BASENAME-logo-sidebar.svg" "assets/logo-sidebar.svg"
