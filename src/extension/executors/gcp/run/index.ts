@@ -8,9 +8,7 @@ import { CloudRunListRevisionsOptions, CloudRunListServiceOptions, Revision } fr
 
 export function getIngressDisplayName(
   ingress:
-    | google.cloud.run.v2.IngressTraffic
-    | keyof typeof google.cloud.run.v2.IngressTraffic
-    | null,
+    google.cloud.run.v2.IngressTraffic | keyof typeof google.cloud.run.v2.IngressTraffic | null,
 ): string {
   switch (ingress) {
     case 'INGRESS_TRAFFIC_ALL':

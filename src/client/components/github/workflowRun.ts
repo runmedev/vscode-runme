@@ -32,9 +32,9 @@ export class WorkflowRun extends LitElement {
     return html`
       <div class="workflow-run action-notice">
         <div
-          class="icon icon-${this.conclusion
-            ? this.conclusion.toLowerCase()
-            : this.status?.toLowerCase()}"
+          class="icon icon-${
+            this.conclusion ? this.conclusion.toLowerCase() : this.status?.toLowerCase()
+          }"
         ></div>
         <div>
           ${this.displayTitle} #${this.runNumber}: Manually run by

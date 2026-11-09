@@ -161,8 +161,8 @@ export class RunmeLauncherProvider implements RunmeTreeProvider {
         new RunmeFile(file, {
           collapsibleState: TreeItemCollapsibleState.None,
           tooltip: 'Click to open runme file',
-          lightIcon: 'icon.gif',
-          darkIcon: 'icon.gif',
+          lightIcon: 'icon.png',
+          darkIcon: 'icon.png',
           contextValue: 'markdown-file',
           onSelectedCommand: {
             arguments: [{ file, folderPath }],

@@ -122,8 +122,9 @@ export class VMInstances extends LitElement implements Disposable {
           switch (field) {
             case 'name':
               return html`<vscode-link
-                href="https://console.cloud.google.com/compute/instancesDetail/zones/${row.zone}/instances/${row.name}?project=${this
-                  .projectId}"
+                href="https://console.cloud.google.com/compute/instancesDetail/zones/${row.zone}/instances/${row.name}?project=${
+                  this.projectId
+                }"
                 >${row[field]}</vscode-link
               >`
             case 'status':

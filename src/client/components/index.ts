@@ -1,4 +1,7 @@
-import '@vscode/webview-ui-toolkit/dist/index-rollup.js'
+import { allComponents, provideVSCodeDesignSystem } from '@vscode/webview-ui-toolkit'
+
+// Register explicitly so the toolkit's sideEffects: false cannot remove setup.
+provideVSCodeDesignSystem().register(allComponents)
 
 export * from './output'
 export * from './deno'

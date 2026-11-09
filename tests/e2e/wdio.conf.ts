@@ -229,8 +229,12 @@ export const config: Options.Testrunner = {
    * @param {Array.<String>} specs List of spec file paths that are to be run
    * @param {String} cid worker id (e.g. 0-0)
    */
-  // beforeSession: function (config, capabilities, specs, cid) {
-  // },
+  beforeSession: function () {
+    // The worker's TypeScript loaders and debugger are already active. Prevent
+    // Electron from inheriting them: WDIO's ts-node loader hangs VS Code startup.
+    delete process.env.NODE_OPTIONS
+    delete process.env.VSCODE_INSPECTOR_OPTIONS
+  },
   /**
    * Gets executed before test execution begins. At this point you can access to all global
    * variables like `browser`. It is the perfect place to define custom commands.

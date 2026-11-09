@@ -237,9 +237,11 @@ export class EKSCluster extends LitElement implements Disposable {
                   <div class="row">
                     <div class="bold">Created</div>
                     <div>
-                      ${this.cluster?.createdAt
-                        ? formatDateWithTimeAgo(new Date(this.cluster?.createdAt))
-                        : '-'}
+                      ${
+                        this.cluster?.createdAt
+                          ? formatDateWithTimeAgo(new Date(this.cluster?.createdAt))
+                          : '-'
+                      }
                     </div>
                   </div>
                   <div class="row">

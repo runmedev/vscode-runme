@@ -142,8 +142,7 @@ export default async function saveCellExecution(
     const filePath = gitCtx.repository ? `${gitCtx.relativePath}${path?.split('/').pop()}` : path
     const fileContent = path ? await workspace.fs.readFile(Uri.file(path)) : undefined
     let data:
-      | FetchResult<CreateExtensionCellOutputMutation>
-      | FetchResult<CreateCellExecutionMutation>
+      FetchResult<CreateExtensionCellOutputMutation> | FetchResult<CreateCellExecutionMutation>
 
     if (!session) {
       return postClientMessage(messaging, ClientMessages.platformApiResponse, {

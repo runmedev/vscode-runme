@@ -59,8 +59,8 @@ describe('Runme Notebooks', () => {
       const element = new RunmeFile('runme/workspace/src ', {
         collapsibleState: 0,
         tooltip: 'Click to open runme file',
-        lightIcon: 'icon.gif',
-        darkIcon: 'icon.gif',
+        lightIcon: 'icon.png',
+        darkIcon: 'icon.png',
         contextValue: 'markdown-file',
         onSelectedCommand: {
           arguments: [{ file: 'README.md', folderPath: 'runme/workspace/src' }],

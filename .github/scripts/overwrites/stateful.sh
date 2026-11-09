@@ -15,7 +15,7 @@ npm pkg set contributes.views.runme[0].name="Platform"
 npm pkg set contributes.viewsContainers.activitybar[0].title="Stateful"
 npm pkg delete galleryBanner
 
-cp -f "assets/$EXTENSION_NAME-icon.gif" "assets/icon.gif"
+cp -f "assets/$EXTENSION_NAME-icon.png" "assets/icon.png"
 cp -f "assets/$EXTENSION_NAME-logo-open-dark.svg" "assets/logo-open-dark.svg"
 cp -f "assets/$EXTENSION_NAME-logo-open-light.svg" "assets/logo-open-light.svg"
 cp -f "assets/$EXTENSION_NAME-logo-sidebar.svg" "assets/logo-sidebar.svg"

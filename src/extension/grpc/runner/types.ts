@@ -6,12 +6,10 @@ import * as v2 from './v2'
 import * as v1 from './v1'
 
 export type ResolveProgramResponse_VarResult =
-  | v1.ResolveProgramResponse_VarResult
-  | v2.ResolveProgramResponse_VarResult
+  v1.ResolveProgramResponse_VarResult | v2.ResolveProgramResponse_VarResult
 
 export type ResolveProgramRequest_Mode =
-  | v1.ResolveProgramRequest_Mode
-  | v2.ResolveProgramRequest_Mode
+  v1.ResolveProgramRequest_Mode | v2.ResolveProgramRequest_Mode
 
 export const ResolveProgramRequest_ModeEnum = () => {
   if (v2.matches(getServerRunnerVersion())) {
@@ -21,8 +19,7 @@ export const ResolveProgramRequest_ModeEnum = () => {
 }
 
 export type ResolveProgramRequest_Retention =
-  | v1.ResolveProgramRequest_Retention
-  | v2.ResolveProgramRequest_Retention
+  v1.ResolveProgramRequest_Retention | v2.ResolveProgramRequest_Retention
 
 export const ResolveProgramRequest_RetentionEnum = () => {
   if (v2.matches(getServerRunnerVersion())) {
@@ -46,8 +43,7 @@ export const CommandModeEnum = () => {
 }
 
 export type ResolveProgramResponse_Status =
-  | v1.ResolveProgramResponse_Status
-  | v2.ResolveProgramResponse_Status
+  v1.ResolveProgramResponse_Status | v2.ResolveProgramResponse_Status
 
 export const ResolveProgramResponse_StatusEnum = () => {
   if (v2.matches(getServerRunnerVersion())) {
@@ -66,8 +62,7 @@ export type Session = v1.Session | v2.Session
 export type ExecuteStop = v1.ExecuteStop | v2.ExecuteStop
 
 export type CreateSessionRequest =
-  | (v1.CreateSessionRequest & { env: string[] })
-  | (v2.CreateSessionRequest & { envs: string[] })
+  (v1.CreateSessionRequest & { env: string[] }) | (v2.CreateSessionRequest & { envs: string[] })
 export type CreateSessionResponse = v1.CreateSessionResponse | v2.CreateSessionResponse
 
 export type GetSessionRequest = v1.GetSessionRequest | v2.GetSessionRequest
@@ -83,8 +78,7 @@ export type DeleteSessionRequest = v1.DeleteSessionRequest | v2.DeleteSessionReq
 export type DeleteSessionResponse = v1.DeleteSessionResponse | v2.DeleteSessionResponse
 
 export type MonitorEnvStoreRequest =
-  | v1.MonitorEnvStoreRequest
-  | (v2.MonitorEnvStoreRequest & { session: { envs: string[] } })
+  v1.MonitorEnvStoreRequest | (v2.MonitorEnvStoreRequest & { session: { envs: string[] } })
 export type MonitorEnvStoreResponse = v1.MonitorEnvStoreResponse | v2.MonitorEnvStoreResponse
 
 export type ResolveProgramRequest = v1.ResolveProgramRequest | v2.ResolveProgramRequest
@@ -95,8 +89,7 @@ export type SessionEnvStoreType = v1.SessionEnvStoreType | v2.SessionEnvStoreTyp
 export type Winsize = v1.Winsize | v2.Winsize
 
 export const CreateSessionRequestImpl: () =>
-  | typeof v1.CreateSessionRequest
-  | typeof v2.CreateSessionRequest = () => {
+  typeof v1.CreateSessionRequest | typeof v2.CreateSessionRequest = () => {
   if (v2.matches(getServerRunnerVersion())) {
     return v2.CreateSessionRequest
   }
@@ -108,8 +101,7 @@ export const SessionEnvStoreSeedingEnum = () => {
 }
 
 export const GetSessionRequestImpl: () =>
-  | typeof v1.GetSessionRequest
-  | typeof v2.GetSessionRequest = () => {
+  typeof v1.GetSessionRequest | typeof v2.GetSessionRequest = () => {
   if (v2.matches(getServerRunnerVersion())) {
     return v2.GetSessionRequest
   }
@@ -138,8 +130,7 @@ export const WinsizeImpl: () => typeof v1.Winsize | typeof v2.Winsize = () => {
 }
 
 export const ResolveProgramRequestImpl: () =>
-  | typeof v1.ResolveProgramRequest
-  | typeof v2.ResolveProgramRequest = () => {
+  typeof v1.ResolveProgramRequest | typeof v2.ResolveProgramRequest = () => {
   if (v2.matches(getServerRunnerVersion())) {
     return v2.ResolveProgramRequest
   }
