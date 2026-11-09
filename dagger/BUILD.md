@@ -44,7 +44,7 @@ The previous command will list all the available platforms per version. Let's pi
 
 ```sh {"id":"01JMMSSHXM7N70W4KCHTX92MHE","name":"KernelBinary","terminalRows":"12"}
 ### Exported in runme.dev as KernelBinary
-RunmeKernel | link-release --github-token GITHUB_TOKEN --version latest $TARGET_PLATFORM
+RunmeKernel | link-release --github-token env://GITHUB_TOKEN --version latest $TARGET_PLATFORM
 ```
 
 ## Build the Extension
@@ -80,7 +80,7 @@ Then, let's run the end-to-end tests. These require a virtual X server frame buf
 
 ```sh {"name":"IntegrationTests","terminalRows":"37"}
 ### Exported in runme.dev as IntegrationTests
-Extension | integration-test --runme-test-token RUNME_TEST_TOKEN | stdout
+Extension | integration-test --runme-test-token env://RUNME_TEST_TOKEN | stdout
 ```
 
 Inside of GitHub Actions, we pass additional job information into the test suite.
@@ -89,7 +89,7 @@ Inside of GitHub Actions, we pass additional job information into the test suite
 ### Exported in runme.dev as GhaIntegrationTests
 Extension |
   gha-job $GITHUB_ACTOR $BASE_OWNER $GITHUB_EVENT_NAME $FORK_OWNER |
-  integration-test --runme-test-token RUNME_TEST_TOKEN | export /tmp/e2e-logs
+  integration-test --runme-test-token env://RUNME_TEST_TOKEN | export /tmp/e2e-logs
 ```
 
 ### Troubleshooting
@@ -98,14 +98,14 @@ It's simple to just run a specific integration test spec with the following line
 
 ```sh
 Extension |
-  integration-test --runme-test-token RUNME_TEST_TOKEN --spec "specs/githubAction.e2e.ts" |
+  integration-test --runme-test-token env://RUNME_TEST_TOKEN --spec "specs/githubAction.e2e.ts" |
   stdout
 ```
 
 If they fail, you can re-run them with the `--debug` flag and grab logs and screenshots inside of `/tmp/e2e-logs`.
 
 ```sh
-Extension | integration-test --debug --runme-test-token RUNME_TEST_TOKEN --spec "specs/githubAction.e2e.ts" |
+Extension | integration-test --debug --runme-test-token env://RUNME_TEST_TOKEN --spec "specs/githubAction.e2e.ts" |
   directory "logs" |
   export /tmp/e2e-logs
 ```
@@ -134,7 +134,7 @@ VscodeRunme | prebuild $(. | link-release $TARGET_PLATFORM) |
 ```sh {"name":"PreReleaseIntegrationTests"}
 ### Exported in runme.dev as PreReleaseIntegrationTests
 VscodeRunme | prebuild $(PreReleaseVsix) |
-  integration-test --runme-test-token RUNME_TEST_TOKEN |
+  integration-test --runme-test-token env://RUNME_TEST_TOKEN |
   stdout
 ```
 
@@ -142,6 +142,6 @@ Or with a specific version of VS Code:
 
 ```sh
 VscodeRunme | prebuild $(PreReleaseVsix) |
-  integration-test --runme-test-token RUNME_TEST_TOKEN --vscode-version 1.91.0 |
+  integration-test --runme-test-token env://RUNME_TEST_TOKEN --vscode-version 1.91.0 |
   stdout
 ```
