@@ -1,5 +1,9 @@
 # Repository Instructions
 
+## MUST READ
+
+Read and follow [CONTRIBUTING.md](CONTRIBUTING.md) before contributing.
+
 ## Generated protocol dependencies
 
 - Treat `@buf/*` compatibility per generated-code stack, not across the entire namespace.
