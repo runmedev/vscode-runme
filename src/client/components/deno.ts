@@ -82,13 +82,15 @@ export class DenoOutput extends LitElement {
       <img src="https://www.svgrepo.com/show/378789/deno.svg" />
       <div>
         <h4>Deployment</h4>
-        ${this.deployed
-          ? html`
-              <vscode-link href="https://${deployment.domainMappings[0].domain}">
-                ${deployment.domainMappings[0].domain}
-              </vscode-link>
-            `
-          : html`Pending`}
+        ${
+          this.deployed
+            ? html`
+                <vscode-link href="https://${deployment.domainMappings[0].domain}">
+                  ${deployment.domainMappings[0].domain}
+                </vscode-link>
+              `
+            : html`Pending`
+        }
         <h4>Project</h4>
         <vscode-link href="https://dash.deno.com/projects/${project.name}/deployments">
           ${project.name}
@@ -98,11 +100,13 @@ export class DenoOutput extends LitElement {
         <h4>Created At</h4>
         ${this.deployed ? new Date(deployment.createdAt).toString() : 'Pending'}
         <h4>Status</h4>
-        ${this.deployed
-          ? supportsMessaging && this.promoted
-            ? 'Production'
-            : 'Preview'
-          : html`Deploying <vscode-spinner />`}
+        ${
+          this.deployed
+            ? supportsMessaging && this.promoted
+              ? 'Production'
+              : 'Preview'
+            : html`Deploying <vscode-spinner />`
+        }
         ${when(
           this.deployed && supportsMessaging && !this.promoted,
           () => html`

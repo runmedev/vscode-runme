@@ -255,9 +255,7 @@ export interface GcpCloudRunService extends StringIndexable {
   uri: string
   updateTime: string | null
   ingress:
-    | google.cloud.run.v2.IngressTraffic
-    | keyof typeof google.cloud.run.v2.IngressTraffic
-    | null
+    google.cloud.run.v2.IngressTraffic | keyof typeof google.cloud.run.v2.IngressTraffic | null
   ingressDisplayName: string
   serviceName: string
   isHealthy: boolean

@@ -5,6 +5,7 @@ out/*.d.ts
 src/**
 .github
 .gitignore
+AGENTS.md
 .next
 .wdio-vscode-service
 vsc-extension-quickstart.md
