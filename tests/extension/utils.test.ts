@@ -154,19 +154,40 @@ suite('isDaggerCommand', () => {
     ['global flag', 'dagger --progress=plain shell', true],
     ['script arguments', 'dagger script --debug', true],
     ['whitespace', '  dagger   shell  ', true],
-    ['v1 terminal shell', 'dagger shell --container foo', false],
-    ['legacy shell argument', 'dagger shell --debug', false],
-    ['legacy progress argument', 'dagger shell --progress=plain', false],
+    ['shell arguments', 'dagger shell --container foo', true],
+    ['legacy shell argument', 'dagger shell --debug', true],
+    ['legacy progress argument', 'dagger shell --progress=plain', true],
     ['wrapper', 'sudo dagger shell', false],
     ['unrelated', 'bash', false],
     ['substring', 'not dagger shell', false],
     ['suffix', 'dagger shellcheck', false],
+    ['shell in flag value', 'dagger --progress=shell', false],
+    ['script in flag value', 'dagger --future-flag=script', false],
   ] as const
 
   for (const [name, command, expected] of cases) {
     test(name, () => {
       expect(isDaggerCommand(command)).toBe(expected)
     })
+  }
+
+  for (const interpreter of ['shell', 'script']) {
+    for (const args of [
+      `--progress=plain ${interpreter}`,
+      `${interpreter} --progress=plain`,
+      `--progress plain ${interpreter}`,
+      `${interpreter} --progress plain`,
+      `--debug ${interpreter} --progress plain -vv`,
+      `--future-global=value ${interpreter} --future-option value`,
+      `${interpreter} --x-release v1.0.0-beta.25`,
+      `${interpreter} --x-release=v1.0.0-beta.25`,
+      `${interpreter} --progress`,
+      `${interpreter} -- --debug`,
+    ]) {
+      test(`recognizes dagger ${args}`, () => {
+        expect(isDaggerCommand(`dagger ${args}`)).toBe(true)
+      })
+    }
   }
 })
 
@@ -189,14 +210,14 @@ test('getKeyInfo', () => {
   expect(
     getKeyInfo(
       {
-        getText: vi.fn().mockReturnValue('echo terminal'),
+        getText: vi.fn().mockReturnValue('echo dagger'),
         languageId: 'sh',
       } as any,
       { interpreter: 'dagger shell --container alpine' } as any,
       fakeFrontmatter,
     ),
   ).toStrictEqual({
-    key: 'sh',
+    key: 'daggerShell',
     resource: 'None',
   })
 
@@ -207,7 +228,7 @@ test('getKeyInfo', () => {
         languageId: 'sh',
       } as any,
       {} as any,
-      { shell: 'dagger shell' },
+      { shell: 'dagger shell --progress=plain' },
     ),
   ).toStrictEqual({
     key: 'daggerShell',
@@ -221,7 +242,7 @@ test('getKeyInfo', () => {
         languageId: 'sh',
       } as any,
       { interpreter: 'bash' } as any,
-      { shell: 'dagger script' },
+      { shell: 'dagger shell --progress=plain' },
     ),
   ).toStrictEqual({
     key: 'sh',
@@ -235,7 +256,7 @@ test('getKeyInfo', () => {
         languageId: 'shellscript',
       } as any,
       { background: true } as any,
-      { shell: 'dagger script' },
+      { shell: 'dagger shell --progress=plain' },
     ),
   ).toStrictEqual({
     key: 'shellscript',

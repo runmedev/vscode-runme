@@ -2,9 +2,8 @@ import path from 'node:path'
 
 /**
  * Reports whether an interpreter invokes Dagger's legacy shell command or its
- * replacement, script. Legacy shell interpreters must not have trailing
- * arguments because those belong to Dagger v1's terminal shell command.
- * Execution canonicalization remains kernel-owned.
+ * replacement, script, including configured arguments. Flag validation and
+ * execution canonicalization remain kernel-owned.
  */
 export function isDaggerCommand(programName: string): boolean {
   const fields = programName.trim().split(/\s+/)
@@ -39,7 +38,6 @@ export function isDaggerCommand(programName: string): boolean {
   for (let index = daggerIndex + 1; index < fields.length; index++) {
     switch (fields[index]) {
       case 'shell':
-        return index === fields.length - 1
       case 'script':
         return true
     }
