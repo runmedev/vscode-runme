@@ -7,9 +7,7 @@ import type { CellOutputPayload } from '../../types'
 import { getAnnotations } from '../utils'
 import getLogger from '../logger'
 
-import { handleVercelDeployOutput, isVercelDeployScript } from './vercel'
-
-import { ENV_STORE_MANAGER, IKernelExecutorOptions } from '.'
+import { IKernelExecutorOptions } from '.'
 
 const MIME_TYPES_WITH_CUSTOM_RENDERERS = ['text/plain']
 const log = getLogger('shellExecutor')
@@ -24,41 +22,22 @@ type IKernelShellExecutor = (executor: IKernelShellExecutorOptions) => Promise<b
 
 const shellExecutor: IKernelShellExecutor = async (executor) => {
   const { exec, outputs, script, cwd, env } = executor
-  let postScript = script
-  let prod = false
-  if (process.env['vercelProd'] === 'true') {
-    prod = true
-    postScript = `${postScript} --prod`
-    process.env['vercelProd'] = 'false'
-  }
   const outputItems: Buffer[] = []
-  const child = spawn(postScript, { cwd, shell: true, env })
+  const child = spawn(script, { cwd, shell: true, env })
   log.info(`Started process on pid ${child.pid}`)
   /**
    * this needs more work / specification
    */
   const annotations = getAnnotations(exec.cell)
   const mime = annotations?.mimeType || ('text/plain' as const)
-  const index = exec.cell.index
-
   /**
    * handle output for stdout and stderr
    */
   async function handleOutput(data: Buffer) {
     outputItems.push(data)
-    let item: NotebookCellOutputItem | undefined
+    let item: NotebookCellOutputItem
 
-    // hacky for now, maybe inheritence is a fitting pattern
-    if (isVercelDeployScript(script)) {
-      await handleVercelDeployOutput(
-        exec.cell,
-        outputs,
-        outputItems,
-        index,
-        prod,
-        ENV_STORE_MANAGER,
-      )
-    } else if (MIME_TYPES_WITH_CUSTOM_RENDERERS.includes(mime)) {
+    if (MIME_TYPES_WITH_CUSTOM_RENDERERS.includes(mime)) {
       item = NotebookCellOutputItem.json(
         <CellOutputPayload<OutputType.outputItems>>{
           type: OutputType.outputItems,
@@ -73,9 +52,7 @@ const shellExecutor: IKernelShellExecutor = async (executor) => {
       item = new NotebookCellOutputItem(Buffer.concat(outputItems), mime)
     }
 
-    if (item) {
-      outputs.replaceOutputs([new NotebookCellOutput([item])])
-    }
+    outputs.replaceOutputs([new NotebookCellOutput([item])])
   }
 
   child.stdout.on('data', handleOutput)

@@ -5,7 +5,6 @@ provideVSCodeDesignSystem().register(allComponents)
 
 export * from './output'
 export * from './deno'
-export * from './vercel'
 export * from './outputItems'
 export * from './configuration/annotations'
 export * from './terminal'

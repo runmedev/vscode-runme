@@ -18,8 +18,6 @@ updates:
       - dependency-name: "@octokit/rest"
       # it breaks wdio-vscode-service
       - dependency-name: "vscode-uri"
-      # Deprecated
-      - dependency-name: "@vercel/client"
       # Node.js
       - dependency-name: "@types/node"
         update-types:
