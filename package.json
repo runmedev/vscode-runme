@@ -1512,7 +1512,7 @@
     "jsonwebtoken": "^9.0.3",
     "lit": "^3.3.3",
     "octokit": "^5.0.5",
-    "simple-git": "^3.36.0",
+    "simple-git": "^4.0.2",
     "strip-ansi": "^7.2.0",
     "tangle": "^4.0.0",
     "ulidx": "^2.4.1",
