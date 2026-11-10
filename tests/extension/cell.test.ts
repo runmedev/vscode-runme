@@ -348,26 +348,6 @@ describe('NotebookCellOutputManager', () => {
     expect(result[0].items[0].mime).toBe(OutputType.annotations)
   })
 
-  it('supports vercel type', async () => {
-    const cell = mockCell([{ items: [] }])
-
-    const { controller, replaceOutput } = mockNotebookController(cell)
-
-    const outputs = new NotebookCellOutputManager(cell, controller)
-
-    const outputSpy = vi.spyOn(outputs, 'getCellState')
-    await outputs.showOutput(OutputType.vercel)
-
-    expect(replaceOutput).toHaveBeenCalledOnce()
-    const result = replaceOutput.mock.calls[0][0]
-
-    expect(result).toHaveLength(1)
-    expect(result[0].items).toHaveLength(1)
-    expect(result[0].items[0].mime).toBe(OutputType.vercel)
-    expect(outputSpy).toHaveBeenCalledWith(OutputType.vercel)
-    expect(outputSpy).toHaveBeenCalledOnce()
-  })
-
   it('supports deno type', async () => {
     const cell = mockCell([{ items: [] }])
 
@@ -413,11 +393,8 @@ describe('NotebookCellOutputManager', () => {
     const outputs = new NotebookCellOutputManager(cell, controller)
 
     outputs.setState({
-      type: OutputType.vercel,
-      state: {
-        payload: 'vercel',
-        outputItems: [],
-      },
+      type: OutputType.deno,
+      state: {},
     })
     await outputs.showOutput(OutputType.github)
     expect(outputs.getCellState(OutputType.github)).toBeUndefined()

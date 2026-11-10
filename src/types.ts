@@ -113,7 +113,6 @@ export namespace Serializer {
     ['runme.dev/id']?: string
     ['runme.dev/denoState']?: DenoState
     ['runme.dev/daggerState']?: DaggerState
-    ['runme.dev/vercelState']?: VercelState
     ['runme.dev/githubState']?: GitHubState
     [RUNME_FRONTMATTER_PARSED]?: Grpc.Frontmatter
     ['runme.dev/textRange']?: Grpc.Cell['textRange']
@@ -135,13 +134,6 @@ export interface DenoState {
   deployed?: boolean
   project?: any
   deployments?: any[]
-  error?: any
-}
-
-export interface VercelState {
-  payload?: any
-  outputItems: string[]
-  type?: string
   error?: any
 }
 
@@ -378,7 +370,6 @@ export interface AnnotationsPayload {
 interface Payload {
   [OutputType.error]: string
   [OutputType.deno]?: DenoState
-  [OutputType.vercel]: VercelState
   [OutputType.outputItems]: OutputItemsPayload
   [OutputType.annotations]: AnnotationsPayload & { settings: Settings }
   [OutputType.terminal]: TerminalConfiguration & {
@@ -419,9 +410,6 @@ export interface ClientMessagePayload {
   [ClientMessages.denoPromote]: {
     id: string
     productionDeployment: string
-  }
-  [ClientMessages.vercelProd]: {
-    cellIndex: number
   }
   [ClientMessages.mutateAnnotations]: {
     annotations: CellAnnotations

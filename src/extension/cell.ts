@@ -29,7 +29,6 @@ import {
   GCPState,
   GitHubState,
   Serializer,
-  VercelState,
 } from '../types'
 import { Mutex } from '../utils/sync'
 import {
@@ -115,7 +114,7 @@ interface ICellOption {
 interface ICellState {
   type: OutputType
   // TODO: Define a better abstraction for integration states.
-  state: GitHubState | DenoState | VercelState | GCPState | AWSState
+  state: GitHubState | DenoState | GCPState | AWSState
 }
 
 interface InsertCodeCellOptions {
@@ -133,7 +132,6 @@ export class NotebookCellOutputManager {
   protected enabledOutputs = new Map([
     [OutputType.annotations, false],
     [OutputType.deno, false],
-    [OutputType.vercel, false],
     [OutputType.github, false],
     [OutputType.gcp, false],
     [OutputType.aws, false],
@@ -216,17 +214,6 @@ export class NotebookCellOutputManager {
         return new NotebookCellOutput([NotebookCellOutputItem.json(payload, OutputType.deno)], {
           deno: { deploy: true },
         })
-      }
-
-      case OutputType.vercel: {
-        const json: CellOutputPayload<OutputType.vercel> = {
-          type: OutputType.vercel,
-          output: this.getCellState(type) ?? {
-            outputItems: [],
-          },
-        }
-
-        return new NotebookCellOutput([NotebookCellOutputItem.json(json, OutputType.vercel)])
       }
 
       case OutputType.terminal: {

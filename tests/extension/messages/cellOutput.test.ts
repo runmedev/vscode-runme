@@ -87,8 +87,4 @@ suite('Handle CellOutput messages', () => {
   test('OutputItems cell output', async () => {
     return expectOutput(OutputType.outputItems)
   })
-
-  test('Vercel cell output', async () => {
-    return expectOutput(OutputType.vercel)
-  })
 })

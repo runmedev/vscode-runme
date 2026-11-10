@@ -21,16 +21,6 @@ export const activate: ActivationFunction<void> = (context) => {
       const payload: CellOutput = outputItem.json()
 
       switch (payload.type) {
-        case OutputType.vercel:
-          if (payload.output.error) {
-            renderError(payload.output.error)
-            break
-          }
-
-          const vercelElem = document.createElement(RENDERERS.VercelOutput)
-          vercelElem.setAttribute('content', JSON.stringify(payload.output))
-          element.appendChild(vercelElem)
-          break
         case OutputType.daggerCall:
           // if (payload.output?.error) {
           //   renderError(payload.output.error)

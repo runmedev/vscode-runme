@@ -7,7 +7,6 @@
  * @deprecated OutputType is deprecated and will be removed in a future release.
  */
 export enum OutputType {
-  vercel = 'stateful.runme/vercel-stdout',
   deno = 'stateful.runme/deno-stdout',
   outputItems = 'stateful.runme/output-items',
   annotations = 'stateful.runme/annotations',
@@ -45,7 +44,6 @@ export enum ClientMessages {
   onProgramClose = 'common:onProgramClose',
   denoUpdate = 'deno:deploymentUpdate',
   denoPromote = 'deno:promoteDeployment',
-  vercelProd = 'vercel:promotePreview',
   mutateAnnotations = 'annotations:mutate',
   terminalStdout = 'terminal:stdout',
   terminalStderr = 'terminal:stderr',
@@ -179,7 +177,6 @@ export const SERVER_PORT = 7863
 export const DEFAULT_PROMPT_ENV = true
 
 export enum RENDERERS {
-  VercelOutput = 'vercel-output',
   DenoOutput = 'deno-output',
   ShellOutput = 'shell-output',
   ShellOutputItems = 'shell-output-items',
