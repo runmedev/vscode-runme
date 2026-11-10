@@ -6,7 +6,6 @@ wasm
 .DS_Store
 coverage
 .wdio-vscode-service
-examples/fresh/deno.lock
 tests/e2e/logs
 tests/e2e/screenshots
 #Comment

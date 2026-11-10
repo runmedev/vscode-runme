@@ -111,7 +111,6 @@ export namespace Serializer {
     ['runme.dev/name']?: string
     ['runme.dev/nameGenerated']?: string
     ['runme.dev/id']?: string
-    ['runme.dev/denoState']?: DenoState
     ['runme.dev/daggerState']?: DaggerState
     ['runme.dev/githubState']?: GitHubState
     [RUNME_FRONTMATTER_PARSED]?: Grpc.Frontmatter
@@ -128,14 +127,6 @@ export interface ICellOutput<T extends OutputType> {
 export type CellOutputPayload<T extends OutputType> = T extends any ? ICellOutput<T> : never
 
 export type CellOutput = CellOutputPayload<OutputType>
-
-export interface DenoState {
-  promoted?: boolean
-  deployed?: boolean
-  project?: any
-  deployments?: any[]
-  error?: any
-}
 
 export interface GitHubState {
   repo?: string
@@ -369,7 +360,6 @@ export interface AnnotationsPayload {
 
 interface Payload {
   [OutputType.error]: string
-  [OutputType.deno]?: DenoState
   [OutputType.outputItems]: OutputItemsPayload
   [OutputType.annotations]: AnnotationsPayload & { settings: Settings }
   [OutputType.terminal]: TerminalConfiguration & {
@@ -406,11 +396,6 @@ export type ClientMessage<T extends ClientMessages> = T extends any
  * @deprecated ClientMessagePayload is deprecated and will be removed in a future release.
  */
 export interface ClientMessagePayload {
-  [ClientMessages.denoUpdate]: DenoState
-  [ClientMessages.denoPromote]: {
-    id: string
-    productionDeployment: string
-  }
   [ClientMessages.mutateAnnotations]: {
     annotations: CellAnnotations
   }

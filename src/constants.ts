@@ -7,7 +7,6 @@
  * @deprecated OutputType is deprecated and will be removed in a future release.
  */
 export enum OutputType {
-  deno = 'stateful.runme/deno-stdout',
   outputItems = 'stateful.runme/output-items',
   annotations = 'stateful.runme/annotations',
   terminal = 'stateful.runme/terminal',
@@ -42,8 +41,6 @@ export enum ClientMessages {
   copyTextToClipboard = 'common:copyTextToClipboard',
   onCopyTextToClipboard = 'common:onCopyTextToClipboard',
   onProgramClose = 'common:onProgramClose',
-  denoUpdate = 'deno:deploymentUpdate',
-  denoPromote = 'deno:promoteDeployment',
   mutateAnnotations = 'annotations:mutate',
   terminalStdout = 'terminal:stdout',
   terminalStderr = 'terminal:stderr',
@@ -177,7 +174,6 @@ export const SERVER_PORT = 7863
 export const DEFAULT_PROMPT_ENV = true
 
 export enum RENDERERS {
-  DenoOutput = 'deno-output',
   ShellOutput = 'shell-output',
   ShellOutputItems = 'shell-output-items',
   EditAnnotations = 'edit-annotations',

@@ -165,11 +165,6 @@ export function getTerminalByCell(cell: vscode.NotebookCell): RunmeTerminal | un
   }) as RunmeTerminal | undefined
 }
 
-export function isDenoScript(runningCell: vscode.TextDocument) {
-  const text = runningCell.getText()
-  return text.indexOf('deployctl deploy') > -1
-}
-
 export function isGitHubLink(runningCell: vscode.TextDocument) {
   const text = runningCell.getText()
   const isWorkflowUrl = text.includes('.github/workflows') || text.includes('actions/workflows')
@@ -210,10 +205,6 @@ export function getKeyInfo(
     const customShell = cellAnnotations.interpreter || parsedNotebookFrontmatter?.shell || ''
     if (!cellAnnotations.background && isDaggerCommand(customShell)) {
       return { key: 'daggerShell', resource: 'None' }
-    }
-
-    if (isDenoScript(runningCell)) {
-      return { key: 'deno', resource: 'URI' }
     }
 
     if (isGitHubLink(runningCell)) {

@@ -792,7 +792,6 @@
         "displayName": "runme renderer",
         "mimeTypes": [
           "stateful.runme/shell-stdout",
-          "stateful.runme/deno-stdout",
           "stateful.runme/html-stdout",
           "stateful.runme/output-items",
           "stateful.runme/annotations",
