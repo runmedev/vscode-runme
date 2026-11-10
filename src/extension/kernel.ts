@@ -52,7 +52,6 @@ import {
   NotebookMode,
   OutputType,
 } from '../constants'
-import { API } from '../utils/deno/api'
 import { postClientMessage } from '../utils/messaging'
 import {
   getNotebookExecutionOrder,
@@ -68,7 +67,6 @@ import executor, {
   IKernelExecutor,
   IKernelExecutorOptions,
 } from './executors'
-import { DENO_ACCESS_TOKEN_KEY } from './constants'
 import {
   getKeyInfo,
   getAnnotations,
@@ -478,21 +476,6 @@ export class Kernel implements Disposable {
       }
 
       return
-    } else if (message.type === ClientMessages.denoPromote) {
-      const payload = message
-      const token = await this.getEnvironmentManager().get(DENO_ACCESS_TOKEN_KEY)
-      if (!token) {
-        return
-      }
-
-      const api = API.fromToken(token)
-      const deployed = await api.promoteDeployment(
-        payload.output.id,
-        payload.output.productionDeployment,
-      )
-      postClientMessage(this.messaging, ClientMessages.denoUpdate, {
-        promoted: deployed.valueOf(),
-      })
     } else if (message.type === ClientMessages.infoMessage) {
       return window.showInformationMessage(message.output as string)
     } else if (message.type === ClientMessages.errorMessage) {

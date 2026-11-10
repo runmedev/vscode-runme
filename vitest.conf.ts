@@ -26,7 +26,6 @@ export default defineConfig({
         // ignore until we bring up coverage
         'src/client',
         // vendored code
-        'src/utils/deno',
         'src/extension/wasm',
         'src/client/components/aws/**',
         'src/client/components/gcp/**',

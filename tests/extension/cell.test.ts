@@ -348,23 +348,6 @@ describe('NotebookCellOutputManager', () => {
     expect(result[0].items[0].mime).toBe(OutputType.annotations)
   })
 
-  it('supports deno type', async () => {
-    const cell = mockCell([{ items: [] }])
-
-    const { controller, replaceOutput } = mockNotebookController(cell)
-
-    const outputs = new NotebookCellOutputManager(cell, controller)
-
-    await outputs.showOutput(OutputType.deno)
-
-    expect(replaceOutput).toHaveBeenCalledOnce()
-    const result = replaceOutput.mock.calls[0][0]
-
-    expect(result).toHaveLength(1)
-    expect(result[0].items).toHaveLength(1)
-    expect(result[0].items[0].mime).toBe(OutputType.deno)
-  })
-
   it('supports github type', async () => {
     const cell = mockCell([{ items: [] }])
 
@@ -393,7 +376,7 @@ describe('NotebookCellOutputManager', () => {
     const outputs = new NotebookCellOutputManager(cell, controller)
 
     outputs.setState({
-      type: OutputType.deno,
+      type: OutputType.gcp,
       state: {},
     })
     await outputs.showOutput(OutputType.github)

@@ -17,7 +17,6 @@ import {
   getWorkspaceFolder,
   getWorkspaceEnvs,
   isGitHubLink,
-  isDenoScript,
   validateAnnotations,
   setNotebookCategories,
   getNotebookCategories,
@@ -277,19 +276,21 @@ test('getKeyInfo', () => {
     resource: 'None',
   })
 
-  expect(
-    getKeyInfo(
-      {
-        getText: vi.fn().mockReturnValue('deployctl deploy foobar'),
-        languageId: 'something else',
-      } as any,
-      {} as any,
-      fakeFrontmatter,
-    ),
-  ).toStrictEqual({
-    key: 'deno',
-    resource: 'URI',
-  })
+  for (const command of ['deployctl deploy', 'deno deploy']) {
+    expect(
+      getKeyInfo(
+        {
+          getText: vi.fn().mockReturnValue(command),
+          languageId: 'sh',
+        } as any,
+        {} as any,
+        fakeFrontmatter,
+      ),
+    ).toStrictEqual({
+      key: 'sh',
+      resource: 'None',
+    })
+  }
 
   expect(
     getKeyInfo(
@@ -412,7 +413,6 @@ suite('mapGitIgnoreToGlobFolders', () => {
     .DS_Store
     coverage
     .wdio-vscode-service
-    examples/fresh/deno.lock
     tests/e2e/logs
     tests/e2e/screenshots
     #Comment
@@ -636,22 +636,6 @@ suite('isGitHubLink', () => {
         ),
     }
     expect(isGitHubLink(cell)).toBe(true)
-  })
-})
-
-suite('isDenoScript', () => {
-  test('Rejects invalid deno command', () => {
-    const cell: any = {
-      getText: vi.fn().mockReturnValue('deno deploy'),
-    }
-    expect(isDenoScript(cell)).toBe(false)
-  })
-
-  test('Accepts only deno deploy script', () => {
-    const cell: any = {
-      getText: vi.fn().mockReturnValue('deployctl deploy'),
-    }
-    expect(isDenoScript(cell)).toBe(true)
   })
 })
 

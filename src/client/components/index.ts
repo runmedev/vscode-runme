@@ -4,7 +4,6 @@ import { allComponents, provideVSCodeDesignSystem } from '@vscode/webview-ui-too
 provideVSCodeDesignSystem().register(allComponents)
 
 export * from './output'
-export * from './deno'
 export * from './outputItems'
 export * from './configuration/annotations'
 export * from './terminal'

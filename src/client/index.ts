@@ -45,19 +45,6 @@ export const activate: ActivationFunction<void> = (context) => {
 
           element.appendChild(daggerElem)
           break
-        case OutputType.deno:
-          if (payload.output?.error) {
-            renderError(payload.output.error)
-            break
-          }
-
-          const deno = payload.output || {}
-          const denoElem = document.createElement(RENDERERS.DenoOutput)
-
-          denoElem.setAttribute('state', JSON.stringify(deno))
-
-          element.appendChild(denoElem)
-          break
         case OutputType.outputItems:
           const content = decodeURIComponent(escape(window.atob(payload.output.content)))
           /**

@@ -24,7 +24,6 @@ import {
 import {
   AWSState,
   CellOutputPayload,
-  DenoState,
   FeatureName,
   GCPState,
   GitHubState,
@@ -114,7 +113,7 @@ interface ICellOption {
 interface ICellState {
   type: OutputType
   // TODO: Define a better abstraction for integration states.
-  state: GitHubState | DenoState | GCPState | AWSState
+  state: GitHubState | GCPState | AWSState
 }
 
 interface InsertCodeCellOptions {
@@ -131,7 +130,6 @@ export class NotebookCellOutputManager {
 
   protected enabledOutputs = new Map([
     [OutputType.annotations, false],
-    [OutputType.deno, false],
     [OutputType.github, false],
     [OutputType.gcp, false],
     [OutputType.aws, false],
@@ -161,7 +159,6 @@ export class NotebookCellOutputManager {
 
   protected generateOutputUnsafe(type: OutputType): NotebookCellOutput | undefined {
     const cell = this.cell
-    const metadata = cell.metadata as Serializer.Metadata
 
     switch (type) {
       case OutputType.annotations: {
@@ -203,17 +200,6 @@ export class NotebookCellOutputManager {
             daggerCellId: cellId,
           },
         )
-      }
-
-      case OutputType.deno: {
-        const payload: CellOutputPayload<OutputType.deno> = {
-          type: OutputType.deno,
-          output: metadata['runme.dev/denoState'],
-        }
-
-        return new NotebookCellOutput([NotebookCellOutputItem.json(payload, OutputType.deno)], {
-          deno: { deploy: true },
-        })
       }
 
       case OutputType.terminal: {

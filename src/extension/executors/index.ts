@@ -13,7 +13,6 @@ import { IRunnerEnvironment } from '../runner/environment'
 import { ExecResourceType } from '../utils'
 
 import { sh, bash } from './task'
-import { deno } from './deno'
 import { github } from './github'
 import { gcp } from './gcp'
 import { aws } from './aws'
@@ -54,4 +53,4 @@ export const ENV_STORE_MANAGER: IEnvironmentManager = {
   },
 }
 
-export default { sh, bash, deno, github, gcp, aws, daggerCall: dagger }
+export default { sh, bash, github, gcp, aws, daggerCall: dagger }
