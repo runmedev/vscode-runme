@@ -1,4 +1,4 @@
-name: Build Dagger Environment Image
+name: Build VS Code Extension Environment Image
 
 on:
   push:
@@ -13,8 +13,13 @@ on:
       - ".github/workflows/build-env-image.yml"
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
+    name: Build extension environment image
     runs-on: ubuntu-latest
     permissions:
       contents: read
