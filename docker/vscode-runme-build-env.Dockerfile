@@ -1,4 +1,7 @@
+ARG BUN_IMAGE=oven/bun:1.4.4@sha256:1d22548f177f4ff38e0c15baa3c2c46c6c2060ba2d1bc573bb4720b407548f1d
 ARG NODE_IMAGE=node:22-bookworm-slim@sha256:18052396bf1d0c6e0a8c58181b5c1457da19409efbd5032a3f4d86974e74d13c
+
+FROM ${BUN_IMAGE} AS bun
 FROM ${NODE_IMAGE}
 
 LABEL org.opencontainers.image.source="https://github.com/runmedev/vscode-runme"
@@ -8,6 +11,8 @@ LABEL org.opencontainers.image.licenses="Apache-2.0"
 
 ENV HOME=/root
 ENV SHELL=/bin/bash
+
+COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
 
 RUN apt-get update \
     && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
