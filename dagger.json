@@ -1,15 +1,16 @@
 {
   "name": "vscode-runme",
-  "engineVersion": "v0.18.5",
+  "engineVersion": "v0.21.11",
   "sdk": {
     "source": "typescript"
   },
   "dependencies": [
     {
-      "name": "RunmeKernel",
-      "source": "github.com/runmedev/runme",
-      "pin": "cd7e853c75a5f5bb7fbb3b36942a3bd14951355f"
+      "name": "runme",
+      "source": "github.com/runmedev/runme@main",
+      "pin": "49a6c5618b2d01be3ec4ac5aa36c2b0ca99568ad"
     }
   ],
-  "source": "dagger"
+  "source": "dagger",
+  "disableDefaultFunctionCaching": true
 }

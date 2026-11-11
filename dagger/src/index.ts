@@ -70,10 +70,7 @@ export class VscodeRunme {
     }
 
     const containerPlatform = await this.defaultPlatform()
-    const binary = dag
-      .runmeKernel()
-      .linkRelease(containerPlatform, { version: 'latest' })
-      .file('runme')
+    const binary = dag.runme().linkRelease(containerPlatform, { version: 'latest' }).file('runme')
 
     this.container = dag
       .container({ platform: containerPlatform })
