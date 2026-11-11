@@ -1,425 +1,67 @@
 name: Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      releaseVersion:
-        description: "Runme release version"
-        required: true
-        type: string
-        default: latest
-      releaseType:
-        description: "Release Type"
-        required: true
-        type: choice
-        default: "patch"
-        options:
-          - patch
-          - minor
-          - major
-      releaseChannel:
-        description: "Release Channel"
-        required: true
-        type: choice
-        default: stable
-        options:
-          - stable
-          - edge
-      publishMarketplace:
-        description: "Publish on Visual Studio Marketplace?"
-        required: true
-        type: choice
-        default: "yes"
-        options:
-          - "yes"
-          - "no"
-      publishOpenVSX:
-        description: "Publish on Open VSX Registry?"
-        required: true
-        type: choice
-        default: "yes"
-        options:
-          - "yes"
-          - "no"
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+-edge.[0-9]+"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  id-token: write
 
 env:
-  EXTENSION_NAME: ${{ vars.EXTENSION_NAME }}
+  DO_NOT_TRACK: 1
+  RELEASE_TAG: ${{ github.ref_name }}
+  SHELL: /bin/bash
 
 jobs:
   release:
-    permissions:
-      contents: write
-      deployments: write
-      id-token: write
-      packages: write
     runs-on: ubuntu-latest
-    env:
-      DO_NOT_TRACK: 1
-      REPOSITORY: runme
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Setup Node
-        uses: actions/setup-node@v3
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
-          node-version: 22
+          go-version: ">=1.24"
 
-      - name: Install xvfb
-        run: sudo apt-get update -y && sudo apt-get install xvfb
+      - name: Install direnv
+        run: curl -fsSL https://direnv.net/install.sh | bash
 
-      - name: Install Dependencies
-        run: npm ci
+      - name: Authorize direnv
+        run: direnv allow && direnv export bash
+
+      - name: Setup Dagger
+        uses: dagger/dagger-for-github@8.0.0
+        with:
+          version: "latest"
+          verb: core
+          args: "engine local-cache"
+
+      - name: Publish Dagger Release
+        uses: stateful/runme-action@v2
+        with:
+          workflows: GhaRelease
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Package
-        run: npm run build:prod
-        env:
-          NODE_ENV: production
-          NODE_OPTIONS: --max-old-space-size=10240
-          INSTRUMENTATION_KEY: ${{ secrets.INSTRUMENTATION_KEY }}
           CONNECTION_STR: ${{ secrets.CONNECTION_STR }}
-
-      - name: Run Tests
-        run: xvfb-run --server-args="-screen 0 1600x1200x24" npm test
-        env:
-          NODE_ENV: production
-
-      - name: Set Extension Name
-        run: |
-          echo "EXTENSION_NAME=${EXTENSION_NAME}" >> $GITHUB_ENV
-
-      - name: Overwrite Extension Definition
-        uses: stateful/runme-action@v2
-        with:
-          workflows: overwrite-stateful
-        if: env.EXTENSION_NAME != 'runme'
-
-      - name: Remove temp TLS certs
-        run: rm -rf tls/
-
-      - name: Get Stable Releases
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const { default: checkRelease } = await import('${{ github.workspace }}/.github/scripts/checkRelease.js')
-            await checkRelease({ github, context, core })
-
-      - name: Create Changelog
-        run: |
-          git log $(git describe --tags --abbrev=0)..HEAD --oneline &> ${{ github.workspace }}-CHANGELOG.txt
-          cat ${{ github.workspace }}-CHANGELOG.txt
-
-      - name: Setup Git
-        run: |
-          git config --global user.name "stateful-wombot"
-          git config --global user.email "sebastian+github-bot@stateful.com"
-
-      - name: Get Current Version Number
-        run: |
-          CURRENT_VERSION=$(cat package.json | jq .version | cut -d'"' -f 2)
-          echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
-
-      - name: Compile New Version (Edge)
-        run: |
-          RELEASE_VERSION="$(npx semver $CURRENT_VERSION -i pre${{ github.event.inputs.releaseType }} --preid edge)"
-          echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-          echo "Bump to $RELEASE_VERSION"
-        if: ${{ env.EXTENSION_NAME == 'runme' && github.event.inputs.releaseChannel == 'edge' && !contains(env.CURRENT_VERSION, 'edge') }}
-
-      - name: Compile New Version (Edge)
-        run: |
-          RELEASE_VERSION="$(npx semver $CURRENT_VERSION -i prerelease)"
-          echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-          echo "Bump to $RELEASE_VERSION"
-        if: ${{ env.EXTENSION_NAME == 'runme' && github.event.inputs.releaseChannel == 'edge' && contains(env.CURRENT_VERSION, 'edge') }}
-
-      - name: Compile New Version (Stable)
-        run: |
-          RELEASE_VERSION="$(npx semver $CURRENT_VERSION -i github.event.inputs.releaseType)"
-          echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
-          echo "Bump to $RELEASE_VERSION"
-        if: ${{ env.EXTENSION_NAME == 'runme' && github.event.inputs.releaseChannel == 'stable' }}
-
-      - name: Tag Check
-        id: tag_check
-        run: |
-          GET_API_URL="https://api.github.com/repos/${GITHUB_REPOSITORY}/git/ref/tags/v${RELEASE_VERSION}"
-          http_status_code=$(curl -LI $GET_API_URL -o /dev/null -w '%{http_code}\n' -s \
-            -H "Authorization: token ${GITHUB_TOKEN}")
-          if [ "$http_status_code" -ne "404" ] ; then
-            echo "exists_tag=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists_tag=false" >> $GITHUB_OUTPUT
-          fi
-        env:
+          DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INSTRUMENTATION_KEY: ${{ secrets.INSTRUMENTATION_KEY }}
+          OPEN_VSX_TOKEN: ${{ secrets.OPEN_VSX_TOKEN }}
+          RUNME_TEST_TOKEN: ${{ secrets.RUNME_TEST_TOKEN }}
 
-      - name: Version Package
-        if: ${{ env.EXTENSION_NAME == 'runme' && steps.tag_check.outputs.exists_tag == 'false' }}
-        run: |
-          npm version $RELEASE_VERSION
-          git tag -a $RELEASE_VERSION -m "$RELEASE_VERSION"
-
-      # Update Edge version
-      - name: Update edge version
-        if: ${{ github.event.inputs.releaseChannel == 'edge' || env.EXTENSION_NAME != 'runme' }}
-        run: node .github/scripts/updateEdgeVersion.js
-
-      - name: Deactivate additional panel & terminal
-        uses: stateful/runme-action@v2
-        with:
-          workflows: deactivate-panels
-        if: ${{ github.event.inputs.releaseChannel != 'edge'}}
-
-      - name: Deactivate smart env store for stable
-        uses: stateful/runme-action@v2
-        with:
-          workflows: deactivate-smartenv
-        if: ${{ github.event.inputs.releaseChannel == 'stable' }}
-
-      - name: Activate smart env store for edge
-        uses: stateful/runme-action@v2
-        with:
-          workflows: activate-smartenv
-        if: ${{ github.event.inputs.releaseChannel == 'edge' }}
-
-      # Linux X86
-      - name: Package Extension Linux x86_64 (Edge)
-        if: ${{ github.event.inputs.releaseChannel == 'edge' }}
-        run: npx vsce package -t linux-x64 --pre-release --no-yarn --no-git-tag-version --no-update-package-json -o "./${{ env.EXTENSION_NAME }}-linux-x64-$RELEASE_VERSION.vsix" ${{ github.event.inputs.additionalFlags }}
-        env:
-          DOWNLOAD_URL: ${{ env.DOWNLOAD_URL_LINUX_x86_64 }}
-          TYPE: "tar"
-
-      - name: Package Extension Linux x86_64 (Stable)
-        if: ${{ github.event.inputs.releaseChannel == 'stable' }}
-        run: npx vsce package $RELEASE_VERSION -t linux-x64 --no-yarn --no-git-tag-version --no-update-package-json -o "./${{ env.EXTENSION_NAME }}-linux-x64-$RELEASE_VERSION.vsix" ${{ github.event.inputs.additionalFlags }}
-        env:
-          DOWNLOAD_URL: ${{ env.DOWNLOAD_URL_LINUX_x86_64 }}
-          TYPE: "tar"
-
-      # Linux arm64
-      - name: Package Linux arm64 (Edge)
-        if: ${{ github.event.inputs.releaseChannel == 'edge' }}
-        run: npx vsce package -t linux-arm64 --pre-release --no-yarn --no-git-tag-version --no-update-package-json -o "./${{ env.EXTENSION_NAME }}-linux-arm64-$RELEASE_VERSION.vsix" ${{ github.event.inputs.additionalFlags }}
-        env:
-          DOWNLOAD_URL: ${{ env.DOWNLOAD_URL_LINUX_arm64 }}
-          TYPE: "tar"
-
-      - name: Package Linux arm64 (Stable)
-        if: ${{ github.event.inputs.releaseChannel == 'stable' }}
-        run: npx vsce package $RELEASE_VERSION -t linux-arm64 --no-yarn --no-git-tag-version --no-update-package-json -o "./${{ env.EXTENSION_NAME }}-linux-arm64-$RELEASE_VERSION.vsix" ${{ github.event.inputs.additionalFlags }}
-        env:
-          DOWNLOAD_URL: ${{ env.DOWNLOAD_URL_LINUX_arm64 }}
-          TYPE: "tar"
-
-      # MacOS x86_64
-      - name: Package MacOS x86_64 (Edge)
-        if: ${{ github.event.inputs.releaseChannel == 'edge' }}
-        run: npx vsce package -t darwin-x64 --pre-release --no-yarn --no-git-tag-version --no-update-package-json -o "./${{ env.EXTENSION_NAME }}-darwin-x64-$RELEASE_VERSION.vsix" ${{ github.event.inputs.additionalFlags }}
-        env:
-          DOWNLOAD_URL: ${{ env.DOWNLOAD_URL_MACOS_x86_64 }}
-          TYPE: "tar"
-
-      - name: Package MacOS x86_64 (Stable)
-        if: ${{ github.event.inputs.releaseChannel == 'stable' }}
-        run: npx vsce package $RELEASE_VERSION -t darwin-x64 --no-yarn --no-git-tag-version --no-update-package-json -o "./${{ env.EXTENSION_NAME }}-darwin-x64-$RELEASE_VERSION.vsix" ${{ github.event.inputs.additionalFlags }}
-        env:
-          DOWNLOAD_URL: ${{ env.DOWNLOAD_URL_MACOS_x86_64 }}
-          TYPE: "tar"
-
-      # MacOS arm64
-      - name: Package MacOS arm64 (Edge)
-        if: ${{ github.event.inputs.releaseChannel == 'edge' }}
-        run: npx vsce package -t darwin-arm64 --pre-release --no-yarn --no-git-tag-version --no-update-package-json -o "./${{ env.EXTENSION_NAME }}-darwin-arm64-$RELEASE_VERSION.vsix" ${{ github.event.inputs.additionalFlags }}
-        env:
-          DOWNLOAD_URL: ${{ env.DOWNLOAD_URL_MACOS_arm64 }}
-          TYPE: "tar"
-
-      - name: Package MacOS arm64 (Stable)
-        if: ${{ github.event.inputs.releaseChannel == 'stable' }}
-        run: npx vsce package $RELEASE_VERSION -t darwin-arm64 --no-yarn --no-git-tag-version --no-update-package-json -o "./${{ env.EXTENSION_NAME }}-darwin-arm64-$RELEASE_VERSION.vsix" ${{ github.event.inputs.additionalFlags }}
-        env:
-          DOWNLOAD_URL: ${{ env.DOWNLOAD_URL_MACOS_arm64 }}
-          TYPE: "tar"
-
-      # Windows x64
-      - name: Package Windows x64 (Edge)
-        if: ${{ github.event.inputs.releaseChannel == 'edge' }}
-        run: npx vsce package -t win32-x64 --pre-release --no-yarn --no-git-tag-version --no-update-package-json -o "./${{ env.EXTENSION_NAME }}-win32-x64-$RELEASE_VERSION.vsix" ${{ github.event.inputs.additionalFlags }}
-        env:
-          DOWNLOAD_URL: ${{ env.DOWNLOAD_URL_WINDOWS_x86_64 }}
-          TYPE: "zip"
-
-      - name: Package Windows x64 (Stable)
-        if: ${{ github.event.inputs.releaseChannel == 'stable' }}
-        run: npx vsce package $RELEASE_VERSION -t win32-x64 --no-yarn --no-git-tag-version --no-update-package-json -o "./${{ env.EXTENSION_NAME }}-win32-x64-$RELEASE_VERSION.vsix" ${{ github.event.inputs.additionalFlags }}
-        env:
-          DOWNLOAD_URL: ${{ env.DOWNLOAD_URL_WINDOWS_x86_64 }}
-          TYPE: "zip"
-
-      # Windows arm64
-      - name: Package Windows arm64 (Edge)
-        if: ${{ github.event.inputs.releaseChannel == 'edge' }}
-        run: npx vsce package -t win32-arm64 --pre-release --no-yarn --no-git-tag-version --no-update-package-json -o "./${{ env.EXTENSION_NAME }}-win32-arm64-$RELEASE_VERSION.vsix" ${{ github.event.inputs.additionalFlags }}
-        env:
-          DOWNLOAD_URL: ${{ env.DOWNLOAD_URL_WINDOWS_arm64 }}
-          TYPE: "zip"
-
-      - name: Package Windows arm64 (Stable)
-        if: ${{ github.event.inputs.releaseChannel == 'stable' }}
-        run: npx vsce package $RELEASE_VERSION -t win32-arm64 --no-yarn --no-git-tag-version --no-update-package-json -o "./${{ env.EXTENSION_NAME }}-win32-arm64-$RELEASE_VERSION.vsix" ${{ github.event.inputs.additionalFlags }}
-        env:
-          DOWNLOAD_URL: ${{ env.DOWNLOAD_URL_WINDOWS_arm64 }}
-          TYPE: "zip"
-
-      # Distribute
-
-      # Visual Studio Marketplace
-
-      # Linux X86
-      - name: Publish to Visual Studio Marketplace Linux X86 (Edge)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-linux-x64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
-        if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'edge' }}
-
-      - name: Publish to Visual Studio Marketplace Linux X86 (Stable)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-linux-x64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
-        if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
-
-      # Linux arm64
-      - name: Publish to Visual Studio Marketplace Linux arm64 (Edge)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-linux-arm64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
-        if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'edge' }}
-
-      - name: Publish to Visual Studio Marketplace Linux arm64 (Stable)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-linux-arm64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
-        if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
-
-      # MacOS x86_64
-      - name: Publish to Visual Studio Marketplace MacOS x86_64 (Edge)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-darwin-x64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
-        if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'edge' }}
-
-      - name: Publish to Visual Studio Marketplace MacOS x86_64 (Stable)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-darwin-x64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
-        if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
-
-      # MacOS arm64
-      - name: Publish to Visual Studio Marketplace MacOS arm64 (Edge)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-darwin-arm64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
-        if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'edge' }}
-
-      - name: Publish to Visual Studio Marketplace MacOS arm64 (Stable)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-darwin-arm64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
-        if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
-
-      # Windows x64
-      - name: Publish to Visual Studio Marketplace Windows x64 (Edge)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-win32-x64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
-        if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'edge' }}
-
-      - name: Publish to Visual Studio Marketplace MacOS x64 (Stable)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-win32-x64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
-        if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
-
-      # Windows arm64
-      - name: Publish to Visual Studio Marketplace Windows arm64 (Edge)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-win32-arm64-$RELEASE_VERSION.vsix" --pre-release --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
-        if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'edge' }}
-
-      - name: Publish to Visual Studio Marketplace Windows arm64 (Stable)
-        run: npx vsce publish --packagePath "./$EXTENSION_NAME-win32-arm64-$RELEASE_VERSION.vsix" --no-yarn --no-git-tag-version --no-update-package-json --oidc ${{ github.event.inputs.additionalFlags }}
-        if: ${{ github.event.inputs.publishMarketplace == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
-
-      # VSX Registry (only Stable releases)
-
-      # Linux X86
-      - name: Publish to Open VSX Registry Linux X86 (Stable)
-        uses: HaaLeo/publish-vscode-extension@v1
-        timeout-minutes: 20
-        # continue-on-error: true
-        if: ${{ github.event.inputs.publishOpenVSX == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
-        with:
-          preRelease: false
-          pat: ${{ secrets.OPEN_VSX_TOKEN }}
-          extensionFile: ./${{ env.EXTENSION_NAME }}-linux-x64-${{ env.RELEASE_VERSION }}.vsix
-      # Linux arm64
-      - name: Publish to Open VSX Registry Linux arm64 (Stable)
-        uses: HaaLeo/publish-vscode-extension@v1
-        timeout-minutes: 20
-        # continue-on-error: true
-        if: ${{ github.event.inputs.publishOpenVSX == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
-        with:
-          preRelease: false
-          pat: ${{ secrets.OPEN_VSX_TOKEN }}
-          extensionFile: ./${{ env.EXTENSION_NAME }}-linux-arm64-${{ env.RELEASE_VERSION }}.vsix
-      # MacOS x86_64
-      - name: Publish to Open VSX Registry MacOS x86_64 (Stable)
-        uses: HaaLeo/publish-vscode-extension@v1
-        timeout-minutes: 20
-        # continue-on-error: true
-        if: ${{ github.event.inputs.publishOpenVSX == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
-        with:
-          preRelease: false
-          pat: ${{ secrets.OPEN_VSX_TOKEN }}
-          extensionFile: ./${{ env.EXTENSION_NAME }}-darwin-x64-${{ env.RELEASE_VERSION }}.vsix
-      # MacOS arm64
-      - name: Publish to Open VSX Registry MacOS arm64 (Stable)
-        uses: HaaLeo/publish-vscode-extension@v1
-        timeout-minutes: 20
-        # continue-on-error: true
-        if: ${{ github.event.inputs.publishOpenVSX == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
-        with:
-          preRelease: false
-          pat: ${{ secrets.OPEN_VSX_TOKEN }}
-          extensionFile: ./${{ env.EXTENSION_NAME }}-darwin-arm64-${{ env.RELEASE_VERSION }}.vsix
-      # Windows x64
-      - name: Publish to Open VSX Registry Windows x64 (Stable)
-        uses: HaaLeo/publish-vscode-extension@v1
-        timeout-minutes: 20
-        # continue-on-error: true
-        if: ${{ github.event.inputs.publishOpenVSX == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
-        with:
-          preRelease: false
-          pat: ${{ secrets.OPEN_VSX_TOKEN }}
-          extensionFile: ./${{ env.EXTENSION_NAME }}-win32-x64-${{ env.RELEASE_VERSION }}.vsix
-      # Windows arm64
-      - name: Publish to Open VSX Registry Windows arm64 (Stable)
-        uses: HaaLeo/publish-vscode-extension@v1
-        timeout-minutes: 20
-        # continue-on-error: true
-        if: ${{ github.event.inputs.publishOpenVSX == 'yes' && github.event.inputs.releaseChannel == 'stable' }}
-        with:
-          preRelease: false
-          pat: ${{ secrets.OPEN_VSX_TOKEN }}
-          extensionFile: ./${{ env.EXTENSION_NAME }}-win32-arm64-${{ env.RELEASE_VERSION }}.vsix
-
-      # Release
-      - name: Push Tags
-        if: env.EXTENSION_NAME == 'runme'
-        continue-on-error: true
-        run: |
-          git log -1 --stat
-          git push origin main --tags
-      - run: |
-          export GIT_TAG=$(git describe --tags --abbrev=0)
-          echo "GIT_TAG=$GIT_TAG" >> $GITHUB_ENV
-
-      - name: GitHub Release
-        if: env.EXTENSION_NAME == 'runme'
-        uses: ncipollo/release-action@v1
-        with:
-          artifacts: "./*.vsix"
-          bodyFile: ${{ github.workspace }}-CHANGELOG.txt
-          tag: ${{ env.GIT_TAG }}
-          prerelease: ${{ github.event.inputs.releaseChannel == 'edge' }}
-
-      - name: 🐛 Debug Build
-        uses: stateful/vscode-server-action@v1
+      - name: Upload test diagnostics
+        uses: actions/upload-artifact@v4
         if: failure()
         with:
-          timeout: "300000"
+          name: release-logs-${{ github.ref_name }}
+          path: /tmp/e2e-logs
+          if-no-files-found: ignore

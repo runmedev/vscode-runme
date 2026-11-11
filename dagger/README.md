@@ -27,3 +27,10 @@ dagger functions
 ## Build pipeline
 
 The executable build and test graph is documented in [`BUILD.md`](BUILD.md). It links the Runme Dagger dependency, builds the extension, and exposes the Runme targets used locally and in CI.
+
+## Release pipeline
+
+The tag-driven release graph is documented in [`RELEASE.md`](RELEASE.md). It
+defines the canonical tag contract, builds the six platform-specific artifacts,
+gates publication on the production tests, and publishes through Dagger while
+GitHub Actions supplies identity and secrets.
