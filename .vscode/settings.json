@@ -8,7 +8,9 @@
   },
   // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
   "typescript.tsc.autoDetect": "off",
-  "marquee.widgets.npm-stats.packageNames": ["runme"],
+  "marquee.widgets.npm-stats.packageNames": [
+    "runme"
+  ],
   "editor.formatOnSave": true,
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -21,5 +23,7 @@
   },
   "[javascriptreact]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  },
+  // "runme.server.customAddress": "127.0.0.1:9999",
+  // "runme.server.tlsDir": "/tmp/runme/tls",
 }
