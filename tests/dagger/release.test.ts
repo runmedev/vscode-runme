@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 
 import {
   assertSourceVersion,
+  evaluateGhaPipelineRuns,
   parseReleaseTag,
   publicationCommand,
   RELEASE_PUBLICATION_ENABLED,
@@ -13,6 +14,7 @@ import {
 describe('Dagger release policy', () => {
   it('exposes the release graph as named Dagger Shell nouns', () => {
     const notebook = readFileSync('dagger/RELEASE.md', 'utf8')
+    const moduleSource = readFileSync('dagger/src/index.ts', 'utf8')
     const workflow = readFileSync('.github/workflows/release.yml', 'utf8')
 
     expect(notebook).toContain('shell: dagger shell --progress=plain')
@@ -23,11 +25,48 @@ describe('Dagger release policy', () => {
     expect(notebook).toContain('"name":"PublishRelease"')
     expect(notebook).toContain('"name":"GhaRelease"')
     expect(notebook).toContain('publish-release $(GhaReleaseCandidate)')
+    expect(notebook).toContain('gha-release-candidate')
     expect(notebook).toContain('runme run PublishRelease')
     expect(notebook).not.toContain('"name":"release:pipeline"')
     expect(notebook).not.toContain('dagger call')
     expect(workflow).toContain('workflows: GhaRelease')
+    expect(workflow).toContain('actions: read')
     expect(workflow).not.toContain('workflows: release:pipeline')
+    expect(workflow).not.toContain('RUNME_TEST_TOKEN')
+    expect(moduleSource).not.toContain('releaseTestMarker')
+    expect(moduleSource).not.toContain('.release-tests-passed')
+  })
+
+  it('waits when the exact GHA Pipeline run has not appeared', () => {
+    expect(evaluateGhaPipelineRuns([])).toEqual({ state: 'pending' })
+  })
+
+  it('waits while the exact GHA Pipeline run is active', () => {
+    expect(
+      evaluateGhaPipelineRuns([
+        { conclusion: null, status: 'in_progress', url: 'https://example.test/pipeline' },
+      ]),
+    ).toEqual({ state: 'pending', url: 'https://example.test/pipeline' })
+  })
+
+  it('accepts only a successful exact GHA Pipeline run', () => {
+    expect(
+      evaluateGhaPipelineRuns([
+        { conclusion: 'success', status: 'completed', url: 'https://example.test/pipeline' },
+      ]),
+    ).toEqual({ state: 'passed', url: 'https://example.test/pipeline' })
+  })
+
+  it('rejects a completed unsuccessful exact GHA Pipeline run', () => {
+    expect(
+      evaluateGhaPipelineRuns([
+        { conclusion: 'failure', status: 'completed', url: 'https://example.test/pipeline' },
+      ]),
+    ).toEqual({
+      state: 'failed',
+      conclusion: 'failure',
+      url: 'https://example.test/pipeline',
+    })
   })
 
   it('keeps publication fail-closed until the rollout constant changes', () => {

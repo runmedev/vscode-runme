@@ -17,6 +17,7 @@ import {
 import { Octokit } from 'octokit'
 import {
   assertSourceVersion,
+  evaluateGhaPipelineRuns,
   parseReleaseTag,
   publicationCommand,
   RELEASE_PUBLICATION_ENABLED,
@@ -333,13 +334,12 @@ export class VscodeRunme {
   }
 
   /**
-   * Build and test a release candidate without publishing it.
+   * Build a release candidate without publishing it.
    * @param tag Canonical bare release tag; defaults to the source package version.
    * @param commitTimestamp Optional tagged-commit timestamp for production edge Marketplace versions.
    * @param githubToken Optional GitHub token used to avoid anonymous API rate limits.
    * @param instrumentationKey Optional Application Insights instrumentation key.
    * @param connectionString Optional Application Insights connection string.
-   * @param runmeTestToken Optional token used by the integration test suite.
    * @param runmeVersion Optional Runme kernel version; defaults to the latest stable release.
    */
   @func()
@@ -349,39 +349,64 @@ export class VscodeRunme {
     githubToken?: Secret,
     instrumentationKey?: Secret,
     connectionString?: Secret,
-    runmeTestToken?: Secret,
     runmeVersion?: string,
   ): Promise<Directory> {
-    const sourcePackage = JSON.parse(await this.source.file('package.json').contents())
-    const sourceLockfile = JSON.parse(await this.source.file('package-lock.json').contents())
-    const releaseTag = tag ?? sourcePackage.version
-    const metadata = parseReleaseTag(releaseTag, commitTimestamp)
-    assertSourceVersion(releaseTag, sourcePackage.version, sourceLockfile.packages?.['']?.version)
-
-    const resolvedRunmeVersion = runmeVersion ?? (await this.latestRunmeVersion(githubToken))
-    const artifacts = await this.releaseArtifacts(
-      releaseTag,
+    return this.releaseArtifacts(
+      tag,
       commitTimestamp,
       githubToken,
       instrumentationKey,
       connectionString,
-      resolvedRunmeVersion,
+      runmeVersion,
     )
-    const testMarker = await this.releaseTestMarker(
-      metadata.channel,
-      metadata.marketplaceVersion,
-      githubToken,
-      instrumentationKey,
-      connectionString,
-      runmeTestToken,
-      resolvedRunmeVersion,
-    )
-
-    return artifacts.withFile('.release-tests-passed', testMarker)
   }
 
   /**
-   * Publish an already-built and tested release candidate.
+   * Wait for the exact main-branch commit's Pipeline run, then build its release candidate.
+   * @param tag Canonical bare release tag.
+   * @param commit Exact tagged commit SHA.
+   * @param commitTimestamp Tagged-commit timestamp for production edge Marketplace versions.
+   * @param repository GitHub repository in owner/name form.
+   * @param githubToken GitHub token with Actions read access.
+   * @param instrumentationKey Optional Application Insights instrumentation key.
+   * @param connectionString Optional Application Insights connection string.
+   * @param runmeVersion Optional Runme kernel version; defaults to the latest stable release.
+   * @param pipelineTimeoutSeconds Maximum time to wait for Pipeline to finish.
+   * @param pipelinePollIntervalSeconds Delay between Pipeline status checks.
+   */
+  @func()
+  async ghaReleaseCandidate(
+    tag: string,
+    commit: string,
+    commitTimestamp: number,
+    repository: string,
+    githubToken: Secret,
+    instrumentationKey?: Secret,
+    connectionString?: Secret,
+    runmeVersion?: string,
+    pipelineTimeoutSeconds: number = 1800,
+    pipelinePollIntervalSeconds: number = 15,
+  ): Promise<Directory> {
+    await this.waitForSuccessfulGhaPipeline(
+      repository,
+      commit,
+      githubToken,
+      pipelineTimeoutSeconds,
+      pipelinePollIntervalSeconds,
+    )
+
+    return this.releaseCandidate(
+      tag,
+      commitTimestamp,
+      githubToken,
+      instrumentationKey,
+      connectionString,
+      runmeVersion,
+    )
+  }
+
+  /**
+   * Publish an already-built release candidate.
    * @param candidate Release candidate returned by releaseCandidate.
    * @param tag Canonical bare release tag (X.Y.Z or X.Y.Z-edge.N).
    * @param repository GitHub repository in owner/name form.
@@ -401,15 +426,11 @@ export class VscodeRunme {
     openVsxToken: Secret,
   ): Promise<Container> {
     const metadata = parseReleaseTag(tag)
-    const testMarker = candidate.file('.release-tests-passed')
-    const artifacts = candidate.withoutFile('.release-tests-passed')
     const releaseSource = this.prepareReleaseSource(metadata.channel, metadata.marketplaceVersion)
     const publisher = new VscodeRunme(releaseSource)
     let container = (await publisher.baseContainer(githubToken))
       .withExec('runme run configureNPM setup'.split(' '))
-      .withDirectory('/tmp/release', artifacts)
-      .withFile('/tmp/release-tests-passed', testMarker)
-      .withExec(['test', '-f', '/tmp/release-tests-passed'])
+      .withDirectory('/tmp/release', candidate)
       .withEnvVariable('ACTIONS_ID_TOKEN_REQUEST_URL', oidcRequestUrl)
       .withSecretVariable('ACTIONS_ID_TOKEN_REQUEST_TOKEN', oidcRequestToken)
       .withEnvVariable('GITHUB_ACTIONS', 'true')
@@ -503,28 +524,59 @@ export class VscodeRunme {
       .directory('/src')
   }
 
-  private async releaseTestMarker(
-    channel: string,
-    marketplaceVersion: string,
-    githubToken: Secret | undefined,
-    instrumentationKey: Secret | undefined,
-    connectionString: Secret | undefined,
-    runmeTestToken: Secret | undefined,
-    runmeVersion: string,
-  ): Promise<File> {
-    const releaseSource = this.prepareReleaseSource(channel, marketplaceVersion)
-    const kernel = await this.runmeKernel('linux/amd64', runmeVersion, githubToken)
-    const builder = new VscodeRunme(releaseSource)
-    await builder.build(kernel, githubToken, instrumentationKey, connectionString)
+  private async waitForSuccessfulGhaPipeline(
+    repository: string,
+    commit: string,
+    githubToken: Secret,
+    timeoutSeconds: number,
+    pollIntervalSeconds: number,
+  ): Promise<void> {
+    const [owner, repo, extra] = repository.split('/')
+    if (!owner || !repo || extra) {
+      throw new Error(`Invalid GitHub repository "${repository}"; expected owner/name`)
+    }
+    if (timeoutSeconds <= 0 || pollIntervalSeconds <= 0) {
+      throw new Error('Pipeline wait timeout and polling interval must be positive')
+    }
 
-    const unitMarker = (await builder.unitTest())
-      .withExec(['touch', '/tmp/release-unit-tests-passed'])
-      .file('/tmp/release-unit-tests-passed')
+    const octokit = new Octokit({ auth: await githubToken.plaintext() })
+    const deadline = Date.now() + timeoutSeconds * 1000
 
-    return (await builder.integrationTest(runmeTestToken))
-      .withFile('/tmp/release-unit-tests-passed', unitMarker)
-      .withExec(['touch', '/tmp/release-tests-passed'])
-      .file('/tmp/release-tests-passed')
+    while (true) {
+      const { data } = await octokit.rest.actions.listWorkflowRuns({
+        owner,
+        repo,
+        workflow_id: 'pipeline.yml',
+        branch: 'main',
+        event: 'push',
+        head_sha: commit,
+        per_page: 100,
+      })
+      const evaluation = evaluateGhaPipelineRuns(
+        data.workflow_runs.map(
+          (run: { conclusion: string | null; html_url: string; status: string | null }) => ({
+            conclusion: run.conclusion,
+            status: run.status ?? 'unknown',
+            url: run.html_url,
+          }),
+        ),
+      )
+
+      if (evaluation.state === 'passed') {
+        return
+      }
+      if (evaluation.state === 'failed') {
+        throw new Error(
+          `Pipeline for tagged commit ${commit} concluded ${evaluation.conclusion}: ${evaluation.url}`,
+        )
+      }
+      if (Date.now() >= deadline) {
+        const details = evaluation.url ? `: ${evaluation.url}` : ''
+        throw new Error(`Timed out waiting for Pipeline on tagged commit ${commit}${details}`)
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, pollIntervalSeconds * 1000))
+    }
   }
 
   private async latestRunmeVersion(githubToken?: Secret): Promise<string> {

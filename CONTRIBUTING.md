@@ -313,10 +313,12 @@ git tag -a "$version" -m "$version"
 git push origin "$version"
 ```
 
-The tag starts the Dagger-native release workflow. It validates the source
-version, builds and tests all six platform artifacts, publishes them to the
-Visual Studio Marketplace, publishes stable releases to Open VSX, and creates
-the GitHub Release. The workflow never commits, tags, or pushes source changes.
+The tag starts the Dagger-native release workflow. Its GitHub Actions adapter
+waits for `pipeline.yml` to pass on the exact tagged commit on `main`, validates
+the source version, builds and validates all six platform artifacts, publishes
+them to the Visual Studio Marketplace, publishes stable releases to Open VSX,
+and creates the GitHub Release. The workflow never commits, tags, or pushes
+source changes.
 
 See [`dagger/RELEASE.md`](dagger/RELEASE.md) for the executable release contract
 and build-only instructions.
