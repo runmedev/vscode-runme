@@ -34,7 +34,12 @@ echo "Building for $TARGET_PLATFORM"
 
 If the target platform is not set, reset your Runme session. It's likely that direnv wasn't authorized yet.
 
-The external Dagger module `github.com/runmedev/runme` is linked inside `vscode-runme` dagger.json. This makes it available as `RunmeKernel` in the current module's scope.
+```sh {"name":"RunmeKernel","terminalRows":"3"}
+### Exported in runme.dev as RunmeKernel
+runme
+```
+
+The external Dagger module `github.com/runmedev/runme` is linked inside `vscode-runme` dagger.json as `runme`. Give it a role-specific name for this build.
 
 ```sh {"terminalRows":"14"}
 RunmeKernel | list-release --version latest | entries

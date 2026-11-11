@@ -22,7 +22,7 @@ export class VscodeRunme {
    * The source to build the extension from.
    */
   @func()
-  source?: Directory
+  source: Directory
 
   /**
    * The container to build the extension in.
@@ -40,11 +40,11 @@ export class VscodeRunme {
    * The presetup script to be added to the container.
    */
   @func()
-  presetup?: File
+  presetup: File
 
   constructor(source?: Directory) {
     if (!source) {
-      source = dag.git('https://github.com/runmedev/vscode-runme.git').tag('main').tree()
+      source = dag.git('https://github.com/runmedev/vscode-runme.git').branch('main').tree()
     }
     this.source = source
     this.presetup = source.file('dagger/scripts/presetup.sh')
@@ -70,10 +70,7 @@ export class VscodeRunme {
     }
 
     const containerPlatform = await this.defaultPlatform()
-    const binary = dag
-      .runmeKernel()
-      .linkRelease(containerPlatform, { version: 'latest' })
-      .file('runme')
+    const binary = dag.runme().linkRelease(containerPlatform, { version: 'latest' }).file('runme')
 
     this.container = dag
       .container({ platform: containerPlatform })
@@ -96,6 +93,14 @@ export class VscodeRunme {
     return this
   }
 
+  private async baseContainer(): Promise<Container> {
+    await this.base()
+    if (!this.container) {
+      throw new Error('Failed to initialize the base container')
+    }
+    return this.container
+  }
+
   /**
    * Builds the VSIX extension file.
    * @param runmeBinary - The runme binary to be added to the container.
@@ -103,9 +108,9 @@ export class VscodeRunme {
    */
   @func()
   async build(runmeBinary: Directory): Promise<VscodeRunme> {
-    await this.base()
+    const container = await this.baseContainer()
 
-    this.container = this.container
+    this.container = container
       .withMountedDirectory('/mnt/vscode-runme/bin', runmeBinary)
       .withExec('runme run configureNPM setup build'.split(' '))
 
@@ -114,10 +119,10 @@ export class VscodeRunme {
 
   @func()
   async prebuild(extensionVsix: File): Promise<VscodeRunme> {
-    await this.base()
+    const container = await this.baseContainer()
 
     this.extension = await this.unpackExtension(extensionVsix)
-    this.container = this.container.withExec('runme run configureNPM setup'.split(' '))
+    this.container = container.withExec('runme run configureNPM setup'.split(' '))
 
     return this
   }
@@ -128,9 +133,9 @@ export class VscodeRunme {
    */
   @func()
   async bundle(): Promise<File> {
-    await this.base()
+    const container = await this.baseContainer()
 
-    return this.container.withExec('runme run bundle'.split(' ')).file('runme-extension.vsix')
+    return container.withExec('runme run bundle'.split(' ')).file('runme-extension.vsix')
   }
 
   /**
@@ -142,11 +147,11 @@ export class VscodeRunme {
    */
   @func()
   async unitTest(debug = false): Promise<Container> {
-    await this.base()
+    const container = await this.baseContainer()
 
     const expect = debug ? ReturnType.Any : ReturnType.Success
 
-    return this.container.withExec('runme run test:unit'.split(' '), { expect })
+    return container.withExec('runme run test:unit'.split(' '), { expect })
   }
 
   /**
@@ -163,7 +168,7 @@ export class VscodeRunme {
     spec?: string,
     vscodeVersion?: string,
   ): Promise<Container> {
-    await this.base()
+    let container = await this.baseContainer()
 
     const e2eTestCommand = ['xvfb-run', 'npx wdio run ./wdio.conf.ts']
     if (spec && spec.length > 0) {
@@ -171,8 +176,6 @@ export class VscodeRunme {
     }
 
     const expect = debug ? ReturnType.Any : ReturnType.Success
-    let container = this.container
-
     if (runmeTestToken) {
       // GitHub Actions-integration e2e tests
       container = container.withSecretVariable('RUNME_TEST_TOKEN', runmeTestToken)
@@ -216,10 +219,10 @@ export class VscodeRunme {
     forkOwner: string,
     specRetries: number = 3,
   ): Promise<VscodeRunme> {
-    await this.base()
+    const container = await this.baseContainer()
 
     // GitHub Actions metadata only for internal PRs
-    this.container = this.container
+    this.container = container
       .withEnvVariable('BASE_OWNER', baseOwner)
       .withEnvVariable('FORK_OWNER', forkOwner)
       .withEnvVariable('GITHUB_ACTOR', actor)
@@ -274,6 +277,9 @@ export class VscodeRunme {
     }
 
     const [os, arch] = platform.split('/')
+    if (!os || !arch) {
+      throw new Error(`Invalid platform ${platform}; expected os/arch`)
+    }
     const archMap: Record<string, string> = {
       x86_64: 'x64',
       amd64: 'x64',
@@ -323,7 +329,7 @@ export class VscodeRunme {
 
     if (version === 'prerelease') {
       const { data } = await octokit.rest.repos.listReleases(repoParams)
-      const prereleases = data.filter((release) => release.prerelease)
+      const prereleases = data.filter((release: { prerelease: boolean }) => release.prerelease)
       return prereleases[0] // Returns the most recent prerelease
     }
 

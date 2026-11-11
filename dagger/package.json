@@ -1,10 +1,7 @@
 {
   "dependencies": {
     "octokit": "^4.1.4",
-    "typescript": "^5.9.3"
-  },
-  "devDependencies": {
-    "@dagger.io/dagger": "file:sdk"
+    "typescript": "5.9.3"
   },
   "type": "module"
 }
