@@ -44,18 +44,11 @@ export class VscodeRunme {
   @func()
   extension?: Directory
 
-  /**
-   * The presetup script to be added to the container.
-   */
-  @func()
-  presetup: File
-
   constructor(source?: Directory) {
     if (!source) {
       source = dag.git('https://github.com/runmedev/vscode-runme.git').branch('main').tree()
     }
     this.source = source
-    this.presetup = source.file('dagger/scripts/presetup.sh')
   }
 
   /**
@@ -85,7 +78,7 @@ export class VscodeRunme {
 
     let container = dag
       .container({ platform: containerPlatform })
-      .from('ghcr.io/runmedev/runme-build-env:latest')
+      .from('ghcr.io/runmedev/vscode-runme-build-env:latest')
 
       // CI/CD-related config
       .withEnvVariable('DO_NOT_TRACK', '1')
@@ -95,11 +88,9 @@ export class VscodeRunme {
       .withEnvVariable('EXTENSION_NAME', 'runme')
 
       .withFile('/usr/local/bin/runme', binary)
-      .withFile('/usr/local/bin/presetup', this.presetup)
       .withEntrypoint([])
       .withMountedDirectory('/mnt/vscode-runme', this.source)
       .withWorkdir('/mnt/vscode-runme')
-      .withExec('bash /usr/local/bin/presetup'.split(' '))
 
     if (githubToken) {
       container = container.withSecretVariable('GITHUB_TOKEN', githubToken)
