@@ -59,11 +59,12 @@ VscodeRunme | release-artifacts
 ReleaseArtifacts | export "./dist/release"
 ```
 
-`ReleaseCandidate` is the local confidence boundary. It builds the same six
-artifacts and completes the unit and integration tests, but has no publication
-credentials and performs no external writes. Its optional arguments inherit the
+`ReleaseCandidate` is the local publication boundary. It builds the same six
+artifacts, but has no publication credentials and performs no external writes.
+The normal pipeline already runs the unit and integration suites, so release
+candidates do not duplicate those checks. Its optional arguments inherit the
 same local-friendly defaults as `ReleaseArtifacts`. Run
-`runme run ReleaseCandidate` to prove everything up to publication.
+`runme run ReleaseCandidate` to prove the release artifacts can be assembled.
 
 ```sh {"name":"ReleaseCandidate","terminalRows":"50"}
 ### Exported in runme.dev as ReleaseCandidate
@@ -72,7 +73,7 @@ VscodeRunme | release-candidate | sync
 
 `GhaReleaseCandidate` is the GitHub Actions adapter for that same candidate. It
 overrides the local defaults with the pushed tag, immutable commit timestamp,
-authenticated API access, production telemetry, and test credentials.
+authenticated API access, and production telemetry.
 
 ```sh {"name":"GhaReleaseCandidate","terminalRows":"50"}
 ### Exported in runme.dev as GhaReleaseCandidate
@@ -82,18 +83,17 @@ VscodeRunme |
     --commit-timestamp "$RELEASE_TIMESTAMP" \
     --github-token env://GITHUB_TOKEN \
     --instrumentation-key env://INSTRUMENTATION_KEY \
-    --connection-string env://CONNECTION_STR \
-    --runme-test-token env://RUNME_TEST_TOKEN
+    --connection-string env://CONNECTION_STR
 ```
 
-`PublishRelease` is the publication noun. It consumes the tested candidate, adds
+`PublishRelease` is the publication noun. It consumes the built candidate, adds
 workload identity and registry credentials, publishes all six targets to the
 Visual Studio Marketplace, publishes stable targets to Open VSX, and creates or
 verifies the GitHub Release and its assets.
 
 Publication is initially fail-closed behind `RELEASE_PUBLICATION_ENABLED` in the
 Dagger module. While it is `false`, the complete candidate and publisher setup
-still runs, every expected artifact and the test marker are verified, and each
+still runs, every expected artifact is verified, and each
 external write is replaced by a sanitized `[SIMULATION]` intent line. Enabling
 real publication is a separate, one-line reviewed change to that constant.
 

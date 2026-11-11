@@ -314,7 +314,7 @@ git push origin "$version"
 ```
 
 The tag starts the Dagger-native release workflow. It validates the source
-version, builds and tests all six platform artifacts, publishes them to the
+version, builds and validates all six platform artifacts, publishes them to the
 Visual Studio Marketplace, publishes stable releases to Open VSX, and creates
 the GitHub Release. The workflow never commits, tags, or pushes source changes.
 

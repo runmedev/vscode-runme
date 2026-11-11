@@ -13,6 +13,7 @@ import {
 describe('Dagger release policy', () => {
   it('exposes the release graph as named Dagger Shell nouns', () => {
     const notebook = readFileSync('dagger/RELEASE.md', 'utf8')
+    const moduleSource = readFileSync('dagger/src/index.ts', 'utf8')
     const workflow = readFileSync('.github/workflows/release.yml', 'utf8')
 
     expect(notebook).toContain('shell: dagger shell --progress=plain')
@@ -28,6 +29,9 @@ describe('Dagger release policy', () => {
     expect(notebook).not.toContain('dagger call')
     expect(workflow).toContain('workflows: GhaRelease')
     expect(workflow).not.toContain('workflows: release:pipeline')
+    expect(workflow).not.toContain('RUNME_TEST_TOKEN')
+    expect(moduleSource).not.toContain('releaseTestMarker')
+    expect(moduleSource).not.toContain('.release-tests-passed')
   })
 
   it('keeps publication fail-closed until the rollout constant changes', () => {

@@ -56,12 +56,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           INSTRUMENTATION_KEY: ${{ secrets.INSTRUMENTATION_KEY }}
           OPEN_VSX_TOKEN: ${{ secrets.OPEN_VSX_TOKEN }}
-          RUNME_TEST_TOKEN: ${{ secrets.RUNME_TEST_TOKEN }}
-
-      - name: Upload test diagnostics
-        uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: release-logs-${{ github.ref_name }}
-          path: /tmp/e2e-logs
-          if-no-files-found: ignore

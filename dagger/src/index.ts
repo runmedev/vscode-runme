@@ -333,13 +333,12 @@ export class VscodeRunme {
   }
 
   /**
-   * Build and test a release candidate without publishing it.
+   * Build a release candidate without publishing it.
    * @param tag Canonical bare release tag; defaults to the source package version.
    * @param commitTimestamp Optional tagged-commit timestamp for production edge Marketplace versions.
    * @param githubToken Optional GitHub token used to avoid anonymous API rate limits.
    * @param instrumentationKey Optional Application Insights instrumentation key.
    * @param connectionString Optional Application Insights connection string.
-   * @param runmeTestToken Optional token used by the integration test suite.
    * @param runmeVersion Optional Runme kernel version; defaults to the latest stable release.
    */
   @func()
@@ -349,39 +348,20 @@ export class VscodeRunme {
     githubToken?: Secret,
     instrumentationKey?: Secret,
     connectionString?: Secret,
-    runmeTestToken?: Secret,
     runmeVersion?: string,
   ): Promise<Directory> {
-    const sourcePackage = JSON.parse(await this.source.file('package.json').contents())
-    const sourceLockfile = JSON.parse(await this.source.file('package-lock.json').contents())
-    const releaseTag = tag ?? sourcePackage.version
-    const metadata = parseReleaseTag(releaseTag, commitTimestamp)
-    assertSourceVersion(releaseTag, sourcePackage.version, sourceLockfile.packages?.['']?.version)
-
-    const resolvedRunmeVersion = runmeVersion ?? (await this.latestRunmeVersion(githubToken))
-    const artifacts = await this.releaseArtifacts(
-      releaseTag,
+    return this.releaseArtifacts(
+      tag,
       commitTimestamp,
       githubToken,
       instrumentationKey,
       connectionString,
-      resolvedRunmeVersion,
+      runmeVersion,
     )
-    const testMarker = await this.releaseTestMarker(
-      metadata.channel,
-      metadata.marketplaceVersion,
-      githubToken,
-      instrumentationKey,
-      connectionString,
-      runmeTestToken,
-      resolvedRunmeVersion,
-    )
-
-    return artifacts.withFile('.release-tests-passed', testMarker)
   }
 
   /**
-   * Publish an already-built and tested release candidate.
+   * Publish an already-built release candidate.
    * @param candidate Release candidate returned by releaseCandidate.
    * @param tag Canonical bare release tag (X.Y.Z or X.Y.Z-edge.N).
    * @param repository GitHub repository in owner/name form.
@@ -401,15 +381,11 @@ export class VscodeRunme {
     openVsxToken: Secret,
   ): Promise<Container> {
     const metadata = parseReleaseTag(tag)
-    const testMarker = candidate.file('.release-tests-passed')
-    const artifacts = candidate.withoutFile('.release-tests-passed')
     const releaseSource = this.prepareReleaseSource(metadata.channel, metadata.marketplaceVersion)
     const publisher = new VscodeRunme(releaseSource)
     let container = (await publisher.baseContainer(githubToken))
       .withExec('runme run configureNPM setup'.split(' '))
-      .withDirectory('/tmp/release', artifacts)
-      .withFile('/tmp/release-tests-passed', testMarker)
-      .withExec(['test', '-f', '/tmp/release-tests-passed'])
+      .withDirectory('/tmp/release', candidate)
       .withEnvVariable('ACTIONS_ID_TOKEN_REQUEST_URL', oidcRequestUrl)
       .withSecretVariable('ACTIONS_ID_TOKEN_REQUEST_TOKEN', oidcRequestToken)
       .withEnvVariable('GITHUB_ACTIONS', 'true')
@@ -501,30 +477,6 @@ export class VscodeRunme {
       .withWorkdir('/src')
       .withExec(['node', 'dagger/scripts/prepare-release.mjs', channel, marketplaceVersion])
       .directory('/src')
-  }
-
-  private async releaseTestMarker(
-    channel: string,
-    marketplaceVersion: string,
-    githubToken: Secret | undefined,
-    instrumentationKey: Secret | undefined,
-    connectionString: Secret | undefined,
-    runmeTestToken: Secret | undefined,
-    runmeVersion: string,
-  ): Promise<File> {
-    const releaseSource = this.prepareReleaseSource(channel, marketplaceVersion)
-    const kernel = await this.runmeKernel('linux/amd64', runmeVersion, githubToken)
-    const builder = new VscodeRunme(releaseSource)
-    await builder.build(kernel, githubToken, instrumentationKey, connectionString)
-
-    const unitMarker = (await builder.unitTest())
-      .withExec(['touch', '/tmp/release-unit-tests-passed'])
-      .file('/tmp/release-unit-tests-passed')
-
-    return (await builder.integrationTest(runmeTestToken))
-      .withFile('/tmp/release-unit-tests-passed', unitMarker)
-      .withExec(['touch', '/tmp/release-tests-passed'])
-      .file('/tmp/release-tests-passed')
   }
 
   private async latestRunmeVersion(githubToken?: Secret): Promise<string> {
