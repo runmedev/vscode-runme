@@ -91,6 +91,12 @@ workload identity and registry credentials, publishes all six targets to the
 Visual Studio Marketplace, publishes stable targets to Open VSX, and creates or
 verifies the GitHub Release and its assets.
 
+Publication is initially fail-closed behind `RELEASE_PUBLICATION_ENABLED` in the
+Dagger module. While it is `false`, the complete candidate and publisher setup
+still runs, every expected artifact and the test marker are verified, and each
+external write is replaced by a sanitized `[SIMULATION]` intent line. Enabling
+real publication is a separate, one-line reviewed change to that constant.
+
 ```sh {"name":"PublishRelease","terminalRows":"50"}
 ### Exported in runme.dev as PublishRelease
 VscodeRunme |

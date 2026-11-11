@@ -7,6 +7,8 @@ export const releaseTargets = [
   { kernelPlatform: 'windows/arm64', vsceTarget: 'win32-arm64' },
 ] as const
 
+export const RELEASE_PUBLICATION_ENABLED = false
+
 export type ReleaseChannel = 'stable' | 'edge'
 
 export interface ReleaseMetadata {
@@ -81,4 +83,16 @@ export function releaseArtifactName(
   version: string,
 ): string {
   return `${extensionName}-${target}-${version}.vsix`
+}
+
+export function publicationCommand(
+  command: string[],
+  simulationDescription: string,
+  enabled = RELEASE_PUBLICATION_ENABLED,
+): string[] {
+  if (enabled) {
+    return command
+  }
+
+  return ['printf', '%s\n', `[SIMULATION] ${simulationDescription}`]
 }

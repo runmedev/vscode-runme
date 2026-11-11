@@ -4,6 +4,8 @@ import { readFileSync } from 'node:fs'
 import {
   assertSourceVersion,
   parseReleaseTag,
+  publicationCommand,
+  RELEASE_PUBLICATION_ENABLED,
   releaseArtifactName,
   releaseTargets,
 } from '../../dagger/src/release'
@@ -26,6 +28,18 @@ describe('Dagger release policy', () => {
     expect(notebook).not.toContain('dagger call')
     expect(workflow).toContain('workflows: GhaRelease')
     expect(workflow).not.toContain('workflows: release:pipeline')
+  })
+
+  it('keeps publication fail-closed until the rollout constant changes', () => {
+    const command = ['npx', 'vsce', 'publish', '--packagePath', '/tmp/release/runme.vsix']
+
+    expect(RELEASE_PUBLICATION_ENABLED).toBe(false)
+    expect(publicationCommand(command, 'Visual Studio Marketplace: runme.vsix')).toEqual([
+      'printf',
+      '%s\n',
+      '[SIMULATION] Visual Studio Marketplace: runme.vsix',
+    ])
+    expect(publicationCommand(command, 'ignored', true)).toEqual(command)
   })
 
   it('parses a stable bare tag', () => {

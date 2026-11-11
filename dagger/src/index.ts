@@ -18,6 +18,8 @@ import { Octokit } from 'octokit'
 import {
   assertSourceVersion,
   parseReleaseTag,
+  publicationCommand,
+  RELEASE_PUBLICATION_ENABLED,
   releaseArtifactName,
   releaseTargets,
 } from './release.js'
@@ -407,6 +409,7 @@ export class VscodeRunme {
       .withExec('runme run configureNPM setup'.split(' '))
       .withDirectory('/tmp/release', artifacts)
       .withFile('/tmp/release-tests-passed', testMarker)
+      .withExec(['test', '-f', '/tmp/release-tests-passed'])
       .withEnvVariable('ACTIONS_ID_TOKEN_REQUEST_URL', oidcRequestUrl)
       .withSecretVariable('ACTIONS_ID_TOKEN_REQUEST_TOKEN', oidcRequestToken)
       .withEnvVariable('GITHUB_ACTIONS', 'true')
@@ -435,24 +438,59 @@ export class VscodeRunme {
       if (metadata.channel === 'edge') {
         marketplaceCommand.push('--pre-release')
       }
-      container = container.withExec(marketplaceCommand)
+      container = container.withExec(['test', '-f', artifactPath])
+      container = this.publicationExec(
+        container,
+        marketplaceCommand,
+        `Visual Studio Marketplace: ${artifactName}`,
+      )
 
       if (metadata.channel === 'stable') {
-        container = container.withExec([
-          'npm',
-          'exec',
-          '--yes',
-          '--package=ovsx@1.4.0',
-          '--',
-          'ovsx',
-          'publish',
-          artifactPath,
-          '--skip-duplicate',
-        ])
+        container = this.publicationExec(
+          container,
+          [
+            'npm',
+            'exec',
+            '--yes',
+            '--package=ovsx@1.4.0',
+            '--',
+            'ovsx',
+            'publish',
+            artifactPath,
+            '--skip-duplicate',
+          ],
+          `Open VSX: ${artifactName}`,
+        )
       }
     }
 
-    return container.withExec(['bash', 'dagger/scripts/publish-github-release.sh'])
+    container = this.publicationExec(
+      container,
+      ['bash', 'dagger/scripts/publish-github-release.sh'],
+      `GitHub Release: ${repository}@${tag}`,
+    )
+
+    if (!RELEASE_PUBLICATION_ENABLED) {
+      container = container.withExec([
+        'printf',
+        '%s\n',
+        '[SIMULATION] PUBLICATION DISABLED: no external release writes were attempted',
+      ])
+    }
+
+    return container
+  }
+
+  private publicationExec(
+    container: Container,
+    command: string[],
+    simulationDescription: string,
+  ): Container {
+    if (RELEASE_PUBLICATION_ENABLED) {
+      return container.withExec(command)
+    }
+
+    return container.withExec(publicationCommand(command, simulationDescription))
   }
 
   private prepareReleaseSource(channel: string, marketplaceVersion: string): Directory {
