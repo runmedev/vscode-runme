@@ -15,6 +15,12 @@ import {
   Secret,
 } from '@dagger.io/dagger'
 import { Octokit } from 'octokit'
+import {
+  assertSourceVersion,
+  parseReleaseTag,
+  releaseArtifactName,
+  releaseTargets,
+} from './release.js'
 
 @object()
 export class VscodeRunme {
@@ -64,15 +70,18 @@ export class VscodeRunme {
    * @returns The modified VscodeRunme instance.
    */
   @func()
-  async base(): Promise<VscodeRunme> {
+  async base(githubToken?: Secret): Promise<VscodeRunme> {
     if (this.container) {
       return this
     }
 
     const containerPlatform = await this.defaultPlatform()
-    const binary = dag.runme().linkRelease(containerPlatform, { version: 'latest' }).file('runme')
+    const binary = dag
+      .runme()
+      .linkRelease(containerPlatform, { githubToken, version: 'latest' })
+      .file('runme')
 
-    this.container = dag
+    let container = dag
       .container({ platform: containerPlatform })
       .from('ghcr.io/runmedev/runme-build-env:latest')
 
@@ -90,11 +99,17 @@ export class VscodeRunme {
       .withWorkdir('/mnt/vscode-runme')
       .withExec('bash /usr/local/bin/presetup'.split(' '))
 
+    if (githubToken) {
+      container = container.withSecretVariable('GITHUB_TOKEN', githubToken)
+    }
+
+    this.container = container
+
     return this
   }
 
-  private async baseContainer(): Promise<Container> {
-    await this.base()
+  private async baseContainer(githubToken?: Secret): Promise<Container> {
+    await this.base(githubToken)
     if (!this.container) {
       throw new Error('Failed to initialize the base container')
     }
@@ -107,8 +122,20 @@ export class VscodeRunme {
    * @returns The modified VscodeRunme instance.
    */
   @func()
-  async build(runmeBinary: Directory): Promise<VscodeRunme> {
-    const container = await this.baseContainer()
+  async build(
+    runmeBinary: Directory,
+    githubToken?: Secret,
+    instrumentationKey?: Secret,
+    connectionString?: Secret,
+  ): Promise<VscodeRunme> {
+    let container = await this.baseContainer(githubToken)
+
+    if (instrumentationKey) {
+      container = container.withSecretVariable('INSTRUMENTATION_KEY', instrumentationKey)
+    }
+    if (connectionString) {
+      container = container.withSecretVariable('CONNECTION_STR', connectionString)
+    }
 
     this.container = container
       .withMountedDirectory('/mnt/vscode-runme/bin', runmeBinary)
@@ -132,10 +159,31 @@ export class VscodeRunme {
    * @returns The modified VscodeRunme instance.
    */
   @func()
-  async bundle(): Promise<File> {
+  async bundle(
+    target?: string,
+    preRelease: boolean = true,
+    output: string = 'runme-extension.vsix',
+  ): Promise<File> {
     const container = await this.baseContainer()
 
-    return container.withExec('runme run bundle'.split(' ')).file('runme-extension.vsix')
+    const command = [
+      'npx',
+      'vsce',
+      'package',
+      '--no-yarn',
+      '--no-git-tag-version',
+      '--no-update-package-json',
+      '-o',
+      output,
+    ]
+    if (target) {
+      command.push('-t', target)
+    }
+    if (preRelease) {
+      command.push('--pre-release')
+    }
+
+    return container.withExec(command).file(output)
   }
 
   /**
@@ -231,6 +279,230 @@ export class VscodeRunme {
       .withEnvVariable('RUNME_TEST_SPEC_RETRIES', specRetries.toString())
 
     return this
+  }
+
+  /**
+   * Build every platform-specific VSIX for a canonical release tag without publishing.
+   * @param tag Canonical bare release tag (X.Y.Z or X.Y.Z-edge.N).
+   * @param commitTimestamp Unix timestamp of the tagged commit, used for edge Marketplace versions.
+   * @param githubToken GitHub token used to resolve the matching Runme kernel release.
+   * @param instrumentationKey Production Application Insights instrumentation key.
+   * @param connectionString Production Application Insights connection string.
+   * @param runmeVersion Optional Runme kernel version; defaults to the latest stable release.
+   */
+  @func()
+  async releaseArtifacts(
+    tag: string,
+    commitTimestamp: number,
+    githubToken: Secret,
+    instrumentationKey: Secret,
+    connectionString: Secret,
+    runmeVersion?: string,
+  ): Promise<Directory> {
+    const metadata = parseReleaseTag(tag, commitTimestamp)
+    const sourcePackage = JSON.parse(await this.source.file('package.json').contents())
+    const sourceLockfile = JSON.parse(await this.source.file('package-lock.json').contents())
+    assertSourceVersion(tag, sourcePackage.version, sourceLockfile.packages?.['']?.version)
+
+    const releaseSource = this.prepareReleaseSource(metadata.channel, metadata.marketplaceVersion)
+    const resolvedRunmeVersion = runmeVersion ?? (await this.latestRunmeVersion(githubToken))
+    let artifacts = dag.directory()
+
+    for (const target of releaseTargets) {
+      const kernel = await this.runmeKernel(
+        target.kernelPlatform,
+        resolvedRunmeVersion,
+        githubToken,
+      )
+      const builder = new VscodeRunme(releaseSource)
+      await builder.build(kernel, githubToken, instrumentationKey, connectionString)
+
+      const artifactName = releaseArtifactName(sourcePackage.name, target.vsceTarget, tag)
+      const artifact = await builder.bundle(
+        target.vsceTarget,
+        metadata.channel === 'edge',
+        artifactName,
+      )
+      artifacts = artifacts.withFile(artifactName, artifact)
+    }
+
+    return artifacts
+  }
+
+  /**
+   * Validate, build, test, and publish a canonical release tag.
+   * @param tag Canonical bare release tag (X.Y.Z or X.Y.Z-edge.N).
+   * @param commitTimestamp Unix timestamp of the tagged commit.
+   * @param repository GitHub repository in owner/name form.
+   * @param githubToken GitHub token for release lookup and publication.
+   * @param instrumentationKey Production Application Insights instrumentation key.
+   * @param connectionString Production Application Insights connection string.
+   * @param runmeTestToken Token used by the integration test suite.
+   * @param oidcRequestUrl GitHub Actions OIDC request URL.
+   * @param oidcRequestToken GitHub Actions OIDC request token.
+   * @param openVsxToken Open VSX token used for stable releases.
+   */
+  @func()
+  async release(
+    tag: string,
+    commitTimestamp: number,
+    repository: string,
+    githubToken: Secret,
+    instrumentationKey: Secret,
+    connectionString: Secret,
+    runmeTestToken: Secret,
+    oidcRequestUrl: string,
+    oidcRequestToken: Secret,
+    openVsxToken: Secret,
+  ): Promise<Container> {
+    const metadata = parseReleaseTag(tag, commitTimestamp)
+    const runmeVersion = await this.latestRunmeVersion(githubToken)
+    const artifacts = await this.releaseArtifacts(
+      tag,
+      commitTimestamp,
+      githubToken,
+      instrumentationKey,
+      connectionString,
+      runmeVersion,
+    )
+    const testMarker = await this.releaseTestMarker(
+      metadata.channel,
+      metadata.marketplaceVersion,
+      githubToken,
+      instrumentationKey,
+      connectionString,
+      runmeTestToken,
+      runmeVersion,
+    )
+    const releaseSource = this.prepareReleaseSource(metadata.channel, metadata.marketplaceVersion)
+    const publisher = new VscodeRunme(releaseSource)
+    let container = (await publisher.baseContainer(githubToken))
+      .withExec('runme run configureNPM setup'.split(' '))
+      .withDirectory('/tmp/release', artifacts)
+      .withFile('/tmp/release-tests-passed', testMarker)
+      .withEnvVariable('ACTIONS_ID_TOKEN_REQUEST_URL', oidcRequestUrl)
+      .withSecretVariable('ACTIONS_ID_TOKEN_REQUEST_TOKEN', oidcRequestToken)
+      .withEnvVariable('GITHUB_ACTIONS', 'true')
+      .withSecretVariable('GH_TOKEN', githubToken)
+      .withEnvVariable('RELEASE_CHANNEL', metadata.channel)
+      .withEnvVariable('RELEASE_REPOSITORY', repository)
+      .withEnvVariable('RELEASE_TAG', tag)
+
+    if (metadata.channel === 'stable') {
+      container = container.withSecretVariable('OVSX_PAT', openVsxToken)
+    }
+
+    for (const target of releaseTargets) {
+      const artifactName = releaseArtifactName('runme', target.vsceTarget, tag)
+      const artifactPath = `/tmp/release/${artifactName}`
+      const marketplaceCommand = [
+        'npx',
+        'vsce',
+        'publish',
+        '--packagePath',
+        artifactPath,
+        '--no-yarn',
+        '--oidc',
+        '--skip-duplicate',
+      ]
+      if (metadata.channel === 'edge') {
+        marketplaceCommand.push('--pre-release')
+      }
+      container = container.withExec(marketplaceCommand)
+
+      if (metadata.channel === 'stable') {
+        container = container.withExec([
+          'npm',
+          'exec',
+          '--yes',
+          '--package=ovsx@1.4.0',
+          '--',
+          'ovsx',
+          'publish',
+          artifactPath,
+          '--skip-duplicate',
+        ])
+      }
+    }
+
+    return container.withExec(['bash', 'dagger/scripts/publish-github-release.sh'])
+  }
+
+  private prepareReleaseSource(channel: string, marketplaceVersion: string): Directory {
+    return dag
+      .container({ platform: 'linux/amd64' as Platform })
+      .from('node:22-bookworm-slim')
+      .withDirectory('/src', this.source.withoutDirectory('tls').withoutFile('.git'))
+      .withWorkdir('/src')
+      .withExec(['node', 'dagger/scripts/prepare-release.mjs', channel, marketplaceVersion])
+      .directory('/src')
+  }
+
+  private async releaseTestMarker(
+    channel: string,
+    marketplaceVersion: string,
+    githubToken: Secret,
+    instrumentationKey: Secret,
+    connectionString: Secret,
+    runmeTestToken: Secret,
+    runmeVersion: string,
+  ): Promise<File> {
+    const releaseSource = this.prepareReleaseSource(channel, marketplaceVersion)
+    const kernel = await this.runmeKernel('linux/amd64', runmeVersion, githubToken)
+    const builder = new VscodeRunme(releaseSource)
+    await builder.build(kernel, githubToken, instrumentationKey, connectionString)
+
+    const unitMarker = (await builder.unitTest())
+      .withExec(['touch', '/tmp/release-unit-tests-passed'])
+      .file('/tmp/release-unit-tests-passed')
+
+    return (await builder.integrationTest(runmeTestToken))
+      .withFile('/tmp/release-unit-tests-passed', unitMarker)
+      .withExec(['touch', '/tmp/release-tests-passed'])
+      .file('/tmp/release-tests-passed')
+  }
+
+  private async latestRunmeVersion(githubToken: Secret): Promise<string> {
+    const octokit = new Octokit({ auth: await githubToken.plaintext() })
+    const { data } = await octokit.rest.repos.getLatestRelease({
+      owner: 'runmedev',
+      repo: 'runme',
+    })
+    return data.tag_name
+  }
+
+  private async runmeKernel(
+    platform: string,
+    version: string,
+    githubToken: Secret,
+  ): Promise<Directory> {
+    if (!platform.startsWith('windows/')) {
+      return dag.runme().linkRelease(platform as Platform, { githubToken, version })
+    }
+
+    const architecture = platform.endsWith('/arm64') ? 'arm64' : 'x86_64'
+    const assetName = `runme_windows_${architecture}.zip`
+    const octokit = new Octokit({ auth: await githubToken.plaintext() })
+    const { data } = await octokit.rest.repos.getReleaseByTag({
+      owner: 'runmedev',
+      repo: 'runme',
+      tag: version,
+    })
+    const asset = data.assets.find(({ name }: { name: string }) => name === assetName)
+    if (!asset) {
+      throw new Error(`Runme ${version} does not contain ${assetName}`)
+    }
+
+    const archive = dag.http(asset.browser_download_url)
+    const extracted = dag
+      .container({ platform: 'linux/amd64' as Platform })
+      .from('alpine:3.22')
+      .withExec(['apk', 'add', '--no-cache', 'unzip'])
+      .withFile('/tmp/runme.zip', archive)
+      .withWorkdir('/tmp/release')
+      .withExec(['unzip', '/tmp/runme.zip'])
+
+    return dag.directory().withFile('runme.exe', extracted.file('/tmp/release/runme.exe'))
   }
 
   /**

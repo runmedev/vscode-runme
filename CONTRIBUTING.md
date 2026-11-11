@@ -297,13 +297,29 @@ When creating a pull request, its description should reference the corresponding
 
 ## Release Project
 
-You can use following Github Actions workflow to release both edge (pre-release) and stable versions of the Runme's VS Code extension. This will package, test, and upon success push a new build of the extension to Microsoft's VS Code marketplace as well as OpenVSX.
+Releases are driven by one annotated, unprefixed SemVer tag on a versioned commit
+on `main`. Stable tags use `X.Y.Z`; edge tags use `X.Y.Z-edge.N`. Do not create a
+parallel `vX.Y.Z` tag.
 
-```sh {"id":"01HF7VQMH8ESX1EFV4Q8N8Z85Z"}
-https://github.com/runmedev/vscode-runme/actions/workflows/release.yml
+First update `package.json` and `package-lock.json` to the intended version through
+the normal pull request flow. After that change lands on `main`, tag the exact
+commit and push only the tag:
+
+```sh {"id":"01HF7VQMH8ESX1EFV4Q8N8Z85Z","promptEnv":"never"}
+git switch main
+git pull --ff-only origin main
+version=$(node -p 'require("./package.json").version')
+git tag -a "$version" -m "$version"
+git push origin "$version"
 ```
 
-Ensure you pick the correct release type by following the [semantic versioning](https://semver.org/) principle.
+The tag starts the Dagger-native release workflow. It validates the source
+version, builds and tests all six platform artifacts, publishes them to the
+Visual Studio Marketplace, publishes stable releases to Open VSX, and creates
+the GitHub Release. The workflow never commits, tags, or pushes source changes.
+
+See [`dagger/RELEASE.md`](dagger/RELEASE.md) for the executable release contract
+and build-only instructions.
 
 ---
 
