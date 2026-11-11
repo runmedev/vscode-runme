@@ -1,4 +1,4 @@
-name: Build VS Code Extension Environment Image
+name: Build Extension Environment Image
 
 on:
   push:
