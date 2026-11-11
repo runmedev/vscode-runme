@@ -8,6 +8,7 @@
     "@wdio/mocha-framework": "^9.33.1",
     "@wdio/spec-reporter": "^9.33.1",
     "chromedriver": "^129.0.4",
+    "clipboardy": "^4.0.0",
     "comment-json": "^4.6.2",
     "expect-webdriverio": "^7.0.1",
     "runme": "^3.17.0",
