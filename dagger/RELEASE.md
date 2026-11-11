@@ -72,15 +72,20 @@ VscodeRunme | release-candidate | sync
 ```
 
 `GhaReleaseCandidate` is the GitHub Actions adapter for that same candidate. It
+waits for the exact tagged commit's `pipeline.yml` run on `main` to pass, then
 overrides the local defaults with the pushed tag, immutable commit timestamp,
-authenticated API access, and production telemetry.
+authenticated API access, and production telemetry. This bounded wait supports
+pushing `main` and its tag back-to-back without racing Pipeline. Local release
+nouns do not perform this GitHub Actions check.
 
 ```sh {"name":"GhaReleaseCandidate","terminalRows":"50"}
 ### Exported in runme.dev as GhaReleaseCandidate
 VscodeRunme |
-  release-candidate \
+  gha-release-candidate \
     --tag "$RELEASE_TAG" \
+    --commit "$RELEASE_COMMIT" \
     --commit-timestamp "$RELEASE_TIMESTAMP" \
+    --repository "$GITHUB_REPOSITORY" \
     --github-token env://GITHUB_TOKEN \
     --instrumentation-key env://INSTRUMENTATION_KEY \
     --connection-string env://CONNECTION_STR
@@ -129,7 +134,9 @@ set -euo pipefail
 
 tag_commit=$(git rev-list -n 1 "$RELEASE_TAG")
 git merge-base --is-ancestor "$tag_commit" origin/main
-RELEASE_TIMESTAMP=$(git show -s --format=%ct "$tag_commit") runme run PublishRelease
+RELEASE_COMMIT="$tag_commit" \
+  RELEASE_TIMESTAMP=$(git show -s --format=%ct "$tag_commit") \
+  runme run PublishRelease
 ```
 
 ## Operator flow
@@ -137,7 +144,8 @@ RELEASE_TIMESTAMP=$(git show -s --format=%ct "$tag_commit") runme run PublishRel
 1. Land the intended version change on `main` through a pull request.
 2. Confirm the `package.json` and `package-lock.json` versions match.
 3. Create one annotated bare tag on that commit.
-4. Push only the tag.
+4. Push the tag; if `main` was just pushed too, the GHA adapter waits for that
+   commit's Pipeline.
 5. Verify the GitHub Actions run, six Marketplace targets, GitHub Release, and,
    for stable releases, Open VSX.
 
