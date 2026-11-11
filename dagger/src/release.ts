@@ -20,7 +20,7 @@ const releaseTagPattern = new RegExp(
   `^${numericIdentifier}\\.${numericIdentifier}\\.${numericIdentifier}(?:-edge\\.${numericIdentifier})?$`,
 )
 
-export function parseReleaseTag(tag: string, commitTimestamp = 0): ReleaseMetadata {
+export function parseReleaseTag(tag: string, commitTimestamp?: number): ReleaseMetadata {
   const match = releaseTagPattern.exec(tag)
   if (!match) {
     throw new Error(
@@ -33,6 +33,14 @@ export function parseReleaseTag(tag: string, commitTimestamp = 0): ReleaseMetada
 
   if (channel === 'stable') {
     return { channel, marketplaceVersion: tag, version: tag }
+  }
+
+  if (commitTimestamp === undefined) {
+    return {
+      channel,
+      marketplaceVersion: `${major}.${minor}.${patch}`,
+      version: `${major}.${minor}.${patch}-edge.${edgeSequence}`,
+    }
   }
 
   if (

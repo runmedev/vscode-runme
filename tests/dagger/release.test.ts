@@ -15,7 +15,8 @@ describe('Dagger release policy', () => {
     expect(notebook).toContain('shell: dagger shell')
     expect(notebook).toContain('"name":"ReleaseArtifacts"')
     expect(notebook).toContain('"name":"ReleaseDistribution"')
-    expect(notebook).toContain('"name":"Release"')
+    expect(notebook).toContain('"name":"GhaRelease"')
+    expect(notebook).toContain('runme run GhaRelease')
     expect(notebook).not.toContain('dagger call')
   })
 
@@ -42,8 +43,16 @@ describe('Dagger release policy', () => {
     },
   )
 
-  it('requires immutable timestamp input for edge tags', () => {
-    expect(() => parseReleaseTag('3.18.1-edge.0')).toThrow('tagged-commit timestamp')
+  it('uses the numeric source version for local edge artifacts by default', () => {
+    expect(parseReleaseTag('3.18.1-edge.0')).toEqual({
+      channel: 'edge',
+      marketplaceVersion: '3.18.1',
+      version: '3.18.1-edge.0',
+    })
+  })
+
+  it('rejects an invalid production timestamp for edge tags', () => {
+    expect(() => parseReleaseTag('3.18.1-edge.0', 0)).toThrow('tagged-commit timestamp')
   })
 
   it('requires source versions to match the tag', () => {

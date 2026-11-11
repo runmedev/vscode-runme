@@ -283,26 +283,27 @@ export class VscodeRunme {
 
   /**
    * Build every platform-specific VSIX for a canonical release tag without publishing.
-   * @param tag Canonical bare release tag (X.Y.Z or X.Y.Z-edge.N).
-   * @param commitTimestamp Unix timestamp of the tagged commit, used for edge Marketplace versions.
-   * @param githubToken GitHub token used to resolve the matching Runme kernel release.
-   * @param instrumentationKey Production Application Insights instrumentation key.
-   * @param connectionString Production Application Insights connection string.
+   * @param tag Canonical bare release tag; defaults to the source package version.
+   * @param commitTimestamp Optional tagged-commit timestamp for production edge Marketplace versions.
+   * @param githubToken Optional GitHub token used to avoid anonymous API rate limits.
+   * @param instrumentationKey Optional Application Insights instrumentation key.
+   * @param connectionString Optional Application Insights connection string.
    * @param runmeVersion Optional Runme kernel version; defaults to the latest stable release.
    */
   @func()
   async releaseArtifacts(
-    tag: string,
-    commitTimestamp: number,
-    githubToken: Secret,
-    instrumentationKey: Secret,
-    connectionString: Secret,
+    tag?: string,
+    commitTimestamp?: number,
+    githubToken?: Secret,
+    instrumentationKey?: Secret,
+    connectionString?: Secret,
     runmeVersion?: string,
   ): Promise<Directory> {
-    const metadata = parseReleaseTag(tag, commitTimestamp)
     const sourcePackage = JSON.parse(await this.source.file('package.json').contents())
     const sourceLockfile = JSON.parse(await this.source.file('package-lock.json').contents())
-    assertSourceVersion(tag, sourcePackage.version, sourceLockfile.packages?.['']?.version)
+    const releaseTag = tag ?? sourcePackage.version
+    const metadata = parseReleaseTag(releaseTag, commitTimestamp)
+    assertSourceVersion(releaseTag, sourcePackage.version, sourceLockfile.packages?.['']?.version)
 
     const releaseSource = this.prepareReleaseSource(metadata.channel, metadata.marketplaceVersion)
     const resolvedRunmeVersion = runmeVersion ?? (await this.latestRunmeVersion(githubToken))
@@ -317,7 +318,7 @@ export class VscodeRunme {
       const builder = new VscodeRunme(releaseSource)
       await builder.build(kernel, githubToken, instrumentationKey, connectionString)
 
-      const artifactName = releaseArtifactName(sourcePackage.name, target.vsceTarget, tag)
+      const artifactName = releaseArtifactName(sourcePackage.name, target.vsceTarget, releaseTag)
       const artifact = await builder.bundle(
         target.vsceTarget,
         metadata.channel === 'edge',
@@ -462,8 +463,8 @@ export class VscodeRunme {
       .file('/tmp/release-tests-passed')
   }
 
-  private async latestRunmeVersion(githubToken: Secret): Promise<string> {
-    const octokit = new Octokit({ auth: await githubToken.plaintext() })
+  private async latestRunmeVersion(githubToken?: Secret): Promise<string> {
+    const octokit = new Octokit({ auth: githubToken ? await githubToken.plaintext() : undefined })
     const { data } = await octokit.rest.repos.getLatestRelease({
       owner: 'runmedev',
       repo: 'runme',
@@ -474,7 +475,7 @@ export class VscodeRunme {
   private async runmeKernel(
     platform: string,
     version: string,
-    githubToken: Secret,
+    githubToken?: Secret,
   ): Promise<Directory> {
     if (!platform.startsWith('windows/')) {
       return dag.runme().linkRelease(platform as Platform, { githubToken, version })
@@ -482,7 +483,9 @@ export class VscodeRunme {
 
     const architecture = platform.endsWith('/arm64') ? 'arm64' : 'x86_64'
     const assetName = `runme_windows_${architecture}.zip`
-    const octokit = new Octokit({ auth: await githubToken.plaintext() })
+    const octokit = new Octokit({
+      auth: githubToken ? await githubToken.plaintext() : undefined,
+    })
     const { data } = await octokit.rest.repos.getReleaseByTag({
       owner: 'runmedev',
       repo: 'runme',

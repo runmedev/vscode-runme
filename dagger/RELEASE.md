@@ -41,35 +41,35 @@ functions below are its verbs.
 `ReleaseArtifacts` is the immutable directory containing all six VSIX files.
 It validates the tag against the source versions, resolves one stable Runme
 kernel release, and builds Linux, macOS, and Windows packages for x64 and arm64.
+With no arguments it uses the source package version, the latest stable kernel,
+anonymous GitHub API access, and no production telemetry credentials. For a
+local edge build, its numeric manifest version defaults to the tag's `X.Y.Z`
+core; the GHA noun below supplies the tagged-commit timestamp used in production.
 
 ```sh {"name":"ReleaseArtifacts","terminalRows":"30"}
 ### Exported in runme.dev as ReleaseArtifacts
-VscodeRunme |
-  release-artifacts \
-    --tag "$RELEASE_TAG" \
-    --commit-timestamp "$RELEASE_TIMESTAMP" \
-    --github-token env://GITHUB_TOKEN \
-    --instrumentation-key env://INSTRUMENTATION_KEY \
-    --connection-string env://CONNECTION_STR
+VscodeRunme | release-artifacts
 ```
 
 `ReleaseDistribution` materializes that directory without publishing it. Run
-the lower-case `release:artifacts` workflow below to derive the immutable Git
-context before targeting this noun.
+`runme run ReleaseDistribution` locally to export the VSIX files.
 
 ```sh {"name":"ReleaseDistribution","terminalRows":"30"}
 ### Exported in runme.dev as ReleaseDistribution
-ReleaseArtifacts | export "./dist/release/$RELEASE_TAG"
+ReleaseArtifacts | export "./dist/release"
 ```
 
-`Release` is the publishing noun. Before the first external publication command,
-the Dagger graph builds all packages and completes the existing production unit
-and integration tests. It then publishes all six targets to the Visual Studio
-Marketplace, stable targets to Open VSX, and creates or verifies the GitHub
-Release and its assets.
+`GhaRelease` is the thin GitHub Actions publishing noun. It overrides the local
+defaults with the pushed tag, immutable commit timestamp, authenticated API
+access, production telemetry, test credentials, workload identity, and registry
+credentials. Before the first external publication command, the Dagger graph
+builds all packages and completes the existing production unit and integration
+tests. It then publishes all six targets to the Visual Studio Marketplace,
+stable targets to Open VSX, and creates or verifies the GitHub Release and its
+assets.
 
-```sh {"name":"Release","terminalRows":"50"}
-### Exported in runme.dev as Release
+```sh {"name":"GhaRelease","terminalRows":"50"}
+### Exported in runme.dev as GhaRelease
 VscodeRunme |
   release \
     --tag "$RELEASE_TAG" \
@@ -92,26 +92,11 @@ version required by the Marketplace. That numeric version is derived from the
 tagged commit timestamp, making retries deterministic and preserving the
 existing monotonic version scheme.
 
-## Runme workflows
-
-The `release:artifacts` workflow verifies the annotated tag points at `HEAD`,
-derives its immutable commit timestamp, and asks Runme to materialize the
-`ReleaseDistribution` noun.
-
-```sh {"interpreter":"bash","name":"release:artifacts","promptEnv":"never","terminalRows":"30"}
-set -euo pipefail
-: "${RELEASE_TAG:?set RELEASE_TAG to a canonical release tag}"
-test "$(git cat-file -t "${RELEASE_TAG}")" = tag
-test "$(git rev-list -n 1 "${RELEASE_TAG}")" = "$(git rev-parse HEAD)"
-export RELEASE_TIMESTAMP
-RELEASE_TIMESTAMP=$(git show -s --format=%ct "${RELEASE_TAG}^{commit}")
-
-runme run ReleaseDistribution
-```
+## GitHub Actions workflow
 
 The `release:pipeline` workflow is the sole publishing entry point called by
 `.github/workflows/release.yml`. It adds the GitHub Actions and `main` ancestry
-guards, then asks Runme to evaluate the `Release` noun.
+guards, then asks Runme to evaluate the `GhaRelease` noun.
 
 ```sh {"interpreter":"bash","name":"release:pipeline","promptEnv":"never","terminalRows":"50"}
 set -euo pipefail
@@ -127,7 +112,7 @@ git merge-base --is-ancestor "${tag_commit}" origin/main
 export RELEASE_TIMESTAMP
 RELEASE_TIMESTAMP=$(git show -s --format=%ct "${RELEASE_TAG}^{commit}")
 
-runme run Release
+runme run GhaRelease
 ```
 
 ## Operator flow
