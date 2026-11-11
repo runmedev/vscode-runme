@@ -331,40 +331,39 @@ export class VscodeRunme {
   }
 
   /**
-   * Validate, build, test, and publish a canonical release tag.
-   * @param tag Canonical bare release tag (X.Y.Z or X.Y.Z-edge.N).
-   * @param commitTimestamp Unix timestamp of the tagged commit.
-   * @param repository GitHub repository in owner/name form.
-   * @param githubToken GitHub token for release lookup and publication.
-   * @param instrumentationKey Production Application Insights instrumentation key.
-   * @param connectionString Production Application Insights connection string.
-   * @param runmeTestToken Token used by the integration test suite.
-   * @param oidcRequestUrl GitHub Actions OIDC request URL.
-   * @param oidcRequestToken GitHub Actions OIDC request token.
-   * @param openVsxToken Open VSX token used for stable releases.
+   * Build and test a release candidate without publishing it.
+   * @param tag Canonical bare release tag; defaults to the source package version.
+   * @param commitTimestamp Optional tagged-commit timestamp for production edge Marketplace versions.
+   * @param githubToken Optional GitHub token used to avoid anonymous API rate limits.
+   * @param instrumentationKey Optional Application Insights instrumentation key.
+   * @param connectionString Optional Application Insights connection string.
+   * @param runmeTestToken Optional token used by the integration test suite.
+   * @param runmeVersion Optional Runme kernel version; defaults to the latest stable release.
    */
   @func()
-  async release(
-    tag: string,
-    commitTimestamp: number,
-    repository: string,
-    githubToken: Secret,
-    instrumentationKey: Secret,
-    connectionString: Secret,
-    runmeTestToken: Secret,
-    oidcRequestUrl: string,
-    oidcRequestToken: Secret,
-    openVsxToken: Secret,
-  ): Promise<Container> {
-    const metadata = parseReleaseTag(tag, commitTimestamp)
-    const runmeVersion = await this.latestRunmeVersion(githubToken)
+  async releaseCandidate(
+    tag?: string,
+    commitTimestamp?: number,
+    githubToken?: Secret,
+    instrumentationKey?: Secret,
+    connectionString?: Secret,
+    runmeTestToken?: Secret,
+    runmeVersion?: string,
+  ): Promise<Directory> {
+    const sourcePackage = JSON.parse(await this.source.file('package.json').contents())
+    const sourceLockfile = JSON.parse(await this.source.file('package-lock.json').contents())
+    const releaseTag = tag ?? sourcePackage.version
+    const metadata = parseReleaseTag(releaseTag, commitTimestamp)
+    assertSourceVersion(releaseTag, sourcePackage.version, sourceLockfile.packages?.['']?.version)
+
+    const resolvedRunmeVersion = runmeVersion ?? (await this.latestRunmeVersion(githubToken))
     const artifacts = await this.releaseArtifacts(
-      tag,
+      releaseTag,
       commitTimestamp,
       githubToken,
       instrumentationKey,
       connectionString,
-      runmeVersion,
+      resolvedRunmeVersion,
     )
     const testMarker = await this.releaseTestMarker(
       metadata.channel,
@@ -373,8 +372,35 @@ export class VscodeRunme {
       instrumentationKey,
       connectionString,
       runmeTestToken,
-      runmeVersion,
+      resolvedRunmeVersion,
     )
+
+    return artifacts.withFile('.release-tests-passed', testMarker)
+  }
+
+  /**
+   * Publish an already-built and tested release candidate.
+   * @param candidate Release candidate returned by releaseCandidate.
+   * @param tag Canonical bare release tag (X.Y.Z or X.Y.Z-edge.N).
+   * @param repository GitHub repository in owner/name form.
+   * @param githubToken GitHub token for publication.
+   * @param oidcRequestUrl GitHub Actions OIDC request URL.
+   * @param oidcRequestToken GitHub Actions OIDC request token.
+   * @param openVsxToken Open VSX token used for stable releases.
+   */
+  @func()
+  async publishRelease(
+    candidate: Directory,
+    tag: string,
+    repository: string,
+    githubToken: Secret,
+    oidcRequestUrl: string,
+    oidcRequestToken: Secret,
+    openVsxToken: Secret,
+  ): Promise<Container> {
+    const metadata = parseReleaseTag(tag)
+    const testMarker = candidate.file('.release-tests-passed')
+    const artifacts = candidate.withoutFile('.release-tests-passed')
     const releaseSource = this.prepareReleaseSource(metadata.channel, metadata.marketplaceVersion)
     const publisher = new VscodeRunme(releaseSource)
     let container = (await publisher.baseContainer(githubToken))
@@ -442,10 +468,10 @@ export class VscodeRunme {
   private async releaseTestMarker(
     channel: string,
     marketplaceVersion: string,
-    githubToken: Secret,
-    instrumentationKey: Secret,
-    connectionString: Secret,
-    runmeTestToken: Secret,
+    githubToken: Secret | undefined,
+    instrumentationKey: Secret | undefined,
+    connectionString: Secret | undefined,
+    runmeTestToken: Secret | undefined,
     runmeVersion: string,
   ): Promise<File> {
     const releaseSource = this.prepareReleaseSource(channel, marketplaceVersion)

@@ -59,26 +59,45 @@ VscodeRunme | release-artifacts
 ReleaseArtifacts | export "./dist/release"
 ```
 
-`GhaRelease` is the thin GitHub Actions publishing noun. It overrides the local
-defaults with the pushed tag, immutable commit timestamp, authenticated API
-access, production telemetry, test credentials, workload identity, and registry
-credentials. Before the first external publication command, the Dagger graph
-builds all packages and completes the existing production unit and integration
-tests. It then publishes all six targets to the Visual Studio Marketplace,
-stable targets to Open VSX, and creates or verifies the GitHub Release and its
-assets.
+`ReleaseCandidate` is the local confidence boundary. It builds the same six
+artifacts and completes the unit and integration tests, but has no publication
+credentials and performs no external writes. Its optional arguments inherit the
+same local-friendly defaults as `ReleaseArtifacts`. Run
+`runme run ReleaseCandidate` to prove everything up to publication.
+
+```sh {"name":"ReleaseCandidate","terminalRows":"50"}
+### Exported in runme.dev as ReleaseCandidate
+VscodeRunme | release-candidate | sync
+```
+
+`GhaReleaseCandidate` is the GitHub Actions adapter for that same candidate. It
+overrides the local defaults with the pushed tag, immutable commit timestamp,
+authenticated API access, production telemetry, and test credentials.
+
+```sh {"name":"GhaReleaseCandidate","terminalRows":"50"}
+### Exported in runme.dev as GhaReleaseCandidate
+VscodeRunme |
+  release-candidate \
+    --tag "$RELEASE_TAG" \
+    --commit-timestamp "$RELEASE_TIMESTAMP" \
+    --github-token env://GITHUB_TOKEN \
+    --instrumentation-key env://INSTRUMENTATION_KEY \
+    --connection-string env://CONNECTION_STR \
+    --runme-test-token env://RUNME_TEST_TOKEN
+```
+
+`GhaRelease` is the thin publication noun. It consumes the tested candidate,
+adds workload identity and registry credentials, publishes all six targets to
+the Visual Studio Marketplace, publishes stable targets to Open VSX, and creates
+or verifies the GitHub Release and its assets.
 
 ```sh {"name":"GhaRelease","terminalRows":"50"}
 ### Exported in runme.dev as GhaRelease
 VscodeRunme |
-  release \
+  publish-release $(GhaReleaseCandidate) \
     --tag "$RELEASE_TAG" \
-    --commit-timestamp "$RELEASE_TIMESTAMP" \
     --repository "$GITHUB_REPOSITORY" \
     --github-token env://GITHUB_TOKEN \
-    --instrumentation-key env://INSTRUMENTATION_KEY \
-    --connection-string env://CONNECTION_STR \
-    --runme-test-token env://RUNME_TEST_TOKEN \
     --oidc-request-url "$ACTIONS_ID_TOKEN_REQUEST_URL" \
     --oidc-request-token env://ACTIONS_ID_TOKEN_REQUEST_TOKEN \
     --open-vsx-token env://OPEN_VSX_TOKEN |
