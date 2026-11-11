@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { readFileSync } from 'node:fs'
 
 import {
   assertSourceVersion,
@@ -8,6 +9,16 @@ import {
 } from '../../dagger/src/release'
 
 describe('Dagger release policy', () => {
+  it('exposes the release graph as named Dagger Shell nouns', () => {
+    const notebook = readFileSync('dagger/RELEASE.md', 'utf8')
+
+    expect(notebook).toContain('shell: dagger shell')
+    expect(notebook).toContain('"name":"ReleaseArtifacts"')
+    expect(notebook).toContain('"name":"ReleaseDistribution"')
+    expect(notebook).toContain('"name":"Release"')
+    expect(notebook).not.toContain('dagger call')
+  })
+
   it('parses a stable bare tag', () => {
     expect(parseReleaseTag('3.18.0')).toEqual({
       channel: 'stable',

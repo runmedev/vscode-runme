@@ -3,15 +3,15 @@ cwd: ..
 runme:
   id: 01K9VQABQD8DADW6JH91KBRJ20
   version: v3
+shell: dagger shell
 terminalRows: 30
 ---
 
-# Release the Runme VS Code extension with Dagger
+# Release the Runme VS Code extension (via Dagger)
 
 This notebook is the executable release contract for the Runme VS Code
 extension. GitHub Actions supplies the tag, identity, permissions, and secrets;
-the repository's Dagger module validates, builds, tests, and publishes the
-release.
+the named Dagger artifacts below validate, build, test, and publish the release.
 
 ## Tag contract
 
@@ -29,17 +29,61 @@ flow before tagging.
 
 ## Release graph
 
-The Dagger module:
+Initialize the `VscodeRunme` Dagger module using the local source code. The
+capitalized cell name is the release graph's source noun; the piped Dagger
+functions below are its verbs.
 
-1. Validates the canonical tag and source versions.
-2. Resolves the latest stable Runme kernel through the pinned Runme Dagger
-   dependency.
-3. Builds VSIX files for Linux, macOS, and Windows on x64 and arm64.
-4. Runs the existing production unit and integration tests.
-5. Publishes all six artifacts to the Visual Studio Marketplace with GitHub
-   Actions OIDC.
-6. Publishes stable artifacts to Open VSX.
-7. Creates or verifies the GitHub Release and its artifacts.
+```sh {"name":"VscodeRunme"}
+### Exported in runme.dev as VscodeRunme
+. --source .
+```
+
+`ReleaseArtifacts` is the immutable directory containing all six VSIX files.
+It validates the tag against the source versions, resolves one stable Runme
+kernel release, and builds Linux, macOS, and Windows packages for x64 and arm64.
+
+```sh {"name":"ReleaseArtifacts","terminalRows":"30"}
+### Exported in runme.dev as ReleaseArtifacts
+VscodeRunme |
+  release-artifacts \
+    --tag "$RELEASE_TAG" \
+    --commit-timestamp "$RELEASE_TIMESTAMP" \
+    --github-token env://GITHUB_TOKEN \
+    --instrumentation-key env://INSTRUMENTATION_KEY \
+    --connection-string env://CONNECTION_STR
+```
+
+`ReleaseDistribution` materializes that directory without publishing it. Run
+the lower-case `release:artifacts` workflow below to derive the immutable Git
+context before targeting this noun.
+
+```sh {"name":"ReleaseDistribution","terminalRows":"30"}
+### Exported in runme.dev as ReleaseDistribution
+ReleaseArtifacts | export "./dist/release/$RELEASE_TAG"
+```
+
+`Release` is the publishing noun. Before the first external publication command,
+the Dagger graph builds all packages and completes the existing production unit
+and integration tests. It then publishes all six targets to the Visual Studio
+Marketplace, stable targets to Open VSX, and creates or verifies the GitHub
+Release and its assets.
+
+```sh {"name":"Release","terminalRows":"50"}
+### Exported in runme.dev as Release
+VscodeRunme |
+  release \
+    --tag "$RELEASE_TAG" \
+    --commit-timestamp "$RELEASE_TIMESTAMP" \
+    --repository "$GITHUB_REPOSITORY" \
+    --github-token env://GITHUB_TOKEN \
+    --instrumentation-key env://INSTRUMENTATION_KEY \
+    --connection-string env://CONNECTION_STR \
+    --runme-test-token env://RUNME_TEST_TOKEN \
+    --oidc-request-url "$ACTIONS_ID_TOKEN_REQUEST_URL" \
+    --oidc-request-token env://ACTIONS_ID_TOKEN_REQUEST_TOKEN \
+    --open-vsx-token env://OPEN_VSX_TOKEN |
+  stdout
+```
 
 Stable and edge package transformations happen only in Dagger's immutable source
 directory. They are never written back to the checkout. Edge tags retain their
@@ -48,33 +92,26 @@ version required by the Marketplace. That numeric version is derived from the
 tagged commit timestamp, making retries deterministic and preserving the
 existing monotonic version scheme.
 
-## Build artifacts without publishing
+## Runme workflows
 
-Set `RELEASE_TAG` to a canonical tag that exists in the checkout. The production
-secrets are passed as Dagger secret handles and do not enter command arguments or
-exported artifacts.
+The `release:artifacts` workflow verifies the annotated tag points at `HEAD`,
+derives its immutable commit timestamp, and asks Runme to materialize the
+`ReleaseDistribution` noun.
 
 ```sh {"interpreter":"bash","name":"release:artifacts","promptEnv":"never","terminalRows":"30"}
 set -euo pipefail
 : "${RELEASE_TAG:?set RELEASE_TAG to a canonical release tag}"
 test "$(git cat-file -t "${RELEASE_TAG}")" = tag
 test "$(git rev-list -n 1 "${RELEASE_TAG}")" = "$(git rev-parse HEAD)"
-release_timestamp=$(git show -s --format=%ct "${RELEASE_TAG}^{commit}")
+export RELEASE_TIMESTAMP
+RELEASE_TIMESTAMP=$(git show -s --format=%ct "${RELEASE_TAG}^{commit}")
 
-dagger call --source . release-artifacts \
-  --tag "${RELEASE_TAG}" \
-  --commit-timestamp "${release_timestamp}" \
-  --github-token env://GITHUB_TOKEN \
-  --instrumentation-key env://INSTRUMENTATION_KEY \
-  --connection-string env://CONNECTION_STR \
-  export --path "./dist/release/${RELEASE_TAG}"
+runme run ReleaseDistribution
 ```
 
-## Publish from GitHub Actions
-
-This is the sole publishing entry point called by `.github/workflows/release.yml`.
-It refuses to run outside GitHub Actions. Artifact construction and tests finish
-before the first external publication command executes.
+The `release:pipeline` workflow is the sole publishing entry point called by
+`.github/workflows/release.yml`. It adds the GitHub Actions and `main` ancestry
+guards, then asks Runme to evaluate the `Release` noun.
 
 ```sh {"interpreter":"bash","name":"release:pipeline","promptEnv":"never","terminalRows":"50"}
 set -euo pipefail
@@ -87,20 +124,10 @@ test "$(git cat-file -t "${RELEASE_TAG}")" = tag
 tag_commit=$(git rev-list -n 1 "${RELEASE_TAG}")
 test "${tag_commit}" = "$(git rev-parse HEAD)"
 git merge-base --is-ancestor "${tag_commit}" origin/main
-release_timestamp=$(git show -s --format=%ct "${RELEASE_TAG}^{commit}")
+export RELEASE_TIMESTAMP
+RELEASE_TIMESTAMP=$(git show -s --format=%ct "${RELEASE_TAG}^{commit}")
 
-dagger call --source . release \
-  --tag "${RELEASE_TAG}" \
-  --commit-timestamp "${release_timestamp}" \
-  --repository "${GITHUB_REPOSITORY}" \
-  --github-token env://GITHUB_TOKEN \
-  --instrumentation-key env://INSTRUMENTATION_KEY \
-  --connection-string env://CONNECTION_STR \
-  --runme-test-token env://RUNME_TEST_TOKEN \
-  --oidc-request-url "${ACTIONS_ID_TOKEN_REQUEST_URL}" \
-  --oidc-request-token env://ACTIONS_ID_TOKEN_REQUEST_TOKEN \
-  --open-vsx-token env://OPEN_VSX_TOKEN \
-  stdout
+runme run Release
 ```
 
 ## Operator flow
