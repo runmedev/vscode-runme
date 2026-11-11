@@ -3,7 +3,7 @@ cwd: ..
 runme:
   id: 01K9VQABQD8DADW6JH91KBRJ20
   version: v3
-shell: dagger shell
+shell: dagger shell --progress=plain
 terminalRows: 30
 ---
 
