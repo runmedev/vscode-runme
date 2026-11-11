@@ -14,5 +14,10 @@
     "ts-node": "^10.9.2",
     "wdio-vscode-service": "^8.0.0",
     "webdriverio": "^9.33.1"
+  },
+  "overrides": {
+    "wdio-vscode-service": {
+      "@vscode/test-electron": "^3.1.0"
+    }
   }
 }
