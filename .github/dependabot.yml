@@ -85,3 +85,11 @@ updates:
       day: "wednesday"
       timezone: "America/Los_Angeles"
     open-pull-requests-limit: 3
+  - package-ecosystem: docker
+    directory: "/docker"
+    schedule:
+      interval: weekly
+      time: "05:00"
+      day: "wednesday"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 3

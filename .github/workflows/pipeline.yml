@@ -1,9 +1,17 @@
 name: Pipeline
 on:
   pull_request:
+    paths-ignore:
+      - "docker/vscode-runme-build-env.Dockerfile"
+      - ".github/workflows/build-env-image.yml"
+      - ".github/dependabot.yml"
   push:
     branches:
       - main
+    paths-ignore:
+      - "docker/vscode-runme-build-env.Dockerfile"
+      - ".github/workflows/build-env-image.yml"
+      - ".github/dependabot.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
