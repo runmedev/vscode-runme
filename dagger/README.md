@@ -1,42 +1,29 @@
----
-cwd: ..
-runme:
-  id: 01HTNVRGFMWZERW6S2CZZ9E990
-  version: v3
-shell: dagger shell
-terminalRows: 16
----
+# Dagger module
 
-## List available functions
+The repository's TypeScript Dagger module lives in `dagger/src`, with its engine, SDK, source, and module dependencies declared in [`dagger.json`](../dagger.json).
 
-```sh {"excludeFromRunAll":"true","id":"01HTNVRK3AJ2AT8M24TA996RCJ","terminalRows":"15"}
-. | .help
+## Local development
+
+After a fresh checkout, or after changing `dagger.json` or the Dagger version, regenerate the ignored TypeScript SDK bindings through the named target in [`CONTRIBUTING.md`](../CONTRIBUTING.md):
+
+```bash
+runme run dagger:develop
 ```
 
-## Build Kernel Binary
+This runs:
 
-```sh {"id":"01HTQBSZTS5M1HP3GGP4T99PT0","name":"KernelBinary"}
-### Exported in runme.dev as KernelBinary
-github.com/purpleclay/daggerverse/golang $(git https://github.com/stateful/runme | tag v3.12.2 | tree) |
-  build |
-  file runme
+```bash
+dagger develop --compat=skip
 ```
 
-## Build Extension
+The generated `dagger/sdk` directory provides editor types and autocomplete. Do not commit it.
 
-```sh {"name":"Presetup"}
-### Exported in runme.dev as Presetup
-git https://github.com/runmedev/vscode-runme |
-  head |
-  tree |
-  file dagger/scripts/presetup.sh
+List the module's available functions with:
+
+```bash
+dagger functions
 ```
 
-```sh {"id":"01HTNZBARHB97RPQPCVQZ7PNRN","name":"Extension"}
-### Exported in runme.dev as Extension
-github.com/runmedev/vscode-runme |
-  with-remote github.com/runmedev/vscode-runme main |
-  with-container $(KernelBinary) $(Presetup) |
-  build-extension GITHUB_TOKEN |
-  export extension.vsix
-```
+## Build pipeline
+
+The executable build and test graph is documented in [`BUILD.md`](BUILD.md). It links the Runme Dagger dependency, builds the extension, and exposes the Runme targets used locally and in CI.

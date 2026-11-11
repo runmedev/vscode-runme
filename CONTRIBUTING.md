@@ -101,6 +101,14 @@ $ cp -f "assets/$EXTENSION_BASENAME-logo-sidebar.svg" "assets/logo-sidebar.svg"
 $ NODE_OPTIONS='' npm install --include=dev
 ```
 
+### Develop the Dagger module
+
+After a fresh checkout, or after changing `dagger.json` or the Dagger version, regenerate the local TypeScript SDK bindings. The generated `dagger/sdk` directory is ignored by Git and provides editor types and autocomplete.
+
+```sh {"name":"dagger:develop","promptEnv":"never"}
+dagger develop --compat=skip
+```
+
 ### Dev against Project
 
 Make sure to install all recommended extensions please:
