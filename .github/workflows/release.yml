@@ -49,7 +49,7 @@ jobs:
       - name: Publish Dagger Release
         uses: stateful/runme-action@v2
         with:
-          workflows: release:pipeline
+          workflows: GhaRelease
         env:
           CONNECTION_STR: ${{ secrets.CONNECTION_STR }}
           DAGGER_CLOUD_TOKEN: ${{ secrets.DAGGER_CLOUD_TOKEN }}

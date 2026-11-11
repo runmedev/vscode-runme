@@ -86,13 +86,13 @@ VscodeRunme |
     --runme-test-token env://RUNME_TEST_TOKEN
 ```
 
-`GhaRelease` is the thin publication noun. It consumes the tested candidate,
-adds workload identity and registry credentials, publishes all six targets to
-the Visual Studio Marketplace, publishes stable targets to Open VSX, and creates
-or verifies the GitHub Release and its assets.
+`PublishRelease` is the publication noun. It consumes the tested candidate, adds
+workload identity and registry credentials, publishes all six targets to the
+Visual Studio Marketplace, publishes stable targets to Open VSX, and creates or
+verifies the GitHub Release and its assets.
 
-```sh {"name":"GhaRelease","terminalRows":"50"}
-### Exported in runme.dev as GhaRelease
+```sh {"name":"PublishRelease","terminalRows":"50"}
+### Exported in runme.dev as PublishRelease
 VscodeRunme |
   publish-release $(GhaReleaseCandidate) \
     --tag "$RELEASE_TAG" \
@@ -113,25 +113,17 @@ existing monotonic version scheme.
 
 ## GitHub Actions workflow
 
-The `release:pipeline` workflow is the sole publishing entry point called by
-`.github/workflows/release.yml`. It adds the GitHub Actions and `main` ancestry
-guards, then asks Runme to evaluate the `GhaRelease` noun.
+`GhaRelease` is the thin GitHub Actions adapter called by
+`.github/workflows/release.yml`. It verifies that the tagged commit belongs to
+`main`, derives the immutable commit timestamp required by edge releases, and
+asks Runme to evaluate the Dagger-native `PublishRelease` graph.
 
-```sh {"interpreter":"bash","name":"release:pipeline","promptEnv":"never","terminalRows":"50"}
+```sh {"interpreter":"bash","name":"GhaRelease","promptEnv":"never","terminalRows":"50"}
 set -euo pipefail
-: "${GITHUB_ACTIONS:?release:pipeline only runs in GitHub Actions}"
-: "${RELEASE_TAG:?release tag is required}"
-: "${GITHUB_REPOSITORY:?GitHub repository is required}"
-: "${ACTIONS_ID_TOKEN_REQUEST_URL:?Marketplace OIDC request URL is required}"
 
-test "$(git cat-file -t "${RELEASE_TAG}")" = tag
-tag_commit=$(git rev-list -n 1 "${RELEASE_TAG}")
-test "${tag_commit}" = "$(git rev-parse HEAD)"
-git merge-base --is-ancestor "${tag_commit}" origin/main
-export RELEASE_TIMESTAMP
-RELEASE_TIMESTAMP=$(git show -s --format=%ct "${RELEASE_TAG}^{commit}")
-
-runme run GhaRelease
+tag_commit=$(git rev-list -n 1 "$RELEASE_TAG")
+git merge-base --is-ancestor "$tag_commit" origin/main
+RELEASE_TIMESTAMP=$(git show -s --format=%ct "$tag_commit") runme run PublishRelease
 ```
 
 ## Operator flow

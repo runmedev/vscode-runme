@@ -11,16 +11,21 @@ import {
 describe('Dagger release policy', () => {
   it('exposes the release graph as named Dagger Shell nouns', () => {
     const notebook = readFileSync('dagger/RELEASE.md', 'utf8')
+    const workflow = readFileSync('.github/workflows/release.yml', 'utf8')
 
     expect(notebook).toContain('shell: dagger shell')
     expect(notebook).toContain('"name":"ReleaseArtifacts"')
     expect(notebook).toContain('"name":"ReleaseDistribution"')
     expect(notebook).toContain('"name":"ReleaseCandidate"')
     expect(notebook).toContain('"name":"GhaReleaseCandidate"')
+    expect(notebook).toContain('"name":"PublishRelease"')
     expect(notebook).toContain('"name":"GhaRelease"')
     expect(notebook).toContain('publish-release $(GhaReleaseCandidate)')
-    expect(notebook).toContain('runme run GhaRelease')
+    expect(notebook).toContain('runme run PublishRelease')
+    expect(notebook).not.toContain('"name":"release:pipeline"')
     expect(notebook).not.toContain('dagger call')
+    expect(workflow).toContain('workflows: GhaRelease')
+    expect(workflow).not.toContain('workflows: release:pipeline')
   })
 
   it('parses a stable bare tag', () => {
