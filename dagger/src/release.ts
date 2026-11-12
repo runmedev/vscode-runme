@@ -22,6 +22,11 @@ export interface GitHubRepository {
   repo: string
 }
 
+export interface GitObject {
+  sha: string
+  type: string
+}
+
 const numericIdentifier = '(0|[1-9]\\d*)'
 const releaseTagPattern = new RegExp(
   `^${numericIdentifier}\\.${numericIdentifier}\\.${numericIdentifier}(?:-edge\\.${numericIdentifier})?$`,
@@ -41,6 +46,25 @@ export function parseGitCommitTimestamp(value: string | null | undefined): numbe
     throw new Error(`Invalid GitHub commit timestamp "${String(value)}"`)
   }
   return timestamp
+}
+
+export function resolveReleaseTagCommit(
+  tag: string,
+  reference: GitObject,
+  annotatedTarget?: GitObject,
+): string {
+  if (reference.type === 'commit') {
+    return reference.sha
+  }
+  if (reference.type !== 'tag') {
+    throw new Error(`Release ref "${tag}" points to unsupported ${reference.type}`)
+  }
+  if (!annotatedTarget || annotatedTarget.type !== 'commit') {
+    throw new Error(
+      `Release tag "${tag}" points to unsupported ${annotatedTarget?.type ?? 'target'}`,
+    )
+  }
+  return annotatedTarget.sha
 }
 
 export function parseReleaseTag(tag: string, commitTimestamp?: number): ReleaseMetadata {

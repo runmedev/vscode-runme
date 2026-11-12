@@ -24,6 +24,7 @@ import {
   RELEASE_PUBLICATION_ENABLED,
   releaseArtifactName,
   releaseTargets,
+  resolveReleaseTagCommit,
 } from './release.js'
 
 @object()
@@ -423,26 +424,16 @@ export class VscodeRunme {
       throw error
     }
 
-    let tagCommit: string
-    if (tagReference.object.type === 'commit') {
-      if (tagReference.object.sha !== commit) {
-        return this.releaseNoop(commit, tag)
-      }
-      throw new Error(`Release tag "${tag}" must be annotated`)
+    let annotatedTarget: { sha: string; type: string } | undefined
+    if (tagReference.object.type === 'tag') {
+      const { data: annotatedTag } = await octokit.rest.git.getTag({
+        owner,
+        repo,
+        tag_sha: tagReference.object.sha,
+      })
+      annotatedTarget = annotatedTag.object
     }
-    if (tagReference.object.type !== 'tag') {
-      throw new Error(`Release ref "${tag}" points to unsupported ${tagReference.object.type}`)
-    }
-
-    const { data: annotatedTag } = await octokit.rest.git.getTag({
-      owner,
-      repo,
-      tag_sha: tagReference.object.sha,
-    })
-    if (annotatedTag.object.type !== 'commit') {
-      throw new Error(`Release tag "${tag}" points to unsupported ${annotatedTag.object.type}`)
-    }
-    tagCommit = annotatedTag.object.sha
+    const tagCommit = resolveReleaseTagCommit(tag, tagReference.object, annotatedTarget)
     if (tagCommit !== commit) {
       return this.releaseNoop(commit, tag)
     }

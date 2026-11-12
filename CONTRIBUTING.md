@@ -297,9 +297,9 @@ When creating a pull request, its description should reference the corresponding
 
 ## Release Project
 
-Releases are driven by one annotated, unprefixed SemVer tag on a versioned commit
-on `main`. Stable tags use `X.Y.Z`; edge tags use `X.Y.Z-edge.N`. Do not create a
-parallel `vX.Y.Z` tag.
+Releases are driven by one unprefixed SemVer tag on a versioned commit on `main`.
+Stable tags use `X.Y.Z`; edge tags use `X.Y.Z-edge.N`. Lightweight and annotated
+tags are both accepted. A parallel `vX.Y.Z` tag, when present, is ignored.
 
 First update `package.json` and `package-lock.json` to the intended version through
 the normal pull request flow. After that change lands on `main`, tag the exact
@@ -309,7 +309,7 @@ commit and push the tag before that commit's Pipeline run finishes:
 git switch main
 git pull --ff-only origin main
 version=$(node -p 'require("./package.json").version')
-git tag -a "$version" -m "$version"
+git tag "$version"
 git push origin "$version"
 ```
 

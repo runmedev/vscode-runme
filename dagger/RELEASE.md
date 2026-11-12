@@ -15,13 +15,14 @@ the named Dagger artifacts below validate, build, test, and publish the release.
 
 ## Tag contract
 
-Create one annotated, unprefixed SemVer tag on a versioned commit on `main`:
+Create one unprefixed SemVer tag on a versioned commit on `main`:
 
 - Stable: `3.18.0`
 - Edge: `3.18.1-edge.0`
 
-The tag must match the versions in `package.json` and the root package in
-`package-lock.json`. Do not create a parallel `v3.18.0` tag.
+The tag may be lightweight or annotated. It must match the versions in
+`package.json` and the root package in `package-lock.json`. A parallel
+`v3.18.0` tag, when present, is ignored.
 
 The release workflow never calculates a new semantic version, commits, creates
 tags, or pushes `main`. Those source changes land through the normal pull request
@@ -123,7 +124,7 @@ existing monotonic version scheme.
 
 `GhaRelease` is the thin GitHub Actions adapter called by
 `.github/workflows/release.yml` after a successful `pipeline.yml` run for a
-`main` push. The Dagger function reads the source version, resolves its annotated
+`main` push. The Dagger function reads the source version, resolves its unprefixed
 GitHub tag, verifies that it points at the exact successful commit, and derives
 the immutable commit timestamp. A version tag that does not point at the commit
 returns a successful no-op; a matching tag enters the `PublishRelease` graph.
@@ -147,8 +148,8 @@ VscodeRunme |
 
 1. Land the intended version change on `main` through a pull request.
 2. Confirm the `package.json` and `package-lock.json` versions match.
-3. Create one annotated bare tag on that commit and push it before that commit's
-   Pipeline finishes.
+3. Create one bare tag on that commit and push it before that commit's Pipeline
+   finishes.
 4. Pipeline completion triggers Release; a successful commit without a matching
    tag produces a visible, successful no-op.
 5. Verify the GitHub Actions run, six Marketplace targets, GitHub Release, and,
