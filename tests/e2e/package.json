@@ -3,16 +3,22 @@
   "private": true,
   "scripts": {},
   "dependencies": {
-    "@wdio/cli": "^8.46.0",
-    "@wdio/local-runner": "^8.46.0",
-    "@wdio/mocha-framework": "^8.46.0",
-    "@wdio/spec-reporter": "^8.43.0",
+    "@wdio/cli": "^9.33.1",
+    "@wdio/local-runner": "^9.33.1",
+    "@wdio/mocha-framework": "^9.33.1",
+    "@wdio/spec-reporter": "^9.33.1",
     "chromedriver": "^129.0.4",
+    "clipboardy": "^4.0.0",
     "comment-json": "^4.6.2",
-    "expect-webdriverio": "^4.15.4",
+    "expect-webdriverio": "^7.0.1",
     "runme": "^3.17.0",
     "ts-node": "^10.9.2",
-    "wdio-vscode-service": "^6.1.4",
-    "webdriverio": "^8.46.0"
+    "wdio-vscode-service": "^8.0.0",
+    "webdriverio": "^9.33.1"
+  },
+  "overrides": {
+    "wdio-vscode-service": {
+      "@vscode/test-electron": "^3.1.0"
+    }
   }
 }

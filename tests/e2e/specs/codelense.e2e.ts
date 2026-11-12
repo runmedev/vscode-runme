@@ -70,7 +70,7 @@ describe('Runme Codelense Support', async () => {
     })
     const webview = (await workbench.getAllWebviews())[0]
     await webview.open()
-    await expect($('body')).toHaveTextContaining('Runme Examples')
+    await expect($('body')).toHaveText(expect.stringContaining('Runme Examples'))
     await webview.close()
   })
 })
