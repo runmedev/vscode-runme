@@ -42,6 +42,10 @@ functions below are its verbs.
 `ReleaseArtifacts` is the immutable directory containing all six VSIX files.
 It validates the tag against the source versions, resolves one stable Runme
 kernel release, and builds Linux, macOS, and Windows packages for x64 and arm64.
+Dependency setup and webpack compilation run once per candidate, before any
+target kernel is mounted. All six packaging branches share that compiled
+container, each adding only its own kernel binary and VSIX target metadata.
+Checkout-local binaries are excluded from the shared release source.
 With no arguments it uses the source package version, the latest stable kernel,
 anonymous GitHub API access, and no production telemetry credentials. For a
 local edge build, its numeric manifest version defaults to the tag's `X.Y.Z`
