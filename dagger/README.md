@@ -34,3 +34,11 @@ The tag-driven release graph is documented in [`RELEASE.md`](RELEASE.md). It
 defines the canonical tag contract, builds the six platform-specific artifacts,
 gates publication on the production tests, and publishes through Dagger while
 GitHub Actions supplies identity and secrets.
+
+### Build environment image
+
+The module starts from `ghcr.io/runmedev/vscode-runme-build-env`, which contains the static operating-system dependencies needed to build and test the extension. [The image workflow](../.github/workflows/build-env-image.yml) builds it for AMD64 and ARM64 from [`docker/vscode-runme-build-env.Dockerfile`](../docker/vscode-runme-build-env.Dockerfile).
+
+The Dockerfile pins its upstream Node image by digest. Dependabot proposes upstream digest changes, and merging one rebuilds the `vscode-runme` image on `main`. The workflow publishes `latest` for the Dagger module to consume, plus an immutable commit tag and manifest digest for diagnostics and rollback.
+
+Because the image is built and consumed inside the `runmedev` organization, the Dagger module intentionally follows `latest`. After an image update, materialize the base container and let the build and test pipeline validate the refreshed environment.
