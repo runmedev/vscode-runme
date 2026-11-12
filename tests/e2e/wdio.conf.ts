@@ -76,6 +76,8 @@ export const config: Options.Testrunner = {
         extensionPath,
         workspacePath,
         filePath: path.join(workspacePath, 'tests', 'fixtures', 'README.md'),
+        // Container /dev/shm limits can crash the notebook renderer.
+        vscodeArgs: process.platform === 'linux' ? { disableDevShmUsage: true } : {},
         userSettings: {
           'terminal.integrated.defaultProfile.osx': 'bash',
         },
