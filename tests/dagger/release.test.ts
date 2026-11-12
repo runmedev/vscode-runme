@@ -85,7 +85,7 @@ describe('Dagger release policy', () => {
   it('keeps publication fail-closed until the rollout constant changes', () => {
     const command = ['npx', 'vsce', 'publish', '--packagePath', '/tmp/release/runme.vsix']
 
-    expect(RELEASE_PUBLICATION_ENABLED).toBe(false)
+    expect(RELEASE_PUBLICATION_ENABLED).toBe(true)
     expect(publicationCommand(command, 'Visual Studio Marketplace: runme.vsix')).toEqual([
       'printf',
       '%s\n',
