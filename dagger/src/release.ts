@@ -17,17 +17,6 @@ export interface ReleaseMetadata {
   version: string
 }
 
-export interface GhaWorkflowRun {
-  conclusion: string | null
-  status: string
-  url: string
-}
-
-export type GhaPipelineEvaluation =
-  | { state: 'passed'; url: string }
-  | { state: 'pending'; url?: string }
-  | { state: 'failed'; conclusion: string; url: string }
-
 const numericIdentifier = '(0|[1-9]\\d*)'
 const releaseTagPattern = new RegExp(
   `^${numericIdentifier}\\.${numericIdentifier}\\.${numericIdentifier}(?:-edge\\.${numericIdentifier})?$`,
@@ -86,29 +75,6 @@ export function assertSourceVersion(
       `package-lock.json root version "${String(lockfileVersion)}" does not match tag "${tag}"`,
     )
   }
-}
-
-export function evaluateGhaPipelineRuns(runs: GhaWorkflowRun[]): GhaPipelineEvaluation {
-  const successfulRun = runs.find(({ conclusion }) => conclusion === 'success')
-  if (successfulRun) {
-    return { state: 'passed', url: successfulRun.url }
-  }
-
-  const pendingRun = runs.find(({ status }) => status !== 'completed')
-  if (pendingRun) {
-    return { state: 'pending', url: pendingRun.url }
-  }
-
-  const failedRun = runs[0]
-  if (failedRun) {
-    return {
-      state: 'failed',
-      conclusion: failedRun.conclusion ?? 'unknown',
-      url: failedRun.url,
-    }
-  }
-
-  return { state: 'pending' }
 }
 
 export function releaseArtifactName(

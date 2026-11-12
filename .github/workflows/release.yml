@@ -1,33 +1,43 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "[0-9]+.[0-9]+.[0-9]+"
-      - "[0-9]+.[0-9]+.[0-9]+-edge.[0-9]+"
+  workflow_run:
+    workflows:
+      - Pipeline
+    branches:
+      - main
+    types:
+      - completed
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_sha }}
   cancel-in-progress: false
 
 permissions:
-  actions: read
   contents: write
   id-token: write
 
 env:
   DO_NOT_TRACK: 1
-  RELEASE_TAG: ${{ github.ref_name }}
+  RELEASE_COMMIT: ${{ github.event.workflow_run.head_sha }}
   SHELL: /bin/bash
 
 jobs:
   release:
+    if: >-
+      ${{
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_repository.full_name == github.repository
+      }}
     runs-on: ubuntu-latest
     steps:
       - name: Clone Repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Setup Go
         uses: actions/setup-go@v5

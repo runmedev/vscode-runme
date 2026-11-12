@@ -17,7 +17,6 @@ import {
 import { Octokit } from 'octokit'
 import {
   assertSourceVersion,
-  evaluateGhaPipelineRuns,
   parseReleaseTag,
   publicationCommand,
   RELEASE_PUBLICATION_ENABLED,
@@ -362,39 +361,23 @@ export class VscodeRunme {
   }
 
   /**
-   * Wait for the exact main-branch commit's Pipeline run, then build its release candidate.
+   * Build a release candidate with GitHub Actions production metadata.
    * @param tag Canonical bare release tag.
-   * @param commit Exact tagged commit SHA.
    * @param commitTimestamp Tagged-commit timestamp for production edge Marketplace versions.
-   * @param repository GitHub repository in owner/name form.
-   * @param githubToken GitHub token with Actions read access.
+   * @param githubToken GitHub token used to avoid anonymous API rate limits.
    * @param instrumentationKey Optional Application Insights instrumentation key.
    * @param connectionString Optional Application Insights connection string.
    * @param runmeVersion Optional Runme kernel version; defaults to the latest stable release.
-   * @param pipelineTimeoutSeconds Maximum time to wait for Pipeline to finish.
-   * @param pipelinePollIntervalSeconds Delay between Pipeline status checks.
    */
   @func()
   async ghaReleaseCandidate(
     tag: string,
-    commit: string,
     commitTimestamp: number,
-    repository: string,
     githubToken: Secret,
     instrumentationKey?: Secret,
     connectionString?: Secret,
     runmeVersion?: string,
-    pipelineTimeoutSeconds: number = 1800,
-    pipelinePollIntervalSeconds: number = 15,
   ): Promise<Directory> {
-    await this.waitForSuccessfulGhaPipeline(
-      repository,
-      commit,
-      githubToken,
-      pipelineTimeoutSeconds,
-      pipelinePollIntervalSeconds,
-    )
-
     return this.releaseCandidate(
       tag,
       commitTimestamp,
@@ -522,61 +505,6 @@ export class VscodeRunme {
       .withWorkdir('/src')
       .withExec(['node', 'dagger/scripts/prepare-release.mjs', channel, marketplaceVersion])
       .directory('/src')
-  }
-
-  private async waitForSuccessfulGhaPipeline(
-    repository: string,
-    commit: string,
-    githubToken: Secret,
-    timeoutSeconds: number,
-    pollIntervalSeconds: number,
-  ): Promise<void> {
-    const [owner, repo, extra] = repository.split('/')
-    if (!owner || !repo || extra) {
-      throw new Error(`Invalid GitHub repository "${repository}"; expected owner/name`)
-    }
-    if (timeoutSeconds <= 0 || pollIntervalSeconds <= 0) {
-      throw new Error('Pipeline wait timeout and polling interval must be positive')
-    }
-
-    const octokit = new Octokit({ auth: await githubToken.plaintext() })
-    const deadline = Date.now() + timeoutSeconds * 1000
-
-    while (true) {
-      const { data } = await octokit.rest.actions.listWorkflowRuns({
-        owner,
-        repo,
-        workflow_id: 'pipeline.yml',
-        branch: 'main',
-        event: 'push',
-        head_sha: commit,
-        per_page: 100,
-      })
-      const evaluation = evaluateGhaPipelineRuns(
-        data.workflow_runs.map(
-          (run: { conclusion: string | null; html_url: string; status: string | null }) => ({
-            conclusion: run.conclusion,
-            status: run.status ?? 'unknown',
-            url: run.html_url,
-          }),
-        ),
-      )
-
-      if (evaluation.state === 'passed') {
-        return
-      }
-      if (evaluation.state === 'failed') {
-        throw new Error(
-          `Pipeline for tagged commit ${commit} concluded ${evaluation.conclusion}: ${evaluation.url}`,
-        )
-      }
-      if (Date.now() >= deadline) {
-        const details = evaluation.url ? `: ${evaluation.url}` : ''
-        throw new Error(`Timed out waiting for Pipeline on tagged commit ${commit}${details}`)
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, pollIntervalSeconds * 1000))
-    }
   }
 
   private async latestRunmeVersion(githubToken?: Secret): Promise<string> {
