@@ -10,6 +10,7 @@ import {
   RELEASE_PUBLICATION_ENABLED,
   releaseArtifactName,
   releaseTargets,
+  resolveReleaseTagCommit,
 } from '../../dagger/src/release'
 
 describe('Dagger release policy', () => {
@@ -32,6 +33,7 @@ describe('Dagger release policy', () => {
     expect(notebook).not.toContain('grep -E')
     expect(moduleSource).toContain('async ghaRelease(')
     expect(moduleSource).toContain('[NOOP] Release tag')
+    expect(moduleSource).not.toContain('must be annotated')
     expect(notebook).not.toContain('"name":"release:pipeline"')
     expect(notebook).not.toContain('dagger call')
     expect(workflow).toContain('workflows: GhaRelease')
@@ -62,6 +64,22 @@ describe('Dagger release policy', () => {
     expect(parseGitCommitTimestamp('2026-11-11T23:26:59Z')).toBe(1_794_439_619)
     expect(() => parseGitCommitTimestamp(undefined)).toThrow('GitHub commit timestamp')
     expect(() => parseGitCommitTimestamp('not-a-date')).toThrow('GitHub commit timestamp')
+  })
+
+  it('resolves lightweight and annotated release tags to their commits', () => {
+    expect(resolveReleaseTagCommit('3.18.0', { sha: 'lightweight-sha', type: 'commit' })).toBe(
+      'lightweight-sha',
+    )
+    expect(
+      resolveReleaseTagCommit(
+        '3.18.0',
+        { sha: 'tag-object-sha', type: 'tag' },
+        { sha: 'annotated-target-sha', type: 'commit' },
+      ),
+    ).toBe('annotated-target-sha')
+    expect(() => resolveReleaseTagCommit('3.18.0', { sha: 'tree-sha', type: 'tree' })).toThrow(
+      'unsupported tree',
+    )
   })
 
   it('keeps publication fail-closed until the rollout constant changes', () => {
