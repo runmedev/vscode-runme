@@ -82,11 +82,12 @@ describe('Dagger release policy', () => {
     )
   })
 
-  it('keeps publication fail-closed until the rollout constant changes', () => {
+  it('enables publication by default and supports explicit simulation', () => {
     const command = ['npx', 'vsce', 'publish', '--packagePath', '/tmp/release/runme.vsix']
 
     expect(RELEASE_PUBLICATION_ENABLED).toBe(true)
-    expect(publicationCommand(command, 'Visual Studio Marketplace: runme.vsix')).toEqual([
+    expect(publicationCommand(command, 'Visual Studio Marketplace: runme.vsix')).toEqual(command)
+    expect(publicationCommand(command, 'Visual Studio Marketplace: runme.vsix', false)).toEqual([
       'printf',
       '%s\n',
       '[SIMULATION] Visual Studio Marketplace: runme.vsix',
