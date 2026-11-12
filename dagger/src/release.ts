@@ -17,10 +17,31 @@ export interface ReleaseMetadata {
   version: string
 }
 
+export interface GitHubRepository {
+  owner: string
+  repo: string
+}
+
 const numericIdentifier = '(0|[1-9]\\d*)'
 const releaseTagPattern = new RegExp(
   `^${numericIdentifier}\\.${numericIdentifier}\\.${numericIdentifier}(?:-edge\\.${numericIdentifier})?$`,
 )
+
+export function parseGitHubRepository(repository: string): GitHubRepository {
+  const [owner, repo, extra] = repository.split('/')
+  if (!owner || !repo || extra) {
+    throw new Error(`Invalid GitHub repository "${repository}"; expected owner/name`)
+  }
+  return { owner, repo }
+}
+
+export function parseGitCommitTimestamp(value: string | null | undefined): number {
+  const timestamp = value ? Math.floor(Date.parse(value) / 1000) : Number.NaN
+  if (!Number.isSafeInteger(timestamp) || timestamp <= 0) {
+    throw new Error(`Invalid GitHub commit timestamp "${String(value)}"`)
+  }
+  return timestamp
+}
 
 export function parseReleaseTag(tag: string, commitTimestamp?: number): ReleaseMetadata {
   const match = releaseTagPattern.exec(tag)

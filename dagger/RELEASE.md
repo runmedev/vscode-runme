@@ -123,40 +123,24 @@ existing monotonic version scheme.
 
 `GhaRelease` is the thin GitHub Actions adapter called by
 `.github/workflows/release.yml` after a successful `pipeline.yml` run for a
-`main` push. It discovers a canonical release tag pointing at that exact commit.
-No matching tag is a successful no-op; one matching tag enters the Dagger-native
-`PublishRelease` graph; multiple matching tags fail closed.
+`main` push. The Dagger function reads the source version, resolves its annotated
+GitHub tag, verifies that it points at the exact successful commit, and derives
+the immutable commit timestamp. A version tag that does not point at the commit
+returns a successful no-op; a matching tag enters the `PublishRelease` graph.
 
-```sh {"interpreter":"bash","name":"GhaRelease","promptEnv":"never","terminalRows":"50"}
-set -euo pipefail
-
-release_tags=()
-while IFS= read -r release_tag; do
-  release_tags+=("$release_tag")
-done < <(
-  git tag --points-at "$RELEASE_COMMIT" |
-    grep -E '^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-edge\.(0|[1-9][0-9]*))?$'
-)
-
-case "${#release_tags[@]}" in
-  0)
-    printf '[NOOP] No canonical release tag points at %s\n' "$RELEASE_COMMIT"
-    exit 0
-    ;;
-  1) RELEASE_TAG="${release_tags[0]}" ;;
-  *)
-    printf 'Multiple canonical release tags point at %s: %s\n' \
-      "$RELEASE_COMMIT" "${release_tags[*]}" >&2
-    exit 1
-    ;;
-esac
-
-test "$(git cat-file -t "$RELEASE_TAG")" = tag
-test "$(git rev-list -n 1 "$RELEASE_TAG")" = "$RELEASE_COMMIT"
-
-RELEASE_TAG="$RELEASE_TAG" \
-  RELEASE_TIMESTAMP=$(git show -s --format=%ct "$RELEASE_COMMIT") \
-  runme run PublishRelease
+```sh {"name":"GhaRelease","promptEnv":"never","terminalRows":"50"}
+### Exported in runme.dev as GhaRelease
+VscodeRunme |
+  gha-release \
+    --commit "$RELEASE_COMMIT" \
+    --repository "$GITHUB_REPOSITORY" \
+    --github-token env://GITHUB_TOKEN \
+    --oidc-request-url "$ACTIONS_ID_TOKEN_REQUEST_URL" \
+    --oidc-request-token env://ACTIONS_ID_TOKEN_REQUEST_TOKEN \
+    --open-vsx-token env://OPEN_VSX_TOKEN \
+    --instrumentation-key env://INSTRUMENTATION_KEY \
+    --connection-string env://CONNECTION_STR |
+  stdout
 ```
 
 ## Operator flow

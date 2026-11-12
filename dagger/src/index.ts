@@ -17,6 +17,8 @@ import {
 import { Octokit } from 'octokit'
 import {
   assertSourceVersion,
+  parseGitCommitTimestamp,
+  parseGitHubRepository,
   parseReleaseTag,
   publicationCommand,
   RELEASE_PUBLICATION_ENABLED,
@@ -389,6 +391,94 @@ export class VscodeRunme {
   }
 
   /**
+   * Resolve and publish the release associated with a successful GitHub Actions Pipeline commit.
+   * Returns a successful no-op container when the source version tag does not point at the commit.
+   * @param commit Exact commit SHA from the completed Pipeline workflow run.
+   * @param repository GitHub repository in owner/name form.
+   * @param githubToken GitHub token for tag resolution and publication.
+   * @param oidcRequestUrl GitHub Actions OIDC request URL.
+   * @param oidcRequestToken GitHub Actions OIDC request token.
+   * @param openVsxToken Open VSX token used for stable releases.
+   * @param instrumentationKey Optional Application Insights instrumentation key.
+   * @param connectionString Optional Application Insights connection string.
+   * @param runmeVersion Optional Runme kernel version; defaults to the latest stable release.
+   */
+  @func()
+  async ghaRelease(
+    commit: string,
+    repository: string,
+    githubToken: Secret,
+    oidcRequestUrl: string,
+    oidcRequestToken: Secret,
+    openVsxToken: Secret,
+    instrumentationKey?: Secret,
+    connectionString?: Secret,
+    runmeVersion?: string,
+  ): Promise<Container> {
+    const { owner, repo } = parseGitHubRepository(repository)
+    const sourcePackage = JSON.parse(await this.source.file('package.json').contents())
+    const tag = sourcePackage.version
+    parseReleaseTag(tag)
+
+    const octokit = new Octokit({ auth: await githubToken.plaintext() })
+    let tagReference: { object: { sha: string; type: string } }
+    try {
+      const response = await octokit.rest.git.getRef({ owner, repo, ref: `tags/${tag}` })
+      tagReference = response.data
+    } catch (error) {
+      if (this.githubErrorStatus(error) === 404) {
+        return this.releaseNoop(commit, tag)
+      }
+      throw error
+    }
+
+    let tagCommit: string
+    if (tagReference.object.type === 'commit') {
+      if (tagReference.object.sha !== commit) {
+        return this.releaseNoop(commit, tag)
+      }
+      throw new Error(`Release tag "${tag}" must be annotated`)
+    }
+    if (tagReference.object.type !== 'tag') {
+      throw new Error(`Release ref "${tag}" points to unsupported ${tagReference.object.type}`)
+    }
+
+    const { data: annotatedTag } = await octokit.rest.git.getTag({
+      owner,
+      repo,
+      tag_sha: tagReference.object.sha,
+    })
+    if (annotatedTag.object.type !== 'commit') {
+      throw new Error(`Release tag "${tag}" points to unsupported ${annotatedTag.object.type}`)
+    }
+    tagCommit = annotatedTag.object.sha
+    if (tagCommit !== commit) {
+      return this.releaseNoop(commit, tag)
+    }
+
+    const { data: commitData } = await octokit.rest.repos.getCommit({ owner, repo, ref: commit })
+    const commitTimestamp = parseGitCommitTimestamp(commitData.commit.committer?.date)
+    const candidate = await this.ghaReleaseCandidate(
+      tag,
+      commitTimestamp,
+      githubToken,
+      instrumentationKey,
+      connectionString,
+      runmeVersion,
+    )
+
+    return this.publishRelease(
+      candidate,
+      tag,
+      repository,
+      githubToken,
+      oidcRequestUrl,
+      oidcRequestToken,
+      openVsxToken,
+    )
+  }
+
+  /**
    * Publish an already-built release candidate.
    * @param candidate Release candidate returned by releaseCandidate.
    * @param tag Canonical bare release tag (X.Y.Z or X.Y.Z-edge.N).
@@ -495,6 +585,21 @@ export class VscodeRunme {
     }
 
     return container.withExec(publicationCommand(command, simulationDescription))
+  }
+
+  private githubErrorStatus(error: unknown): number | undefined {
+    if (typeof error !== 'object' || error === null || !('status' in error)) {
+      return undefined
+    }
+    const { status } = error as { status?: unknown }
+    return typeof status === 'number' ? status : undefined
+  }
+
+  private releaseNoop(commit: string, tag: string): Container {
+    return dag
+      .container({ platform: 'linux/amd64' as Platform })
+      .from('alpine:3.22')
+      .withExec(['echo', `[NOOP] Release tag ${tag} does not point at ${commit}`])
   }
 
   private prepareReleaseSource(channel: string, marketplaceVersion: string): Directory {
