@@ -124,8 +124,22 @@ export class VscodeRunme {
     instrumentationKey?: Secret,
     connectionString?: Secret,
   ): Promise<VscodeRunme> {
-    let container = await this.baseContainer(githubToken)
+    const container = await this.baseContainer(githubToken)
 
+    this.container = this.compileExtension(
+      container.withMountedDirectory('/mnt/vscode-runme/bin', runmeBinary),
+      instrumentationKey,
+      connectionString,
+    )
+
+    return this
+  }
+
+  private compileExtension(
+    container: Container,
+    instrumentationKey?: Secret,
+    connectionString?: Secret,
+  ): Container {
     if (instrumentationKey) {
       container = container.withSecretVariable('INSTRUMENTATION_KEY', instrumentationKey)
     }
@@ -133,11 +147,7 @@ export class VscodeRunme {
       container = container.withSecretVariable('CONNECTION_STR', connectionString)
     }
 
-    this.container = container
-      .withMountedDirectory('/mnt/vscode-runme/bin', runmeBinary)
-      .withExec('runme run configureNPM setup build'.split(' '))
-
-    return this
+    return container.withExec('runme run configureNPM setup build'.split(' '))
   }
 
   @func()
@@ -301,8 +311,17 @@ export class VscodeRunme {
     const metadata = parseReleaseTag(releaseTag, commitTimestamp)
     assertSourceVersion(releaseTag, sourcePackage.version, sourceLockfile.packages?.['']?.version)
 
-    const releaseSource = this.prepareReleaseSource(metadata.channel, metadata.marketplaceVersion)
+    const releaseSource = this.prepareReleaseSource(
+      metadata.channel,
+      metadata.marketplaceVersion,
+    ).withoutDirectory('bin')
     const resolvedRunmeVersion = runmeVersion ?? (await this.latestRunmeVersion(githubToken))
+    const sharedBuilder = new VscodeRunme(releaseSource)
+    const compiled = this.compileExtension(
+      await sharedBuilder.baseContainer(githubToken),
+      instrumentationKey,
+      connectionString,
+    )
     let artifacts = dag.directory()
 
     for (const target of releaseTargets) {
@@ -312,7 +331,8 @@ export class VscodeRunme {
         githubToken,
       )
       const builder = new VscodeRunme(releaseSource)
-      await builder.build(kernel, githubToken, instrumentationKey, connectionString)
+      // Fork the same compiled container so only the kernel and VSIX metadata vary by target.
+      builder.container = compiled.withMountedDirectory('/mnt/vscode-runme/bin', kernel)
 
       const artifactName = releaseArtifactName(sourcePackage.name, target.vsceTarget, releaseTag)
       const artifact = await builder.bundle(
