@@ -7,7 +7,7 @@ export const releaseTargets = [
   { kernelPlatform: 'windows/arm64', vsceTarget: 'win32-arm64' },
 ] as const
 
-export const RELEASE_PUBLICATION_ENABLED = false
+export const RELEASE_PUBLICATION_ENABLED = true
 
 export type ReleaseChannel = 'stable' | 'edge'
 
