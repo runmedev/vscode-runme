@@ -303,7 +303,7 @@ parallel `vX.Y.Z` tag.
 
 First update `package.json` and `package-lock.json` to the intended version through
 the normal pull request flow. After that change lands on `main`, tag the exact
-commit and push only the tag:
+commit and push the tag before that commit's Pipeline run finishes:
 
 ```sh {"id":"01HF7VQMH8ESX1EFV4Q8N8Z85Z","promptEnv":"never"}
 git switch main
@@ -313,12 +313,12 @@ git tag -a "$version" -m "$version"
 git push origin "$version"
 ```
 
-The tag starts the Dagger-native release workflow. Its GitHub Actions adapter
-waits for `pipeline.yml` to pass on the exact tagged commit on `main`, validates
-the source version, builds and validates all six platform artifacts, publishes
-them to the Visual Studio Marketplace, publishes stable releases to Open VSX,
-and creates the GitHub Release. The workflow never commits, tags, or pushes
-source changes.
+Successful `pipeline.yml` completion on `main` starts the Dagger-native release
+workflow. A commit without a canonical release tag is a successful no-op. A
+tagged commit validates the source version, builds and validates all six
+platform artifacts, publishes them to the Visual Studio Marketplace, publishes
+stable releases to Open VSX, and creates the GitHub Release. The workflow never
+commits, tags, or pushes source changes.
 
 See [`dagger/RELEASE.md`](dagger/RELEASE.md) for the executable release contract
 and build-only instructions.

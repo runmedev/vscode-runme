@@ -71,11 +71,10 @@ same local-friendly defaults as `ReleaseArtifacts`. Run
 VscodeRunme | release-candidate | sync
 ```
 
-`GhaReleaseCandidate` is the GitHub Actions adapter for that same candidate. It
-waits for the exact tagged commit's `pipeline.yml` run on `main` to pass, then
-overrides the local defaults with the pushed tag, immutable commit timestamp,
-authenticated API access, and production telemetry. This bounded wait supports
-pushing `main` and its tag back-to-back without racing Pipeline. Local release
+`GhaReleaseCandidate` is the GitHub Actions adapter for that same candidate. The
+workflow invokes it only after `pipeline.yml` passes for the exact commit, and it
+overrides the local defaults with the discovered tag, immutable commit
+timestamp, authenticated API access, and production telemetry. Local release
 nouns do not perform this GitHub Actions check.
 
 ```sh {"name":"GhaReleaseCandidate","terminalRows":"50"}
@@ -83,9 +82,7 @@ nouns do not perform this GitHub Actions check.
 VscodeRunme |
   gha-release-candidate \
     --tag "$RELEASE_TAG" \
-    --commit "$RELEASE_COMMIT" \
     --commit-timestamp "$RELEASE_TIMESTAMP" \
-    --repository "$GITHUB_REPOSITORY" \
     --github-token env://GITHUB_TOKEN \
     --instrumentation-key env://INSTRUMENTATION_KEY \
     --connection-string env://CONNECTION_STR
@@ -125,27 +122,35 @@ existing monotonic version scheme.
 ## GitHub Actions workflow
 
 `GhaRelease` is the thin GitHub Actions adapter called by
-`.github/workflows/release.yml`. It verifies that the tagged commit belongs to
-`main`, derives the immutable commit timestamp required by edge releases, and
-asks Runme to evaluate the Dagger-native `PublishRelease` graph.
+`.github/workflows/release.yml` after a successful `pipeline.yml` run for a
+`main` push. The Dagger function reads the source version, resolves its annotated
+GitHub tag, verifies that it points at the exact successful commit, and derives
+the immutable commit timestamp. A version tag that does not point at the commit
+returns a successful no-op; a matching tag enters the `PublishRelease` graph.
 
-```sh {"interpreter":"bash","name":"GhaRelease","promptEnv":"never","terminalRows":"50"}
-set -euo pipefail
-
-tag_commit=$(git rev-list -n 1 "$RELEASE_TAG")
-git merge-base --is-ancestor "$tag_commit" origin/main
-RELEASE_COMMIT="$tag_commit" \
-  RELEASE_TIMESTAMP=$(git show -s --format=%ct "$tag_commit") \
-  runme run PublishRelease
+```sh {"name":"GhaRelease","promptEnv":"never","terminalRows":"50"}
+### Exported in runme.dev as GhaRelease
+VscodeRunme |
+  gha-release \
+    --commit "$RELEASE_COMMIT" \
+    --repository "$GITHUB_REPOSITORY" \
+    --github-token env://GITHUB_TOKEN \
+    --oidc-request-url "$ACTIONS_ID_TOKEN_REQUEST_URL" \
+    --oidc-request-token env://ACTIONS_ID_TOKEN_REQUEST_TOKEN \
+    --open-vsx-token env://OPEN_VSX_TOKEN \
+    --instrumentation-key env://INSTRUMENTATION_KEY \
+    --connection-string env://CONNECTION_STR |
+  stdout
 ```
 
 ## Operator flow
 
 1. Land the intended version change on `main` through a pull request.
 2. Confirm the `package.json` and `package-lock.json` versions match.
-3. Create one annotated bare tag on that commit.
-4. Push the tag; if `main` was just pushed too, the GHA adapter waits for that
-   commit's Pipeline.
+3. Create one annotated bare tag on that commit and push it before that commit's
+   Pipeline finishes.
+4. Pipeline completion triggers Release; a successful commit without a matching
+   tag produces a visible, successful no-op.
 5. Verify the GitHub Actions run, six Marketplace targets, GitHub Release, and,
    for stable releases, Open VSX.
 

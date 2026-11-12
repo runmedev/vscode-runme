@@ -17,7 +17,8 @@ import {
 import { Octokit } from 'octokit'
 import {
   assertSourceVersion,
-  evaluateGhaPipelineRuns,
+  parseGitCommitTimestamp,
+  parseGitHubRepository,
   parseReleaseTag,
   publicationCommand,
   RELEASE_PUBLICATION_ENABLED,
@@ -362,39 +363,23 @@ export class VscodeRunme {
   }
 
   /**
-   * Wait for the exact main-branch commit's Pipeline run, then build its release candidate.
+   * Build a release candidate with GitHub Actions production metadata.
    * @param tag Canonical bare release tag.
-   * @param commit Exact tagged commit SHA.
    * @param commitTimestamp Tagged-commit timestamp for production edge Marketplace versions.
-   * @param repository GitHub repository in owner/name form.
-   * @param githubToken GitHub token with Actions read access.
+   * @param githubToken GitHub token used to avoid anonymous API rate limits.
    * @param instrumentationKey Optional Application Insights instrumentation key.
    * @param connectionString Optional Application Insights connection string.
    * @param runmeVersion Optional Runme kernel version; defaults to the latest stable release.
-   * @param pipelineTimeoutSeconds Maximum time to wait for Pipeline to finish.
-   * @param pipelinePollIntervalSeconds Delay between Pipeline status checks.
    */
   @func()
   async ghaReleaseCandidate(
     tag: string,
-    commit: string,
     commitTimestamp: number,
-    repository: string,
     githubToken: Secret,
     instrumentationKey?: Secret,
     connectionString?: Secret,
     runmeVersion?: string,
-    pipelineTimeoutSeconds: number = 1800,
-    pipelinePollIntervalSeconds: number = 15,
   ): Promise<Directory> {
-    await this.waitForSuccessfulGhaPipeline(
-      repository,
-      commit,
-      githubToken,
-      pipelineTimeoutSeconds,
-      pipelinePollIntervalSeconds,
-    )
-
     return this.releaseCandidate(
       tag,
       commitTimestamp,
@@ -402,6 +387,94 @@ export class VscodeRunme {
       instrumentationKey,
       connectionString,
       runmeVersion,
+    )
+  }
+
+  /**
+   * Resolve and publish the release associated with a successful GitHub Actions Pipeline commit.
+   * Returns a successful no-op container when the source version tag does not point at the commit.
+   * @param commit Exact commit SHA from the completed Pipeline workflow run.
+   * @param repository GitHub repository in owner/name form.
+   * @param githubToken GitHub token for tag resolution and publication.
+   * @param oidcRequestUrl GitHub Actions OIDC request URL.
+   * @param oidcRequestToken GitHub Actions OIDC request token.
+   * @param openVsxToken Open VSX token used for stable releases.
+   * @param instrumentationKey Optional Application Insights instrumentation key.
+   * @param connectionString Optional Application Insights connection string.
+   * @param runmeVersion Optional Runme kernel version; defaults to the latest stable release.
+   */
+  @func()
+  async ghaRelease(
+    commit: string,
+    repository: string,
+    githubToken: Secret,
+    oidcRequestUrl: string,
+    oidcRequestToken: Secret,
+    openVsxToken: Secret,
+    instrumentationKey?: Secret,
+    connectionString?: Secret,
+    runmeVersion?: string,
+  ): Promise<Container> {
+    const { owner, repo } = parseGitHubRepository(repository)
+    const sourcePackage = JSON.parse(await this.source.file('package.json').contents())
+    const tag = sourcePackage.version
+    parseReleaseTag(tag)
+
+    const octokit = new Octokit({ auth: await githubToken.plaintext() })
+    let tagReference: { object: { sha: string; type: string } }
+    try {
+      const response = await octokit.rest.git.getRef({ owner, repo, ref: `tags/${tag}` })
+      tagReference = response.data
+    } catch (error) {
+      if (this.githubErrorStatus(error) === 404) {
+        return this.releaseNoop(commit, tag)
+      }
+      throw error
+    }
+
+    let tagCommit: string
+    if (tagReference.object.type === 'commit') {
+      if (tagReference.object.sha !== commit) {
+        return this.releaseNoop(commit, tag)
+      }
+      throw new Error(`Release tag "${tag}" must be annotated`)
+    }
+    if (tagReference.object.type !== 'tag') {
+      throw new Error(`Release ref "${tag}" points to unsupported ${tagReference.object.type}`)
+    }
+
+    const { data: annotatedTag } = await octokit.rest.git.getTag({
+      owner,
+      repo,
+      tag_sha: tagReference.object.sha,
+    })
+    if (annotatedTag.object.type !== 'commit') {
+      throw new Error(`Release tag "${tag}" points to unsupported ${annotatedTag.object.type}`)
+    }
+    tagCommit = annotatedTag.object.sha
+    if (tagCommit !== commit) {
+      return this.releaseNoop(commit, tag)
+    }
+
+    const { data: commitData } = await octokit.rest.repos.getCommit({ owner, repo, ref: commit })
+    const commitTimestamp = parseGitCommitTimestamp(commitData.commit.committer?.date)
+    const candidate = await this.ghaReleaseCandidate(
+      tag,
+      commitTimestamp,
+      githubToken,
+      instrumentationKey,
+      connectionString,
+      runmeVersion,
+    )
+
+    return this.publishRelease(
+      candidate,
+      tag,
+      repository,
+      githubToken,
+      oidcRequestUrl,
+      oidcRequestToken,
+      openVsxToken,
     )
   }
 
@@ -514,6 +587,21 @@ export class VscodeRunme {
     return container.withExec(publicationCommand(command, simulationDescription))
   }
 
+  private githubErrorStatus(error: unknown): number | undefined {
+    if (typeof error !== 'object' || error === null || !('status' in error)) {
+      return undefined
+    }
+    const { status } = error as { status?: unknown }
+    return typeof status === 'number' ? status : undefined
+  }
+
+  private releaseNoop(commit: string, tag: string): Container {
+    return dag
+      .container({ platform: 'linux/amd64' as Platform })
+      .from('alpine:3.22')
+      .withExec(['echo', `[NOOP] Release tag ${tag} does not point at ${commit}`])
+  }
+
   private prepareReleaseSource(channel: string, marketplaceVersion: string): Directory {
     return dag
       .container({ platform: 'linux/amd64' as Platform })
@@ -522,61 +610,6 @@ export class VscodeRunme {
       .withWorkdir('/src')
       .withExec(['node', 'dagger/scripts/prepare-release.mjs', channel, marketplaceVersion])
       .directory('/src')
-  }
-
-  private async waitForSuccessfulGhaPipeline(
-    repository: string,
-    commit: string,
-    githubToken: Secret,
-    timeoutSeconds: number,
-    pollIntervalSeconds: number,
-  ): Promise<void> {
-    const [owner, repo, extra] = repository.split('/')
-    if (!owner || !repo || extra) {
-      throw new Error(`Invalid GitHub repository "${repository}"; expected owner/name`)
-    }
-    if (timeoutSeconds <= 0 || pollIntervalSeconds <= 0) {
-      throw new Error('Pipeline wait timeout and polling interval must be positive')
-    }
-
-    const octokit = new Octokit({ auth: await githubToken.plaintext() })
-    const deadline = Date.now() + timeoutSeconds * 1000
-
-    while (true) {
-      const { data } = await octokit.rest.actions.listWorkflowRuns({
-        owner,
-        repo,
-        workflow_id: 'pipeline.yml',
-        branch: 'main',
-        event: 'push',
-        head_sha: commit,
-        per_page: 100,
-      })
-      const evaluation = evaluateGhaPipelineRuns(
-        data.workflow_runs.map(
-          (run: { conclusion: string | null; html_url: string; status: string | null }) => ({
-            conclusion: run.conclusion,
-            status: run.status ?? 'unknown',
-            url: run.html_url,
-          }),
-        ),
-      )
-
-      if (evaluation.state === 'passed') {
-        return
-      }
-      if (evaluation.state === 'failed') {
-        throw new Error(
-          `Pipeline for tagged commit ${commit} concluded ${evaluation.conclusion}: ${evaluation.url}`,
-        )
-      }
-      if (Date.now() >= deadline) {
-        const details = evaluation.url ? `: ${evaluation.url}` : ''
-        throw new Error(`Timed out waiting for Pipeline on tagged commit ${commit}${details}`)
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, pollIntervalSeconds * 1000))
-    }
   }
 
   private async latestRunmeVersion(githubToken?: Secret): Promise<string> {

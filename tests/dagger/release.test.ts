@@ -3,7 +3,8 @@ import { readFileSync } from 'node:fs'
 
 import {
   assertSourceVersion,
-  evaluateGhaPipelineRuns,
+  parseGitCommitTimestamp,
+  parseGitHubRepository,
   parseReleaseTag,
   publicationCommand,
   RELEASE_PUBLICATION_ENABLED,
@@ -26,47 +27,41 @@ describe('Dagger release policy', () => {
     expect(notebook).toContain('"name":"GhaRelease"')
     expect(notebook).toContain('publish-release $(GhaReleaseCandidate)')
     expect(notebook).toContain('gha-release-candidate')
-    expect(notebook).toContain('runme run PublishRelease')
+    expect(notebook).toContain('gha-release')
+    expect(notebook).not.toContain('git tag --points-at')
+    expect(notebook).not.toContain('grep -E')
+    expect(moduleSource).toContain('async ghaRelease(')
+    expect(moduleSource).toContain('[NOOP] Release tag')
     expect(notebook).not.toContain('"name":"release:pipeline"')
     expect(notebook).not.toContain('dagger call')
     expect(workflow).toContain('workflows: GhaRelease')
-    expect(workflow).toContain('actions: read')
+    expect(workflow).toContain('workflow_run:')
+    expect(workflow).toContain('- Pipeline')
+    expect(workflow).toContain("github.event.workflow_run.conclusion == 'success'")
+    expect(workflow).toContain('ref: ${{ github.event.workflow_run.head_sha }}')
+    expect(workflow).not.toContain('actions: read')
+    expect(workflow).not.toContain('tags:')
     expect(workflow).not.toContain('workflows: release:pipeline')
     expect(workflow).not.toContain('RUNME_TEST_TOKEN')
     expect(moduleSource).not.toContain('releaseTestMarker')
     expect(moduleSource).not.toContain('.release-tests-passed')
   })
 
-  it('waits when the exact GHA Pipeline run has not appeared', () => {
-    expect(evaluateGhaPipelineRuns([])).toEqual({ state: 'pending' })
-  })
-
-  it('waits while the exact GHA Pipeline run is active', () => {
-    expect(
-      evaluateGhaPipelineRuns([
-        { conclusion: null, status: 'in_progress', url: 'https://example.test/pipeline' },
-      ]),
-    ).toEqual({ state: 'pending', url: 'https://example.test/pipeline' })
-  })
-
-  it('accepts only a successful exact GHA Pipeline run', () => {
-    expect(
-      evaluateGhaPipelineRuns([
-        { conclusion: 'success', status: 'completed', url: 'https://example.test/pipeline' },
-      ]),
-    ).toEqual({ state: 'passed', url: 'https://example.test/pipeline' })
-  })
-
-  it('rejects a completed unsuccessful exact GHA Pipeline run', () => {
-    expect(
-      evaluateGhaPipelineRuns([
-        { conclusion: 'failure', status: 'completed', url: 'https://example.test/pipeline' },
-      ]),
-    ).toEqual({
-      state: 'failed',
-      conclusion: 'failure',
-      url: 'https://example.test/pipeline',
+  it('parses a GitHub repository for the GHA adapter', () => {
+    expect(parseGitHubRepository('runmedev/vscode-runme')).toEqual({
+      owner: 'runmedev',
+      repo: 'vscode-runme',
     })
+    expect(() => parseGitHubRepository('runmedev')).toThrow('expected owner/name')
+    expect(() => parseGitHubRepository('runmedev/vscode-runme/extra')).toThrow(
+      'expected owner/name',
+    )
+  })
+
+  it('converts a GitHub commit date to a Unix timestamp', () => {
+    expect(parseGitCommitTimestamp('2026-11-11T23:26:59Z')).toBe(1_794_439_619)
+    expect(() => parseGitCommitTimestamp(undefined)).toThrow('GitHub commit timestamp')
+    expect(() => parseGitCommitTimestamp('not-a-date')).toThrow('GitHub commit timestamp')
   })
 
   it('keeps publication fail-closed until the rollout constant changes', () => {

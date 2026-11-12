@@ -17,21 +17,31 @@ export interface ReleaseMetadata {
   version: string
 }
 
-export interface GhaWorkflowRun {
-  conclusion: string | null
-  status: string
-  url: string
+export interface GitHubRepository {
+  owner: string
+  repo: string
 }
-
-export type GhaPipelineEvaluation =
-  | { state: 'passed'; url: string }
-  | { state: 'pending'; url?: string }
-  | { state: 'failed'; conclusion: string; url: string }
 
 const numericIdentifier = '(0|[1-9]\\d*)'
 const releaseTagPattern = new RegExp(
   `^${numericIdentifier}\\.${numericIdentifier}\\.${numericIdentifier}(?:-edge\\.${numericIdentifier})?$`,
 )
+
+export function parseGitHubRepository(repository: string): GitHubRepository {
+  const [owner, repo, extra] = repository.split('/')
+  if (!owner || !repo || extra) {
+    throw new Error(`Invalid GitHub repository "${repository}"; expected owner/name`)
+  }
+  return { owner, repo }
+}
+
+export function parseGitCommitTimestamp(value: string | null | undefined): number {
+  const timestamp = value ? Math.floor(Date.parse(value) / 1000) : Number.NaN
+  if (!Number.isSafeInteger(timestamp) || timestamp <= 0) {
+    throw new Error(`Invalid GitHub commit timestamp "${String(value)}"`)
+  }
+  return timestamp
+}
 
 export function parseReleaseTag(tag: string, commitTimestamp?: number): ReleaseMetadata {
   const match = releaseTagPattern.exec(tag)
@@ -86,29 +96,6 @@ export function assertSourceVersion(
       `package-lock.json root version "${String(lockfileVersion)}" does not match tag "${tag}"`,
     )
   }
-}
-
-export function evaluateGhaPipelineRuns(runs: GhaWorkflowRun[]): GhaPipelineEvaluation {
-  const successfulRun = runs.find(({ conclusion }) => conclusion === 'success')
-  if (successfulRun) {
-    return { state: 'passed', url: successfulRun.url }
-  }
-
-  const pendingRun = runs.find(({ status }) => status !== 'completed')
-  if (pendingRun) {
-    return { state: 'pending', url: pendingRun.url }
-  }
-
-  const failedRun = runs[0]
-  if (failedRun) {
-    return {
-      state: 'failed',
-      conclusion: failedRun.conclusion ?? 'unknown',
-      url: failedRun.url,
-    }
-  }
-
-  return { state: 'pending' }
 }
 
 export function releaseArtifactName(
