@@ -6,8 +6,6 @@ import {
   parseGitCommitTimestamp,
   parseGitHubRepository,
   parseReleaseTag,
-  publicationCommand,
-  RELEASE_PUBLICATION_ENABLED,
   releaseArtifactName,
   releaseTargets,
   resolveReleaseTagCommit,
@@ -47,6 +45,9 @@ describe('Dagger release policy', () => {
     expect(workflow).not.toContain('RUNME_TEST_TOKEN')
     expect(moduleSource).not.toContain('releaseTestMarker')
     expect(moduleSource).not.toContain('.release-tests-passed')
+    expect(moduleSource).not.toContain('RELEASE_PUBLICATION_ENABLED')
+    expect(moduleSource).not.toContain('publicationExec')
+    expect(moduleSource).not.toContain('[SIMULATION]')
   })
 
   it('parses a GitHub repository for the GHA adapter', () => {
@@ -80,19 +81,6 @@ describe('Dagger release policy', () => {
     expect(() => resolveReleaseTagCommit('3.18.0', { sha: 'tree-sha', type: 'tree' })).toThrow(
       'unsupported tree',
     )
-  })
-
-  it('enables publication by default and supports explicit simulation', () => {
-    const command = ['npx', 'vsce', 'publish', '--packagePath', '/tmp/release/runme.vsix']
-
-    expect(RELEASE_PUBLICATION_ENABLED).toBe(true)
-    expect(publicationCommand(command, 'Visual Studio Marketplace: runme.vsix')).toEqual(command)
-    expect(publicationCommand(command, 'Visual Studio Marketplace: runme.vsix', false)).toEqual([
-      'printf',
-      '%s\n',
-      '[SIMULATION] Visual Studio Marketplace: runme.vsix',
-    ])
-    expect(publicationCommand(command, 'ignored', true)).toEqual(command)
   })
 
   it('parses a stable bare tag', () => {
