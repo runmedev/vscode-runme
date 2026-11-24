@@ -20,8 +20,6 @@ import {
   parseGitCommitTimestamp,
   parseGitHubRepository,
   parseReleaseTag,
-  publicationCommand,
-  RELEASE_PUBLICATION_ENABLED,
   releaseArtifactName,
   releaseTargets,
   resolveReleaseTagCommit,
@@ -535,58 +533,26 @@ export class VscodeRunme {
         marketplaceCommand.push('--pre-release')
       }
       container = container.withExec(['test', '-f', artifactPath])
-      container = this.publicationExec(
-        container,
-        marketplaceCommand,
-        `Visual Studio Marketplace: ${artifactName}`,
-      )
+      container = container.withExec(marketplaceCommand)
 
       if (metadata.channel === 'stable') {
-        container = this.publicationExec(
-          container,
-          [
-            'npm',
-            'exec',
-            '--yes',
-            '--package=ovsx@1.4.0',
-            '--',
-            'ovsx',
-            'publish',
-            artifactPath,
-            '--skip-duplicate',
-          ],
-          `Open VSX: ${artifactName}`,
-        )
+        container = container.withExec([
+          'npm',
+          'exec',
+          '--yes',
+          '--package=ovsx@1.4.0',
+          '--',
+          'ovsx',
+          'publish',
+          artifactPath,
+          '--skip-duplicate',
+        ])
       }
     }
 
-    container = this.publicationExec(
-      container,
-      ['bash', 'dagger/scripts/publish-github-release.sh'],
-      `GitHub Release: ${repository}@${tag}`,
-    )
-
-    if (!RELEASE_PUBLICATION_ENABLED) {
-      container = container.withExec([
-        'printf',
-        '%s\n',
-        '[SIMULATION] PUBLICATION DISABLED: no external release writes were attempted',
-      ])
-    }
+    container = container.withExec(['bash', 'dagger/scripts/publish-github-release.sh'])
 
     return container
-  }
-
-  private publicationExec(
-    container: Container,
-    command: string[],
-    simulationDescription: string,
-  ): Container {
-    if (RELEASE_PUBLICATION_ENABLED) {
-      return container.withExec(command)
-    }
-
-    return container.withExec(publicationCommand(command, simulationDescription))
   }
 
   private githubErrorStatus(error: unknown): number | undefined {
