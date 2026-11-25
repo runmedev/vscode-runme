@@ -26,7 +26,10 @@ describe('Runme VS Code Extension', async () => {
     const workbench = await browser.getWorkbench()
     const sidebar = await workbench.getSideBar()
     const content = await sidebar.getContent()
-    const section = await content.getSection(`${baseName.toLocaleUpperCase()}`)
+    // Older VS Code versions render the workspace title in uppercase.
+    const section = await content
+      .getSection(baseName)
+      .catch(() => content.getSection(baseName.toLocaleUpperCase()))
 
     const filesAndDirs = (await section.getVisibleItems()) as DefaultTreeItem[]
     let readmeFile: DefaultTreeItem | undefined
@@ -47,7 +50,7 @@ describe('Runme VS Code Extension', async () => {
     })
     const webview = (await workbench.getAllWebviews())[0]
     await webview.open()
-    await expect($('body')).toHaveTextContaining('Runme Examples')
+    await expect($('body')).toHaveText(expect.stringContaining('Runme Examples'))
     await webview.close()
   })
 

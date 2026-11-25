@@ -21,7 +21,7 @@
   "private": true,
   "engines": {
     "vscode": "^1.85.0",
-    "node": ">=20.17.0"
+    "node": ">=22.23.4"
   },
   "galleryBanner": {
     "color": "#0D003D",
@@ -1440,10 +1440,10 @@
     "@typescript-eslint/parser": "^8.72.2",
     "@vitest/coverage-v8": "^3.2.7",
     "@vscode/vsce": "^4.1.0",
-    "@wdio/cli": "^8.46.0",
-    "@wdio/local-runner": "^8.46.0",
-    "@wdio/mocha-framework": "^8.46.0",
-    "@wdio/spec-reporter": "^8.43.0",
+    "@wdio/cli": "^9.33.1",
+    "@wdio/local-runner": "^9.33.1",
+    "@wdio/mocha-framework": "^9.33.1",
+    "@wdio/spec-reporter": "^9.33.1",
     "chromedriver": "^146.0.6",
     "comment-json": "^4.6.2",
     "eslint": "^8.57.1",
@@ -1452,7 +1452,7 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-unicorn": "^56.0.1",
     "eslint-plugin-unused-imports": "^4.4.1",
-    "expect-webdriverio": "^4.15.4",
+    "expect-webdriverio": "^7.0.1",
     "fork-ts-checker-webpack-plugin": "^9.1.0",
     "husky": "^9.1.7",
     "msw": "^2.15.0",
@@ -1467,8 +1467,8 @@
     "unzipper": "^0.12.5",
     "vitest": "^3.2.7",
     "vscode-uri": "^3.0.7",
-    "wdio-vscode-service": "^6.1.4",
-    "webdriverio": "^8.46.0",
+    "wdio-vscode-service": "^8.0.0",
+    "webdriverio": "^9.33.1",
     "webpack": "^5.112.2",
     "webpack-cli": "^6.0.1"
   },
@@ -1519,5 +1519,10 @@
     "vscode-telemetry": "^2.1.0",
     "yaml": "^2.9.1",
     "zod": "^3.25.76"
+  },
+  "overrides": {
+    "wdio-vscode-service": {
+      "@vscode/test-electron": "^3.1.0"
+    }
   }
 }

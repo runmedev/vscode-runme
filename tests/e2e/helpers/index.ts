@@ -19,9 +19,13 @@ import { Key } from 'webdriverio'
  * ```
  */
 export async function getTerminalText(workbench: Workbench) {
+  await clipboard.write('')
   await workbench.executeCommand('Terminal: Focus on Terminal View')
   await workbench.executeCommand('Terminal: Select All')
-  await workbench.executeCommand('Copy')
+  await workbench.executeCommand('Terminal: Copy Selection')
+  await browser.waitUntil(async () => (await clipboard.read()).length > 0, {
+    timeoutMsg: 'Terminal selection was not copied to the clipboard',
+  })
   const text = await clipboard.read()
   await clipboard.write('')
   return text

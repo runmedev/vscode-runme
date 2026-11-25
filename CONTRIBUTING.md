@@ -54,7 +54,7 @@ It is always best to discuss your plans beforehand, to ensure that your contribu
 
 To build and work on this project you need to install:
 
-- [Node.js](https://nodejs.org/en/) (v18 or later)
+- [Node.js](https://nodejs.org/en/) (use the version pinned in `.nvmrc`)
 - [NPM](https://www.npmjs.com/package/npm) (latest)
 
 ### Check out code
