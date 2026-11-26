@@ -1,5 +1,6 @@
 /* eslint-disable quotes */
 import fs from 'node:fs/promises'
+import { spawn } from 'node:child_process'
 
 import { suite, test, expect, vi, beforeEach } from 'vitest'
 import { Uri, workspace, env } from 'vscode'
@@ -148,6 +149,31 @@ suite('Kernel server spawn process', () => {
 
     vi.mocked(env).isTelemetryEnabled = false
     expect(server['getConfiguredEnv']()['DO_NOT_TRACK']).toBe('true')
+  })
+
+  test('Should pass the extension host PID as parent PID', async () => {
+    configValues.enableTLS = true
+
+    const server = createServer({
+      retryOnFailure: false,
+      maxNumberOfIntents: 1,
+    })
+
+    vi.mocked(fs.access).mockResolvedValueOnce()
+    vi.mocked(fs.stat).mockResolvedValueOnce({
+      isFile: vi.fn().mockReturnValue(true),
+    } as any)
+    vi.mocked(isPortAvailable).mockResolvedValueOnce(true)
+    vi.mocked(spawn).mockImplementationOnce(() => {
+      throw new Error('spawn intercepted')
+    })
+
+    await expect(server['start']()).rejects.toThrow('spawn intercepted')
+    expect(spawn).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.arrayContaining(['--parent-pid', String(process.pid)]),
+      expect.anything(),
+    )
   })
 })
 
