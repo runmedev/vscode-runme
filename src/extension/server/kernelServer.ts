@@ -313,7 +313,10 @@ class KernelServer implements IServer {
     }
 
     const address = this.address()
-    const args = ['server', '--address', address]
+    // --parent-pid lets the server shut itself down if the extension host
+    // dies without disposing it (crash, SIGKILL, forced quit), which would
+    // otherwise leave orphaned server processes behind.
+    const args = ['server', '--address', address, '--parent-pid', String(process.pid)]
 
     if (this.enableRunner) {
       args.push('--runner')
